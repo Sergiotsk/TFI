@@ -89,7 +89,7 @@ _(pendiente — ver nota de estado al inicio del documento)_
 #### Beneficiarios
 
 - **Ingresantes.** Ganan visibilidad sobre el estado real de su trámite (documentación, pago, alta) en lugar de enterarse tarde o por mail suelto.
-- **Secretaría / área de Bedelía-Alumnado (el Secretario y su equipo).** Reemplazan el seguimiento manual en tres sistemas distintos por un único punto de verdad (*source of truth*), con trazabilidad auditable de altas y bajas — un requisito que el propio Secretario marcó como no negociable ("es tu palabra contra la ley" si no queda registro).
+- **Secretaría (el Secretario y su equipo).** Reemplazan el seguimiento manual en tres sistemas distintos por un único punto de verdad (*source of truth*), con trazabilidad auditable de altas y bajas — un requisito que el propio Secretario marcó como no negociable ("es tu palabra contra la ley" si no queda registro).
 - **Dirección académica (Sebastián, Director).** Accede a información consolidada y confiable para decisiones de cupos y comisiones, hoy afectadas por cargas tardías o incompletas de ingresantes (el Secretario reportó comisiones que arrancan con 10-15 alumnos cuando correspondían 100).
 - **La institución en general.** Reduce el riesgo de errores por falta de contraste entre lo que se espera y lo que efectivamente se carga en SYSACAD, sin necesidad de tocar ese sistema (fuera del alcance del proyecto, ver [1.2](#12-objetivo-límite-y-alcance)).
 
