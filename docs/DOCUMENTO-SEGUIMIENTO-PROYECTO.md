@@ -80,7 +80,7 @@ La elección de este proyecto surge de la convergencia de tres fuentes, no de un
 
 Vale remarcar que los puntos 1 y 3 no son dos quejas sueltas: son el mismo problema visto desde dos veredas distintas. Lo que el equipo vio como alumnos (compañeros cursando sin figurar inscriptos) es el síntoma visible de lo que el Secretario describió desde el otro lado del mostrador como falta de contraste entre lo que se carga y lo que se espera — *"vos no te enterás hasta que no viene el alumno"*. Que la experiencia propia y el relevamiento con el actor institucional apunten al mismo punto de falla, de forma independiente, es lo que terminó de decidir la elección.
 
-De las alternativas evaluadas (ver `docs/Ideas-Exploradas/IDEAS-RANKEADAS.md`), esta fue la que combinó los tres criterios que priorizamos como equipo: un problema real y verificado con evidencia de primera mano (no una hipótesis), un alcance acotable en el tiempo de la cursada, y un interesado institucional concreto dispuesto a validar el resultado.
+De las alternativas evaluadas (ver `docs/discovery/ideacion/IDEAS-RANKEADAS.md`), esta fue la que combinó los tres criterios que priorizamos como equipo: un problema real y verificado con evidencia de primera mano (no una hipótesis), un alcance acotable en el tiempo de la cursada, y un interesado institucional concreto dispuesto a validar el resultado.
 
 #### Título
 
