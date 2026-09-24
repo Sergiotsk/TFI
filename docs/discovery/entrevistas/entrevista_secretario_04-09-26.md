@@ -85,7 +85,7 @@ Esto es lo que te sirve para diseñar la solución. No es lo mismo un problema d
 
 ---
 
-## 3. Lo que el secretario NO te dijo (pero se infiere) — para tu propuesta de valor
+## 3. Lo que el secretario NO dijo (pero se infiere) — para tu propuesta de valor
 
 - Nunca midió tiempos ni volumen exacto (cuántos ingresantes por ciclo, cuánto tarda cada paso). Si vas a proponerle algo, **pedile esos números en la próxima charla** — sin eso no podés argumentar el ROI de automatizar.
 - El "otro sector" que carga SYSACAD es una dependencia crítica y nadie de tu equipo lo entrevistó todavía. Si tu solución depende de pasarle una lista final más prolija, **en algún momento vas a necesitar hablar con ellos también**, no alcanza con el secretario y el director.
