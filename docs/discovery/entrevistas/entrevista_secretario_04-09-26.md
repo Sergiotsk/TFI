@@ -12,7 +12,7 @@
 
 | Persona                                                  | Rol                                           | Qué sabe / qué maneja                                                                                                                      |
 | -------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **El Secretario** (entrevistado hoy)               | Operativo — hace la inscripción día a día | Todo el circuito manual: documentación, pagos, mails                                                                                        |
+| **El Secretario**                                       | Operativo — hace la inscripción día a día | Todo el circuito manual: documentación, pagos, mails                                                                                        |
 | **Sebastián** (Director)                          | Estratégico                                  | Cupos, comisiones, política académica —**entrevista pendiente**                                                                     |
 | Sector de Sistemas/Software (no identificado por nombre) | Backend humano del SYSACAD                    | Genera legajo, correo institucional, carga materias iniciales —**automatizado de su lado, pero es una caja negra para el secretario** |
 | Profesora (GDS)                                          | Docente que asignó el proyecto               | Sugirió el tema y el método (entrevista antes de programar)                                                                                |
