@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04-estado-tramite.html</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col">
+    <!-- Header Institucional -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div
+                    class="w-10 h-10 rounded-lg bg-[#005a9c] flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-black tracking-tight text-slate-900">UTN<span
+                            class="text-[#0284c7]">.BA</span></span>
+                    <span class="block text-xs font-bold text-[#005a9c] tracking-widest">HAEDO · TUP</span>
+                </div>
+            </div>
+            <!-- Stepper Header -->
+            <div class="hidden lg:flex items-center space-x-6 text-xs">
+                <a href="01-bienvenida-requisitos.html"
+                    class="flex items-center text-emerald-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Requisitos
+                </a>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <a href="02-datos-pago-reserva.html"
+                    class="flex items-center text-emerald-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Pago Reserva
+                </a>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <a href="03-carga-documentacion.html"
+                    class="flex items-center text-emerald-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Documentación
+                </a>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <div class="flex items-center text-[#005a9c] font-bold">
+                    <span
+                        class="w-6 h-6 rounded-full bg-[#005a9c] text-white flex items-center justify-center mr-2">4</span>
+                    Estado Final
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span
+                    class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    Lucas Rossi (43.829.114)
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-6">
+        <!-- Header de Saludo y Expediente -->
+        <div
+            class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-[#005a9c] text-xs font-bold rounded-full mb-2">
+                    <span class="w-2 h-2 rounded-full bg-[#005a9c] animate-pulse"></span> En Proceso de Auditoría
+                    Académica
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">¡Hola, Lucas Rossi!</h1>
+                <p class="text-xs text-slate-600 mt-1">Seguimiento en tiempo real de tu trámite de ingreso a la
+                    <strong>Tecnicatura Universitaria en Programación (TUP) - Cohorte 2025</strong> · Sede Haedo</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-right">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">N° de
+                    Expediente</span>
+                <span class="font-mono text-base font-black text-[#005a9c]">TUP-2025-08492</span>
+                <button class="block text-[11px] text-slate-500 hover:text-slate-800 mt-0.5 ml-auto"><i
+                        class="fa-regular fa-copy mr-1"></i> Copiar</button>
+            </div>
+        </div>
+
+        <!-- Barra de Estado General -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex justify-between items-center text-xs mb-2">
+                <span class="font-bold text-slate-800"><i class="fa-solid fa-list-check text-[#005a9c] mr-1.5"></i> Fase
+                    3 de 4 en desarrollo: Auditoría de legajo documental</span>
+                <span class="font-bold text-[#005a9c]">75% Completado</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-[#005a9c] h-2.5 rounded-full" style="width: 75%"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Columna Izquierda: Cronograma y Estados del Trámite -->
+            <div class="lg:col-span-8 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-bold text-slate-900 text-base">Cronograma de Verificación Institucional</h2>
+                    <span class="text-xs text-slate-400">Actualizado hace 2 horas</span>
+                </div>
+
+                <!-- Hito 1: Completado -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-start gap-4">
+                    <div
+                        class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-check text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-900 text-sm">1. Preinscripción y Aceptación de Términos</h3>
+                            <span
+                                class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Completado</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">Formulario digital completado exitosamente con
+                            manifestación de compromiso arancelario y reglamento general.</p>
+                        <div class="mt-2 flex items-center gap-4 text-[11px] text-slate-400">
+                            <span><i class="fa-regular fa-calendar mr-1"></i> 12/11/2024 - 10:45 hs</span>
+                            <span><i class="fa-solid fa-fingerprint mr-1"></i> Validación DNI OK</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hito 2: Acreditado -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-start gap-4">
+                    <div
+                        class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-receipt text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-900 text-sm">2. Reserva de Vacante y Pago de Arancel</h3>
+                            <span
+                                class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Acreditado</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">Monto abonado: <strong>$28.500 ARS</strong> · Comprobante
+                            bancario acreditado por Tesorería de Extensión Universitaria.</p>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-400 font-mono">Operación #982341239 · Acreditado el
+                                13/11/2024</span>
+                            <button class="text-xs font-bold text-[#005a9c] hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-file-invoice"></i> Ver Recibo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hito 3: En Revisión -->
+                <div class="bg-white rounded-xl border-2 border-blue-300 p-5 shadow-sm flex items-start gap-4">
+                    <div
+                        class="w-10 h-10 rounded-full bg-blue-100 text-[#005a9c] flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
+                        <i class="fa-solid fa-magnifying-glass text-base"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-900 text-sm">3. Validación Digital de Legajo</h3>
+                            <span
+                                class="text-xs font-bold text-[#005a9c] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">En
+                                Revisión</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">La Secretaría de Asuntos Estudiantiles se encuentra
+                            verificando la autenticidad y nitidez de los documentos remitidos digitalmente.</p>
+                        <div class="grid sm:grid-cols-2 gap-2.5 mt-3">
+                            <div
+                                class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                                <span>DNI Frente y Dorso</span>
+                                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                            </div>
+                            <div
+                                class="p-2.5 rounded-lg bg-amber-50/60 border border-amber-200 flex items-center justify-between text-xs">
+                                <span>Título Secundario</span>
+                                <span class="text-[10px] font-bold text-amber-700">En cotejo en Libro Matriz</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hito 4: Bloqueado -->
+                <div
+                    class="bg-slate-50 rounded-xl border border-slate-200 p-5 shadow-sm flex items-start gap-4 opacity-75">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-lock text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-700 text-sm">4. Asignación de Comisión y Aula</h3>
+                            <span
+                                class="text-xs font-bold text-slate-500 bg-slate-200 px-2.5 py-0.5 rounded-full">Bloqueado</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Se habilitará automáticamente una vez concluida la
+                            auditoría del legajo documental. Podrás elegir o confirmar tu franja horaria preferida según
+                            disponibilidad de cupo (Turno Tarde: 14:00 a 18:00 hs / Turno Noche: 18:30 a 22:30 hs).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Acciones y Seminario -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-900 text-sm mb-2">Operaciones del Trámite</h4>
+                    <button
+                        class="w-full py-2.5 px-3 rounded-lg bg-[#005a9c] hover:bg-[#00487d] text-white text-xs font-bold flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-download"></i> Descargar Certificado (PDF)
+                    </button>
+                    <a href="03-carga-documentacion.html"
+                        class="w-full py-2.5 px-3 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-pen-to-square"></i> Modificar Documentación
+                    </a>
+                </div>
+
+                <!-- Seminario de Ingreso -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-day text-[#005a9c]"></i> Seminario de Ingreso
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-4">Instancia obligatoria de nivelación académica previa al
+                        inicio regular del primer cuatrimestre lectivo 2025.</p>
+                    <dl class="space-y-2 text-xs border-t border-slate-100 pt-3">
+                        <div class="flex justify-between">
+                            <dt class="text-slate-500">Período:</dt>
+                            <dd class="font-bold text-slate-800">03 Feb al 07 Mar 2025</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-slate-500">Módulos:</dt>
+                            <dd class="font-bold text-slate-800">Programación + Matemática</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-slate-500">Modalidad:</dt>
+                            <dd class="font-bold text-slate-800">Semi-presencial (Haedo)</dd>
+                        </div>
+                    </dl>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-xs">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div class="text-xs">
+                            <span class="text-slate-400 block text-[10px]">Director de Carrera</span>
+                            <span class="font-bold text-slate-800">Lic. Sebastián Andrés de Jesús</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canales de Orientación -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm text-xs space-y-3">
+                    <h4 class="font-bold text-slate-900 mb-1">Canales de Orientación</h4>
+                    <a href="#"
+                        class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#005a9c]">
+                        <span class="font-semibold"><i class="fa-solid fa-bullhorn mr-1.5 text-blue-600"></i> Canal de
+                            Avisos Telegram</span>
+                        <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+                    </a>
+                    <a href="mailto:alumnos.tup@frh.utn.edu.ar"
+                        class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#005a9c]">
+                        <span class="font-semibold"><i class="fa-regular fa-envelope mr-1.5 text-blue-600"></i> Bedelía
+                            de TUP</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-slate-400 text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        Universidad Tecnológica Nacional · Facultad Regional Haedo · París 532, Haedo · (011) 4443-5246
+    </footer>
+</body>
+
+</html>

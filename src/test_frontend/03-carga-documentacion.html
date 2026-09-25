@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03-carga-documentacion.html</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col">
+    <!-- Header Institucional -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div
+                    class="w-10 h-10 rounded-lg bg-[#005a9c] flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-black tracking-tight text-slate-900">UTN<span
+                            class="text-[#0284c7]">.BA</span></span>
+                    <span class="block text-xs font-bold text-[#005a9c] tracking-widest">HAEDO · TUP</span>
+                </div>
+            </div>
+            <!-- Stepper Header -->
+            <div class="hidden lg:flex items-center space-x-6 text-xs">
+                <a href="01-bienvenida-requisitos.html"
+                    class="flex items-center text-emerald-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Requisitos
+                </a>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <a href="02-datos-pago-reserva.html"
+                    class="flex items-center text-emerald-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Pago Reserva
+                </a>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <div class="flex items-center text-[#005a9c] font-bold">
+                    <span
+                        class="w-6 h-6 rounded-full bg-[#005a9c] text-white flex items-center justify-center mr-2">3</span>
+                    Documentación
+                </div>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <div class="flex items-center text-slate-400">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mr-2">4</span>
+                    Estado Final
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span
+                    class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    Postulante DNI 43.829.114
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        <!-- Banner de Plazo de Entrega -->
+        <div
+            class="bg-amber-50 border-l-4 border-amber-500 rounded-r-xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+                    <i class="fa-solid fa-stopwatch text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-sm font-bold text-slate-900">Plazo de entrega de legajo obligatorio</h2>
+                        <span class="bg-amber-200 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded">10 DÍAS
+                            HÁBILES RESTANTES</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Tu reserva de cupo para la cohorte 2025 de la TUP expira el
+                        <strong>viernes 28 de febrero a las 23:59 hs</strong>.</p>
+                </div>
+            </div>
+            <div class="text-xs text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-200">
+                Cierre de admisión: <strong>28/02/2025</strong>
+            </div>
+        </div>
+
+        <!-- Barra de Progreso del Legajo -->
+        <div
+            class="bg-white rounded-xl border border-slate-200 p-5 mb-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-12 h-12 rounded-full border-4 border-[#005a9c] flex items-center justify-center font-bold text-[#005a9c] text-sm">
+                    66%
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Progreso del legajo institucional: 2 de 3 documentos
+                        obligatorios</h3>
+                    <p class="text-xs text-slate-500">Falta completar la carga del Certificado Analítico o Título en
+                        trámite para habilitar el envío oficial.</p>
+                </div>
+            </div>
+            <span
+                class="text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-check"></i> Validación Criterio UTN FRH
+            </span>
+        </div>
+
+        <form action="04-estado-tramite.html" method="GET" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Columna Principal: Dropzones de Documentación -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- 1. DNI -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-[#005a9c] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-address-card"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Documento Nacional de Identidad (DNI)</h4>
+                                <p class="text-xs text-slate-500">Frente y dorso escaneados en un único archivo nítido y
+                                    legible.</p>
+                            </div>
+                        </div>
+                        <span
+                            class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-check"></i> Cargado / Listo
+                        </span>
+                    </div>
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-pdf text-rose-600 text-xl"></i>
+                            <div>
+                                <span class="font-bold text-slate-800 block">dni_frente_dorso_lucas.pdf</span>
+                                <span class="text-slate-400">2.4 MB · Subido hoy a las 11:24 hs · SHA-256
+                                    Validado</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="text-slate-600 hover:text-[#005a9c] font-semibold"><i
+                                    class="fa-solid fa-eye"></i> Previsualizar</button>
+                            <button type="button" class="text-slate-400 hover:text-rose-600"><i
+                                    class="fa-solid fa-arrow-rotate-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Analítico (Pendiente) -->
+                <div class="bg-white rounded-xl border-2 border-blue-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-[#005a9c] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Certificado Analítico o Constancia de
+                                    Título en Trámite</h4>
+                                <p class="text-xs text-slate-500">Emitido por la institución secundaria de egreso con
+                                    sellos y firmas oficiales.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full">
+                            Pendiente de Carga
+                        </span>
+                    </div>
+                    <div
+                        class="bg-amber-50/80 border border-amber-200 rounded-lg p-3 mb-4 text-xs text-amber-950 flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                        <span><strong>Requisito reglamentario:</strong> En caso de presentar constancia de título en
+                            trámite, el certificado debe <strong>expresar obligatoriamente que no adeudás materias
+                                previas</strong> del ciclo secundario completo.</span>
+                    </div>
+                    <!-- Dropzone -->
+                    <div
+                        class="border-2 border-dashed border-[#005a9c]/40 rounded-xl p-8 text-center bg-blue-50/20 hover:bg-blue-50/40 transition cursor-pointer">
+                        <i class="fa-solid fa-file-arrow-up text-[#005a9c] text-3xl mb-2"></i>
+                        <h5 class="text-sm font-bold text-slate-800">Arrastrá y soltá tu certificado aquí</h5>
+                        <p class="text-xs text-slate-500 mt-1">Admite archivos PDF, JPG o PNG de alta resolución hasta
+                            un tamaño máximo de 10 MB.</p>
+                        <button type="button"
+                            class="mt-4 px-4 py-2 bg-[#005a9c] text-white text-xs font-bold rounded-lg hover:bg-[#00487d] transition">
+                            Examinar archivos en tu PC
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Foto Carnet -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-[#005a9c] flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-image"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">Fotografía Carnet 4×4</h4>
+                                <p class="text-xs text-slate-500">Fondo blanco liso, vista frontal 3/4 perfil, sin
+                                    accesorios ni lentes de sol.</p>
+                            </div>
+                        </div>
+                        <span
+                            class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-check"></i> Cargado / Listo
+                        </span>
+                    </div>
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-user text-2xl text-slate-500"></i>
+                            <div>
+                                <span class="font-bold text-slate-800 block">foto_carnet_postulante.jpg</span>
+                                <span class="text-slate-400">840 KB · 1200×1200px · Validación de encuadre
+                                    aprobada</span>
+                            </div>
+                        </div>
+                        <button type="button" class="text-slate-600 hover:text-[#005a9c] font-semibold"><i
+                                class="fa-solid fa-arrow-rotate-right"></i> Reemplazar</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4">
+                    <a href="02-datos-pago-reserva.html" class="text-xs font-bold text-slate-600 hover:underline">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Volver a Datos y Pago
+                    </a>
+                    <button type="submit"
+                        class="px-8 py-3.5 rounded-xl bg-[#005a9c] hover:bg-[#00487d] text-white font-bold text-sm shadow-md transition flex items-center gap-2">
+                        Guardar y Enviar Legajo a Revisión Oficial <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Columna Lateral Informativa -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-[#005a9c]"></i> Revisión por Secretaría Académica
+                    </h4>
+                    <ol class="relative border-l border-slate-200 ml-2 space-y-4 text-xs">
+                        <li class="pl-4">
+                            <span class="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-[#005a9c]"></span>
+                            <span class="font-bold text-slate-800 block">1. Recepción Digital</span>
+                            <p class="text-slate-500 mt-0.5">Generación de hash único institucional y sellado de tiempo
+                                oficial.</p>
+                        </li>
+                        <li class="pl-4">
+                            <span class="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-slate-300"></span>
+                            <span class="font-bold text-slate-800 block">2. Auditoría y Cotejo</span>
+                            <p class="text-slate-500 mt-0.5">El equipo técnico verifica la autenticidad documental
+                                dentro de <strong>48 a 72 hs hábiles</strong>.</p>
+                        </li>
+                        <li class="pl-4">
+                            <span class="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-slate-300"></span>
+                            <span class="font-bold text-slate-800 block">3. Emisión de Matrícula TUP</span>
+                            <p class="text-slate-500 mt-0.5">Aprobación definitiva de legajo y asignación de correo
+                                institucional @frh.utn.edu.ar.</p>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-headset text-[#005a9c]"></i> Mesa de Ayuda · Bedelía TUP
+                    </h4>
+                    <p class="text-xs text-slate-600 mb-3">¿Tenés dudas sobre la validez de tu título analítico o
+                        necesitás prórroga administrativa? Comunicate de forma directa:</p>
+                    <div class="space-y-2 text-xs">
+                        <a href="mailto:tup@frh.utn.edu.ar"
+                            class="block p-2 rounded bg-slate-50 font-bold text-[#005a9c] hover:bg-blue-50">
+                            <i class="fa-regular fa-envelope mr-1.5"></i> tup@frh.utn.edu.ar
+                        </a>
+                        <div class="p-2 rounded bg-slate-50 text-slate-700">
+                            <i class="fa-regular fa-clock mr-1.5"></i> Lunes a Viernes de 14:00 a 20:00 hs
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        Universidad Tecnológica Nacional · Facultad Regional Haedo · París 532, Haedo · (011) 4443-5246
+    </footer>
+</body>
+
+</html>

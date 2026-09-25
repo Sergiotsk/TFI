@@ -1,0 +1,131 @@
+web application/stitch/projects/2682199103128553661/screens/6a714e4a214d4d5ea85b316a48181030
+
+# Sistema de Ingreso TUP - UTN Facultad Regional Haedo
+
+## Documento de Especificación de Frontend, Flujo de Usuario y Arquitectura de Pantallas
+
+Este documento describe la arquitectura, interacción, reglas de negocio y conexión entre las 4 páginas del portal de autogestión para postulantes a la **Tecnicatura Universitaria en Programación (TUP)** de la **Universidad Tecnológica Nacional - Facultad Regional Haedo (UTN FRH)**.
+
+---
+
+### 1. Visión General del Proyecto
+
+El sistema automatiza y transparenta el proceso de admisión, reserva de vacante arancelada, validación de legajo y seguimiento de estado para los futuros ingresantes. Resuelve la problemática de orden de mérito por cupo estricto, cobro de seña vinculante imputable a matrícula, y recepción ordenada de documentación oficial previa al Seminario Universitario de Ingreso.
+
+- **Institución:** UTN Facultad Regional Haedo (París 532, Haedo, Buenos Aires).
+- **Carrera:** Tecnicatura Universitaria en Programación (TUP).
+- **Modalidad:** Semipresencial con virtualidad sincrónica (2 años / 4 cuatrimestres).
+- **Arancel de Reserva de Vacante:** $28.500 ARS (imputable 100% a la matrícula inicial).
+
+---
+
+### 2. Mapa de Navegación y Flujo de Estados
+
+El usuario avanza secuencialmente a través de 4 vistas principales:
+
+```
+[Web Institucional UTN Haedo]
+              │
+              ▼ (Clic en "Inscribite a TUP")
+┌──────────────────────────────────────────────┐
+│  Página 1: 01-bienvenida-requisitos.html     │
+│  - Info de carrera y cupo estricto           │
+│  - Explicación de los 2 casos de reserva     │
+│  - 6 Checkboxes obligatorios de aceptación   │
+└──────────────────────┬───────────────────────┘
+                       │ (Validación 6/6 checklists = OK)
+                       ▼
+┌──────────────────────────────────────────────┐
+│  Página 2: 02-datos-pago-reserva.html        │
+│  - Formulario de datos personales básicos    │
+│  - Timer regresivo de reserva (24:00:00)     │
+│  - Pago Virtual (QR Mercado Pago, CBU/Alias) │
+│    o Pago Presencial en Tesorería UTN        │
+│  - Carga de N° Operación + Comprobante       │
+└──────────────────────┬───────────────────────┘
+                       │ (Subida y confirmación de pago)
+                       ▼
+┌──────────────────────────────────────────────┐
+│  Página 3: 03-carga-documentacion.html       │
+│  - Plazo de entrega de legajo (10 días)      │
+│  - Drag & Drop: DNI (Frente/Dorso)           │
+│  - Drag & Drop: Certificado Analítico Sec.   │
+│  - Drag & Drop: Foto Carnet 4x4              │
+│  - Barra de completitud de legajo            │
+└──────────────────────┬───────────────────────┘
+                       │ (Envío a Secretaría Académica)
+                       ▼
+┌──────────────────────────────────────────────┐
+│  Página 4: 04-estado-tramite.html            │
+│  - N° de Expediente asignado (ej: TUP-2025)  │
+│  - Stepper con semáforo de auditoría         │
+│  - Detalle de turno/comisión de cursada      │
+│  - Descarga de Constancia Oficial en PDF     │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+### 3. Detalle de Pantallas y Reglas de Negocio
+
+#### Pantalla 1: Bienvenida y Requisitos (`01-bienvenida-requisitos.html`)
+
+- **Propósito:** Filtro legal y de información crítica previa al compromiso financiero.
+- **Elementos Clave:**
+  - Resumen de carrera (2 años, 4 cuatrimestres, arancelada, cupo limitado).
+  - **Aviso de Reserva de Vacante:**
+    - _Caso 1 (Aprobado):_ Con legajo completo en plazo legal de 10 días, el 100% de la seña ($28.500 ARS) se imputa a la matrícula formal.
+    - _Caso 2 (Incumplimiento):_ Superado el plazo, falseamiento o adeudar materias secundarias, se pierde el cupo y la seña de forma irrevocable (se habilita lista de espera).
+  - **Checklist de Conformidad (6 ítems):** El botón de avanzar ("Continuar a Datos y Pago de Reserva") permanece deshabilitado hasta que el usuario tilde los 6 checkboxes o haga clic en "Marcar todos".
+
+#### Pantalla 2: Datos y Pago de Reserva (`02-datos-pago-reserva.html`)
+
+- **Propósito:** Identificación del aspirante y cobro de la reserva con vencimiento temporal.
+- **Elementos Clave:**
+  - **Timer de Bloqueo:** Badge con cuenta regresiva de 24 horas (`23:59:44`) para asegurar la vacante temporal.
+  - **Campos del Postulante:** Nombres, Apellidos, DNI, Género/Sexo registral, Fecha de Nacimiento, Domicilio, Localidad/Partido, Celular (WhatsApp para notificaciones) y Correo Electrónico.
+  - **Selector de Métodos de Pago:**
+    - _Pago Virtual:_ Código QR interoperable para escanear con Mercado Pago, Cuenta DNI, BNA+, Ualá o apps bancarias; Datos bancarios oficiales (Alias `UTN.HAEDO.TUP`, CBU, CUIT).
+    - _Input de Conciliación:_ Campo obligatorio de "Número de Operación / ID de Comprobante" + Dropzone para adjuntar comprobante (PDF, JPG, PNG).
+    - _Pago Presencial:_ Instrucciones para abonar en ventanilla de Tesorería Haedo antes de las 48 hs hábiles.
+  - Al presionar _"Confirmar y Enviar Comprobante de Reserva"_, se redirige al Paso 3.
+
+#### Pantalla 3: Carga de Documentación para Legajo (`03-carga-documentacion.html`)
+
+- **Propósito:** Digitalización de los requisitos académicos obligatorios para la conformación del legajo universitario.
+- **Elementos Clave:**
+  - Banner con plazo restante de 10 días hábiles antes de la fecha límite de admisión.
+  - Barra de progreso del legajo (ej. 2 de 3 completados - 66%).
+  - **Archivos requeridos:**
+    1. _Documento Nacional de Identidad (DNI):_ Frente y dorso nítido en archivo único.
+    2. _Certificado Analítico Secundario o Constancia de Título en Trámite:_ Con leyenda obligatoria de "no adeudar materias previas". Dropzone drag-and-drop con botón "Examinar archivos en tu PC".
+    3. _Fotografía Carnet 4x4:_ Fondo blanco liso, vista frontal 3/4 perfil.
+    4. _Documentación Complementaria (Opcional):_ Certificado laboral o de distancia (>50 km) para régimen semipresencial.
+  - Sidebar con workflow explicativo del proceso de auditoría por Secretaría Académica (48 a 72 hs hábiles) y canales de Mesa de Ayuda / Bedelía.
+  - Botón de guardado de borrador y botón principal _"Guardar y Enviar Legajo a Revisión Oficial"_.
+
+#### Pantalla 4: Portal / Estado del Trámite (`04-estado-tramite.html`)
+
+- **Propósito:** Dashboard en tiempo real donde el estudiante matriculado puede consultar el estado de su admisión y próximas etapas académicas.
+- **Elementos Clave:**
+  - Cabecera con saludo personalizado y código de expediente único (`N° EXPEDIENTE: TUP-2025-08492`) con botón para copiar al portapapeles.
+  - Barra de estado general (Fase 3 de 4 en desarrollo: 75% completado).
+  - **Cronograma de Verificación interactivo (Timeline con semáforo):**
+    1. _Preinscripción y Aceptación de Términos:_ Estado "Completado" (con fecha/hora y hash de validación).
+    2. _Reserva de Vacante y Pago de Arancel:_ Estado "Acreditado" ($28.500 ARS) con botón de "Ver Recibo".
+    3. _Validación Digital de Legajo:_ Estado "En Revisión" (DNI validado, analítico secundario en cotejo).
+    4. _Asignación de Comisión y Aula:_ Estado "Bloqueado / Pendiente" (disponibilidad de turnos: Tarde 14:00 a 18:00 hs o Noche 18:30 a 22:30 hs).
+  - Panel de acciones rápidas: Descargar Certificado de Trámite en PDF, Modificar Documentación, Canal de Avisos y Bedelía presencial.
+
+---
+
+### 4. Directrices Técnicas para Replicación en Código (React / Next.js / Vue)
+
+1. **Framework CSS:** Las interfaces están construidas con **Tailwind CSS**, utilizando variables temáticas de diseño institucional UTN (`#005a9c` como primario, `#0284c7` como secundario, y fondos suaves `#f9f9ff`).
+2. **Íconos:** Compatibles con bibliotecas estándar como **Lucide Icons** (`lucide-react`) o **Material Symbols**.
+3. **Manejo de Estado Sugerido:**
+   - Crear un store global (Zustand / Redux / Pinia) o React Context para persistir:
+     - `postulante`: { nombre, apellido, dni, email, celular, direccion, ... }
+     - `pago`: { metodo, comprobanteFile, transaccionId, estado: 'pendiente' | 'acreditado' }
+     - `legajo`: { dniFile, analiticoFile, fotoCarnetFile, porcentajeCompletado }
+     - `expedienteId`: generado automáticamente tras el pago exitoso.

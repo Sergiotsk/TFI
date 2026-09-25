@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01-bienvenida-requisitos.html</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+    <!-- Header Institucional -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-[#005a9c] flex items-center justify-center text-white font-bold text-xl">
+                        <i class="fa-solid fa-gear"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-tight text-slate-900">UTN<span
+                                class="text-[#0284c7]">.BA</span></span>
+                        <span class="block text-xs font-semibold text-[#005a9c] tracking-widest">HAEDO · TUP</span>
+                    </div>
+                </div>
+                <div class="hidden md:block h-6 w-px bg-slate-200 mx-2"></div>
+                <div class="hidden md:block text-xs text-slate-500">
+                    <span class="font-semibold text-slate-800">Portal de Ingresantes</span> · Cohorte 2025
+                </div>
+            </div>
+            <!-- Stepper Header -->
+            <div class="hidden lg:flex items-center space-x-6 text-xs">
+                <div class="flex items-center text-[#005a9c] font-semibold">
+                    <span
+                        class="w-6 h-6 rounded-full bg-[#005a9c] text-white flex items-center justify-center mr-2">1</span>
+                    Requisitos
+                </div>
+                <div class="w-6 h-px bg-slate-200"></div>
+                <div class="flex items-center text-slate-400">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-2">2</span>
+                    Pago Reserva
+                </div>
+                <div class="w-6 h-px bg-slate-200"></div>
+                <div class="flex items-center text-slate-400">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-2">3</span>
+                    Documentación
+                </div>
+                <div class="w-6 h-px bg-slate-200"></div>
+                <div class="flex items-center text-slate-400">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-2">4</span>
+                    Estado Final
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-medium text-slate-400">Postulante</p>
+                    <p class="text-xs font-semibold text-slate-700">DNI 43.829.114</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                    <i class="fa-regular fa-user text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        <!-- Banner Convocatoria -->
+        <div
+            class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-shield-halved text-[#005a9c] text-lg"></i>
+                <div>
+                    <span class="text-xs font-semibold uppercase text-[#005a9c] tracking-wide">Convocatoria Ciclo
+                        Lectivo 2025</span>
+                    <p class="text-xs text-slate-500">Sede Haedo · Proceso formal sujeto a cupo máximo estipulado por
+                        resolución de decanato.</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-rose-50 text-rose-700 text-xs font-semibold rounded-full">
+                Cupos restantes: 24
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <div>
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 bg-[#005a9c]/10 text-[#005a9c] text-xs font-semibold rounded-full mb-3">
+                        PASO 1 DE 4 · FASE INICIAL
+                    </div>
+                    <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Tecnicatura Universitaria en
+                        Programación (TUP)</h1>
+                    <p class="text-slate-500 mt-2 text-sm leading-relaxed">
+                        Proceso oficial y vinculante de reserva de cupo, validación de condiciones académicas e inicio
+                        de legajo para ingresantes a la Universidad Tecnológica Nacional - Facultad Regional Haedo.
+                    </p>
+                </div>
+
+                <!-- Tarjetas Resumen Carrera -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200">
+                        <span class="text-[11px] font-medium text-slate-400 block uppercase">Duración</span>
+                        <span class="text-base font-semibold text-slate-800 mt-1 block">2 Años</span>
+                        <span class="text-xs text-slate-400">4 cuatrimestres</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200">
+                        <span class="text-[11px] font-medium text-slate-400 block uppercase">Modalidad</span>
+                        <span class="text-base font-semibold text-slate-800 mt-1 block">Semipresencial</span>
+                        <span class="text-xs text-slate-400">Sincrónico + Haedo</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200">
+                        <span class="text-[11px] font-medium text-slate-400 block uppercase">Cupo</span>
+                        <span class="text-base font-semibold text-[#005a9c] mt-1 block">Estricto</span>
+                        <span class="text-xs text-slate-400">Orden de pago</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200">
+                        <span class="text-[11px] font-medium text-slate-400 block uppercase">Régimen</span>
+                        <span class="text-base font-semibold text-slate-800 mt-1 block">Arancelada</span>
+                        <span class="text-xs text-slate-400">Seña para matrícula</span>
+                    </div>
+                </div>
+
+                <!-- Información Crucial de Reserva -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                        <h2 class="font-semibold text-amber-950 text-base">Información crucial sobre la reserva de
+                            vacante</h2>
+                    </div>
+                    <p class="text-xs text-amber-900/80 leading-relaxed mb-4">
+                        El pago inicial efectúa la reserva preventiva del cupo en el sistema de cómputos de la UTN
+                        FRH. Según la reglamentación vigente de carreras autofinanciadas, el trámite genera dos
+                        alternativas excluyentes:
+                    </p>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <div class="border-l-2 border-emerald-500 pl-3">
+                            <div class="flex items-center gap-2 text-emerald-700 font-semibold text-xs mb-1">
+                                <i class="fa-solid fa-circle-check"></i> Caso 1: Legajo completo
+                            </div>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Presentando la documentación respaldatoria dentro del plazo legal de <strong>10 días
+                                    hábiles</strong>, el 100% de la seña ($28.500 ARS) se imputa y cancela de forma
+                                automática la matrícula formal de inicio de ciclo.
+                            </p>
+                        </div>
+                        <div class="border-l-2 border-rose-400 pl-3">
+                            <div class="flex items-center gap-2 text-rose-700 font-semibold text-xs mb-1">
+                                <i class="fa-solid fa-circle-xmark"></i> Caso 2: Incumplimiento
+                            </div>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Si se supera el plazo límite, se comprueba falsedad o se adeudan asignaturas
+                                secundarias, se pierde la vacante de forma irrevocable y el monto abonado no es
+                                reembolsable, reasignándose a lista de espera.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist de Conformidad -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                        <div>
+                            <h3 class="font-semibold text-slate-900 text-base">Declaración jurada y conformidad del
+                                postulante</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Marcá individualmente cada cláusula para
+                                habilitar el pago de reserva.</p>
+                        </div>
+                        <button id="btnMarcarTodos" type="button"
+                            class="text-xs font-semibold text-[#005a9c] hover:underline shrink-0 ml-3">Marcar
+                            todos</button>
+                    </div>
+
+                    <div class="space-y-2" id="checklistCont">
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox"
+                                class="chk-item mt-0.5 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+                            <span class="text-xs text-slate-600 leading-relaxed">Entiendo que estoy iniciando
+                                formalmente el proceso de ingreso a la <strong>Tecnicatura Universitaria en
+                                    Programación</strong> de la UTN Regional Haedo.</span>
+                        </label>
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox"
+                                class="chk-item mt-0.5 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+                            <span class="text-xs text-slate-600 leading-relaxed">Entiendo y asumo el compromiso de
+                                cargar la documentación obligatoria y legalizada dentro del <strong>plazo
+                                    improrrogable de diez (10) días hábiles</strong> posteriores al pago.</span>
+                        </label>
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox"
+                                class="chk-item mt-0.5 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+                            <span class="text-xs text-slate-600 leading-relaxed">Certifico bajo juramento que
+                                <strong>cumplo con los requisitos mínimos de admisión</strong> (Nivel Secundario
+                                completo sin adeudar materias a la fecha de matriculación efectiva).</span>
+                        </label>
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox"
+                                class="chk-item mt-0.5 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+                            <span class="text-xs text-slate-600 leading-relaxed">Entiendo que en caso de comprobación
+                                de falta de documentación, falsedad o vencimiento de plazos estipulados, <strong>pierdo
+                                    automáticamente el cupo reservado y no existirá derecho a reintegro o reembolso
+                                    alguno</strong>.</span>
+                        </label>
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox"
+                                class="chk-item mt-0.5 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+                            <span class="text-xs text-slate-600 leading-relaxed">Entiendo que el proceso continúa
+                                inmediatamente con el abono de la <strong>reserva de cupo arancelada de $28.500
+                                    ARS</strong> a fin de señar válidamente mi vacante académica.</span>
+                        </label>
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox"
+                                class="chk-item mt-0.5 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+                            <span class="text-xs text-slate-600 leading-relaxed">He leído íntegramente, comprendo en
+                                su totalidad y <strong>acepto sin reservas las condiciones generales del reglamento de
+                                    ingreso</strong> de la UTN Haedo para el ciclo 2025.</span>
+                        </label>
+                    </div>
+
+                    <div
+                        class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <span id="contadorChk" class="text-xs text-slate-400 font-medium">0 de 6 cláusulas
+                            obligatorias confirmadas</span>
+                        <a id="btnContinuar" href="02-datos-pago-reserva.html"
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-sm text-slate-400 bg-slate-100 pointer-events-none transition cursor-not-allowed">
+                            Continuar a Datos y Pago de Reserva <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Lateral -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-5">
+                    <h4 class="font-semibold text-slate-900 text-sm mb-3">Resumen del trámite</h4>
+                    <dl class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <dt class="text-slate-400">Carrera</dt>
+                            <dd class="font-semibold text-slate-700">TUP Haedo</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <dt class="text-slate-400">Ciclo Lectivo</dt>
+                            <dd class="font-semibold text-slate-700">1° Cuatrimestre 2025</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <dt class="text-slate-400">Monto Seña de Reserva</dt>
+                            <dd class="font-bold text-[#005a9c] text-sm">$ 28.500 ARS</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <dt class="text-slate-400">Plazo Documentación</dt>
+                            <dd class="font-semibold text-rose-600">10 días hábiles</dd>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <dt class="text-slate-400">Imputación Arancelaria</dt>
+                            <dd class="font-semibold text-emerald-600">100% a Matrícula</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="bg-[#005a9c] text-white rounded-xl p-5">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-blue-200 block mb-1">Facultad
+                        Regional Haedo</span>
+                    <h4 class="font-semibold text-base mb-2">Excelencia pública tecnológica</h4>
+                    <p class="text-xs text-blue-100 leading-relaxed mb-3">
+                        Fundada con un fuerte vínculo con el polo industrial y tecnológico, la UTN Haedo forma
+                        profesionales con inserción directa en la industria de software.
+                    </p>
+                    <div class="flex items-center text-xs text-blue-200 gap-1.5">
+                        <i class="fa-solid fa-location-dot"></i> París 532, Haedo, Buenos Aires
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 p-4 text-xs text-slate-500">
+                    <span class="font-semibold text-slate-900 block mb-0.5">¿Dudas sobre tu título secundario?</span>
+                    Escribí a <strong class="text-[#005a9c]">alumnos@frh.utn.edu.ar</strong> antes de confirmar la
+                    reserva.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-400">
+        Universidad Tecnológica Nacional · Facultad Regional Haedo · París 532, Haedo · (011) 4443-5246
+    </footer>
+
+    <script>
+        const checkboxes = document.querySelectorAll('.chk-item');
+        const btnContinuar = document.getElementById('btnContinuar');
+        const contador = document.getElementById('contadorChk');
+        const btnMarcarTodos = document.getElementById('btnMarcarTodos');
+
+        function actualizarEstado() {
+            const checkedCount = Array.from(checkboxes).filter(c => c.checked).length;
+            contador.textContent = `${checkedCount} de 6 cláusulas obligatorias confirmadas`;
+            if (checkedCount === 6) {
+                btnContinuar.classList.remove('pointer-events-none', 'bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                btnContinuar.classList.add('bg-[#005a9c]', 'text-white', 'hover:bg-[#00487d]');
+            } else {
+                btnContinuar.classList.add('pointer-events-none', 'bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                btnContinuar.classList.remove('bg-[#005a9c]', 'text-white', 'hover:bg-[#00487d]');
+            }
+        }
+
+        checkboxes.forEach(chk => chk.addEventListener('change', actualizarEstado));
+        btnMarcarTodos.addEventListener('click', () => {
+            checkboxes.forEach(chk => chk.checked = true);
+            actualizarEstado();
+        });
+    </script>
+</body>
+
+</html>
