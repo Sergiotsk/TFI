@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02-pago-reserva.html · TUP UTN FRH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col">
+    <!-- Header Institucional -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div
+                    class="w-10 h-10 rounded-lg bg-[#005a9c] flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-black tracking-tight text-slate-900">UTN<span
+                            class="text-[#0284c7]">.FRH</span></span>
+                    <span class="block text-xs font-bold text-[#005a9c] tracking-widest">HAEDO · TUP</span>
+                </div>
+            </div>
+            <!-- Stepper Header -->
+            <div class="hidden lg:flex items-center space-x-6 text-xs">
+                <a href="01-bienvenida-requisitos.html"
+                    class="flex items-center text-emerald-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Requisitos
+                </a>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <div class="flex items-center text-[#005a9c] font-bold">
+                    <span
+                        class="w-6 h-6 rounded-full bg-[#005a9c] text-white flex items-center justify-center mr-2">2</span>
+                    Pago Reserva
+                </div>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <div class="flex items-center text-slate-400">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mr-2">3</span>
+                    Documentación
+                </div>
+                <div class="w-6 h-px bg-slate-300"></div>
+                <div class="flex items-center text-slate-400">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mr-2">4</span>
+                    Estado Final
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span
+                    class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    DNI **.***.***
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        <!-- Barra Alerta Timer Reserva -->
+        <div
+            class="bg-amber-50 border-l-4 border-amber-500 rounded-r-xl p-4 mb-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900">Paso 2 de 4: Pago de Reserva de Cupo</h2>
+                    <p class="text-xs text-slate-600">Tenés una vacante temporal apartada durante las próximas 48 horas
+                        para concretar el pago y asegurar tu lugar.</p>
+                </div>
+            </div>
+            <div class="bg-white px-4 py-2 rounded-xl border border-amber-200 shadow-sm flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-500 uppercase">Expira en:</span>
+                <span id="countdownTimer" class="font-mono font-black text-amber-700 text-base">47:59:44</span>
+            </div>
+        </div>
+
+        <form action="03-carga-documentacion.html" method="GET" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Columna Izquierda: Datos Confirmados del Postulante y Aclaración Arancelaria -->
+            <div class="lg:col-span-6 space-y-6">
+                <!-- Resumen de Postulante Registrado -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                        <div class="flex items-center gap-2.5">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-blue-50 text-[#005a9c] flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-id-card"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">Titular de la Vacante Asignada</h3>
+                                <p class="text-[11px] text-slate-500">Datos precargados y confirmados en la inscripción
+                                </p>
+                            </div>
+                        </div>
+                        <span
+                            class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check text-xs"></i> Verificado
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-slate-500 font-medium block text-[11px] mb-0.5">Postulante /
+                                Titular</span>
+                            <span class="font-bold text-slate-800 text-sm">Martín Ignacio Sosa Benítez</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-slate-500 font-medium block text-[11px] mb-0.5">DNI / Documento</span>
+                            <span class="font-bold text-slate-800 text-sm">43.829.114</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-slate-500 font-medium block text-[11px] mb-0.5">CUIL / Facturación</span>
+                            <span class="font-semibold text-slate-800">20-43829114-9</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-slate-500 font-medium block text-[11px] mb-0.5">Carrera Destino</span>
+                            <span class="font-semibold text-[#005a9c]">Tecnicatura Universitaria en Programación</span>
+                        </div>
+                        <div
+                            class="sm:col-span-2 bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <div>
+                                <span class="text-slate-500 font-medium text-[11px] block">Email de Notificaciones
+                                    Académicas:</span>
+                                <span class="font-semibold text-slate-800">martin.sosa@gmail.com</span>
+                            </div>
+                            <span class="text-[11px] text-slate-500">Comprobante fiscal a nombre del titular</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Arancel Oficial -->
+                <div class="bg-[#005a9c] text-white rounded-xl p-6 shadow-md">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs uppercase font-bold tracking-wider text-blue-200">Arancel Oficial de
+                            Ingreso</span>
+                        <span class="bg-blue-800/80 text-blue-100 text-[10px] font-bold px-2 py-0.5 rounded">Cupo
+                            Temporalmente Reservado</span>
+                    </div>
+                    <h3 class="text-xl font-black">Seña y Reserva de Matrícula TUP 2026</h3>
+                    <div class="mt-4 flex items-baseline gap-2">
+                        <span class="text-4xl font-black tracking-tight">$100.000</span>
+                        <span class="text-xs font-bold text-blue-200">ARS (Final)</span>
+                    </div>
+                </div>
+
+                <!-- Banner de Aclaración e Imputación al Arancel Definitivo -->
+                <div
+                    class="bg-blue-50 border-l-4 border-[#005a9c] rounded-r-xl p-5 shadow-sm text-xs text-blue-900 space-y-2">
+                    <div class="flex items-center gap-2 font-bold text-sm text-[#005a9c]">
+                        <i class="fa-solid fa-circle-info text-base"></i>
+                        <span class="">Información importante sobre el arancel abonado</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-700">
+                        El pago de <strong class="text-slate-900">$100.000 ARS</strong> corresponde a la seña de reserva
+                        de vacante para la TUP 2026. Una vez verificada la documentación obligatoria (Paso 3), el
+                        <strong class="text-[#005a9c]">100% de este importe se computará y acreditará
+                            automáticamente</strong> para cancelar el arancel de la matrícula definitiva del ciclo
+                        lectivo.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Pasarela de Pago y Comprobante -->
+            <div class="lg:col-span-6 space-y-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                    <span class="text-xs font-bold text-slate-900 block mb-3">Seleccioná tu medio de pago:</span>
+
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button type="button" id="tabVirtual"
+                            class="py-2.5 px-3 rounded-lg border-2 border-[#005a9c] bg-blue-50/50 text-[#005a9c] text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition">
+                            <i class="fa-solid fa-qrcode"></i> Virtual / QR / CBU
+                        </button>
+                        <button type="button" id="tabPresencial"
+                            class="py-2.5 px-3 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-50 cursor-pointer transition">
+                            <i class="fa-solid fa-building-columns"></i> Tesorería Haedo
+                        </button>
+                    </div>
+
+                    <!-- Contenedor Pago Virtual -->
+                    <div id="panelVirtual" class="space-y-4">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                            <div
+                                class="w-40 h-40 mx-auto bg-white p-2 rounded-lg border border-slate-300 shadow-sm flex items-center justify-center mb-2">
+                                <i class="fa-solid fa-qrcode text-8xl text-slate-900"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-800 block">Escaneá con cualquier billetera
+                                virtual</span>
+                            <p class="text-[11px] text-slate-500">Mercado Pago, Cuenta DNI, MODO, BNA+, Ualá y apps
+                                bancarias</p>
+                        </div>
+
+                        <div class="bg-blue-50/60 border border-blue-200 rounded-lg p-3 space-y-2 text-xs">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500 font-medium">Alias para Transferencia:</span>
+                                <span class="font-mono font-bold text-[#005a9c]">UTN.HAEDO.TUP</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500 font-medium">CBU Oficial:</span>
+                                <span class="font-mono text-slate-800">0110031020000012345678</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500 font-medium">CUIT Institución:</span>
+                                <span class="font-mono text-slate-800">30-54667232-4</span>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- Contenedor Pago Presencial (Oculto por defecto) -->
+                    <div id="panelPresencial" class="hidden space-y-3">
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-950">
+                            <h5 class="font-bold mb-1"><i class="fa-solid fa-clock"></i> Plazo de Ventanilla: 48 hs
+                                hábiles</h5>
+                            <p class="leading-relaxed">Acercate a la Tesorería de UTN Haedo (París 532) de Lunes a
+                                Viernes de 10:00 a 19:00 hs con tu DNI para abonar en efectivo o débito.</p>
+                        </div>
+                        <p class="text-xs text-slate-600">Al confirmar la opción de Tesorería, se reservará
+                            temporalmente tu lugar emitiendo una constancia provisoria sujeta al pago en ventanilla.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 mt-4">Número de Operación / ID de
+                            Transferencia *</label>
+                        <input type="text" required="" placeholder="Ej: 9482710382"
+                            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-[#005a9c] bg-white text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 mt-4">Adjuntar Comprobante de Pago
+                            (PDF, JPG, PNG) *</label>
+                        <div
+                            class="border-2 border-dashed border-slate-300 rounded-lg p-5 text-center hover:bg-slate-50 transition cursor-pointer bg-white">
+                            <i class="fa-solid fa-cloud-arrow-up text-slate-400 text-2xl mb-1"></i>
+                            <p class="text-xs font-semibold text-slate-700">Hacé clic o arrastrá el comprobante acá
+                            </p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Formatos admitidos: PDF, JPG, PNG (Hasta 5
+                                MB)</p>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full mt-6 py-3.5 rounded-xl bg-[#005a9c] hover:bg-[#00487d] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                        Confirmar y Enviar Comprobante de Reserva <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        Universidad Tecnológica Nacional · Facultad Regional Haedo · París 532, Haedo · (011) 4443-5246
+    </footer>
+
+    <script>
+        const tabVirtual = document.getElementById('tabVirtual');
+        const tabPresencial = document.getElementById('tabPresencial');
+        const panelVirtual = document.getElementById('panelVirtual');
+        const panelPresencial = document.getElementById('panelPresencial');
+
+        tabVirtual.addEventListener('click', () => {
+            tabVirtual.classList.add('border-[#005a9c]', 'bg-blue-50/50', 'text-[#005a9c]');
+            tabVirtual.classList.remove('border-slate-200', 'text-slate-600');
+            tabPresencial.classList.remove('border-[#005a9c]', 'bg-blue-50/50', 'text-[#005a9c]');
+            tabPresencial.classList.add('border-slate-200', 'text-slate-600');
+            panelVirtual.classList.remove('hidden');
+            panelPresencial.classList.add('hidden');
+        });
+
+        tabPresencial.addEventListener('click', () => {
+            tabPresencial.classList.add('border-[#005a9c]', 'bg-blue-50/50', 'text-[#005a9c]');
+            tabPresencial.classList.remove('border-slate-200', 'text-slate-600');
+            tabVirtual.classList.remove('border-[#005a9c]', 'bg-blue-50/50', 'text-[#005a9c]');
+            tabVirtual.classList.add('border-slate-200', 'text-slate-600');
+            panelPresencial.classList.remove('hidden');
+            panelVirtual.classList.add('hidden');
+        });
+    </script>
+
+
+
+
+
+</body>
+
+</html>
