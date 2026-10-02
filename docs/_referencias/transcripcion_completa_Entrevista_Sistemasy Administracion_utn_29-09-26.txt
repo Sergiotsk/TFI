@@ -1,0 +1,699 @@
+
+
+--- BLOQUE 1 [00:00:00 - 00:30:00] ---
+
+¿Qué es lo que te pasa cuando te vas a hacer una receta? Que... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ...
+... ... ... ... ... ... ... ... ... ... ... ¿Cuál es la cuestión de la visión que no debería tener? Bueno, es algo que
+no sabemos. Recibimos. Todos, estoy atentado. Los chicos que están desarrollando el proyecto de Ituáneo, en la carrera.
+Christian es el que maneja la práctica de toda la parte administrativa, y pago, y es mucha más pobre. Christian es el
+facultante, pero conoce muchísimo de todos esos signos administrativos que son bastante complejos.
+
+Y Luis es quien gestiona, entre otras cosas, los sistemas académicos y administrativos de la facultad. Los chicos
+plantean la posibilidad de, en su proyecto final, hacer el desarrollo de un sistema para gestionar todo lo que es la
+inscripción de alumnos nuevos a la carrera. Y yo les comenté, y poco, que ya hayamos tenido unas reuniones con
+rectorado, porque hay algunas soluciones generales que yo ya he integrado con las cosas acá. Pero bueno, entre esas
+soluciones, a veces son generales por la diferente facultad de regiones.
+
+Si quieren hacer un trabajo práctico, si quieren trabajar ese tema, una de esas no viene mal. No, no viene mal. No viene
+mal, solo el poder elegir. Claro, soltó, por lo tanto el proceso lo gestionamos más. La idea es que sea una herramienta
+para que ellos... Claro, pues es crear funcionamiento, si así. La idea justamente era integrar o comunicar el sistema
+que va a ser el ingreso con las partes de pagos que no la podemos evitar. Más que nada la parte de pago en efectivo.
+Ahora se va a ver un poco.
+
+La idea de tener un nuevo ingreso es no reemplazar necesariamente cosas que ya están definidas de modo terminado. Como
+la gestión de pagos por un canal que no sea de putera en el concurso ya está. No es la idea. Pero sí, por ejemplo, la
+conducción de todo lo que es el proceso de edicción, donde de repente nosotros les mandamos a ustedes un Excel o les
+mandamos a Luis o una carpeta compartida, bueno, a ver cómo lo podemos hacer, con un foco particular para nosotros. Y
+que tiene que ver con el hecho de que en tecnicatura, posiblemente en tecnicaturas, hay un factor elemental clave, que
+es poner al principio del proceso administrativo el pago de la matrimonía.
+
+Otros activos, chavones, conocidos, les comentaba que al ovologar todos estos procesos, que son de las carreras de
+grado, queda posteriori el tema del pago. Y ahí nos volvemos a lo que estamos hablando. Porque el alumno se anota, carga
+unos datos, después paga, después no paga, manda el ovologar de un lado, manda el ovologar de otro lado. Bueno, vamos. A
+igual que yo le di a los documentos a todos, a ver si saben. Y si ya te voy a charlar. ¡Vamos al día, vamos al día!
+Entonces claro, yo fui con un montón de ideas, y me fui a decir, mira, acá hay dos factores que son fundamentales.
+
+Uno, que hay sistemas que la facultad ya tiene, y que no lo podemos paralelizar, digamos, ¿sí? Es decir, si tenemos
+registrado algo de Cisacat, no podemos tener un registro paralelo, porque uno tiene que encargar todos los datos, sino,
+tenemos que ver qué podemos extraer de Cisacat. De este modo... Se me han metido los ojos para dentro, y yo me he
+atrapado. Y para hacer la opinión, ¿de dónde apuntan? Porque tienen la mano ustedes, ¿no? Vamos a ver, desde el lado del
+místil mío, vamos. Para que, por lo menos, las cuámos intentar, ¿sabes bien?
+
+¿A qué está apuntado? Por mí, yo te pude empezar a hablar de lo que es el proceso de instrucción, de lo que es la
+propiedad legislativa, hasta el pago y el seguimiento, y... Claro, claro. No, igual a nosotros, lo que nos interesaría
+es simplemente capturar el concepto de pago, y... O sea, cuando ingresa un pago para la tecnicatura, capturar eso, esa
+información, y nada más. La interacción sería solamente cuando cargan, cuando en la parte de administración cargan en la
+base de datos. O sea, eso ya es más ánimo, ¿sabes?
+
+Creo que... ...la autorización se va a desgastar. ¿Qué es lo que se va a hacer? ¿Quieren insumos algo? No, los primeros
+que se pusieron... ...que nos comentaba y que me diría que la parte del pago, o sea, el primer proceso, o uno de los
+primeros procesos para toda la parte que conlleva inscribirse, lo primero que se pensó es que, bueno, obviamente el pago
+no puede demorar en registrarse, no sé, una semana, porque si vos lo primero que vas a hacer... ...claro, pero lo que no
+puedes... ...pueden ser que vos que mandes un comprobante de pago, que lo haces pago en el extracto de un par de días,
+no esté terminado de quienes.
+
+Claro, yo voy. En el momento que se registra el pago, que ya se toma, debería hacerlo lo más rápido posible desde el
+momento que el pago se registró, se recibió, ya lo tenemos, listo, ya sabemos de quién es, hasta que ese pago se dice
+listo, es que el pago es de tal persona. Claro, la idea es evitar la dependencia de la comunicación con ellos, sino que
+sea la comunicación con la base de datos. Y el caso virtual, claro. Claro, cuando usted carga el concepto, que nosotros,
+que se refleje en el sistema de ingresos de yo también, que no haya una comunicación...
+
+Igual es, quizás, el que puede compartir un poco, como para hacer una idea, ¿no? En lo que sería este sistema que yo
+desarrollaría, lo primero que capturaría de algún modo es la intención de el ingresante de la universidad, y ofrecerle
+algunas modalidades de pago. Hoy puede ser que la facultad no tenga, y puede ser que la facultad nunca implene en esto,
+pero hoy en su proyecto diga, nosotros vamos a hacer un sistema donde, digo una pagada, alguna cosa que yo no entiendo,
+donde el chico pueda, el estudiante del ingresante, pueda pagar con un marcado de pago.
+
+Igual me decís, no, pero la facultad no quiere pagar el ingreso. Bueno, listo, no usé este sistema, pero la propuesta
+que ellos proponen es que, por ejemplo, el proyecto inicial del propósito, que al respecto el ingresante, bueno, el
+marcado pago me va a decir, pago, y huyendo el video del video del comprobante, el de los comprobantes, el de el PÚ, que
+después eso sea liable para nosotros, ¿o no? Bueno, ellos verán cómo lo pueden aplicar. Bueno, ya una consulta que te
+piden hacer. A mañana un toque, un toque y hago el concepto general, y después ya lo digo, ya.
+
+De el mismo modo, pasa por el caso de los sistemas que probé Luis, ¿sí? De repente ellos me dicen, bueno, los datos de
+los alumnos cuando al momento después se quede a registrarlo como alumno, y a ver dónde los sacamos, dónde los
+guardamos, bueno, nosotros deberíamos trabajarlos con Sysacar. ¿Y quién me puede dar esa información fuerte? Esa
+información lo pueden echar los alumnos. Pero de repente cuando dicen, no sé, vamos a hacer tal proceso que voy a
+importar en Sysadmin, importar en Sysadmin, Luis dice, técnicamente es viable, pero luego desde el punto de vista
+operativo, dice, no, no lo es.
+
+Claro, porque sabes también de manera externa. Y eso es lo que yo quiero saber. Que no simplemente rigan en todo el reto
+de datos. Claro, entonces digo, bueno, a ver, cómo se puede articular a las ideas que ellos tienen, eso es un poco la
+idea, ¿sí? Incluso la idea es que la Estadounidon, que ustedes tienen mucho trabajo, no sea demasiado larga. Pensamos
+por ese lado. ¿Y si lo sirva para ellos? 15, 20 minutos que ustedes puedan charlar con Jorizos, y ustedes empezar a
+explorar. Sí, sí, me complican.
+
+Les quería consultar a él porque yo por lo que estuve viendo de la documentación de la Uteneq, ¿esan SQL y SQL? Sí, el
+sistema SQL de Microsoft. Pero corre bajo un sistema que está programado en Visual Fox Pro, que es el que tiene todas
+las reglas, pues la estructura de la base de datos y las relaciones no están en la base de datos, están en el programa.
+Ahí está marcando algo importante que está en el día. Bueno, ahí se escribe. Todas las comprobaciones no las hace el
+mundo de los baseados, las hace la aplicación.
+
+Esto es lo que quiere decir, por ejemplo. Es que si ustedes quieren obtener, por ejemplo, una información de sistemas o
+impactar con una actualización o registro, no lo pueden hacer directamente a base de datos. No, solamente lo van a poder
+hacer por las interfaces que eventualmente, si las tienen, cada uno de esos sistemas la tiene en mi vida. Si no te
+podemos meter en mano, le andrás a poder coercar. Claro que decía aquí. Lo primero que habían pensado era armar un
+agente que nos genera una vista simplemente para hacer un serie y que no interactuemos más de ningún tipo de privilegio.
+
+Todo lo que decía interacción, exactamente. Y tiene que ser ejecutivamente otra vez. Claro. Las interfaces que están
+definidas. Claro, porque se pueden agarrar. Si no, hay que pensar. Claro, yo pensando que se guardaban en la base de
+datos, generan una vista, dejamos un binario que corre, un cron que nos tire a nuestro bar que nos trae a mí, a cierto
+tiempo y que vaya capturándolo en los recibo de ellos. Yo sugiero en esta instancia no entrar en presidencia técnico por
+voles de ciencia. A uno que meta tu binario, no me toqueis nada.
+
+Yo quiero que se entere de lo que pensamos. Para que me digan no se puede. No le digan lo que vos penséis, vos todavía
+no sabéis cuál es el que sea. Tenéis una idea general de cuál es la necesidad. Ahora va a ser posible en los fondos de
+ámbito. No, no, no, no. No es más cada día que viene. No, no, no, no. Aparte del pichito, esto lo quiere decir que es un
+sistema que forma mandatarios de implementar. Si no trabajas en un sistema, esto es compatible. Si sacado, es un mismo.
+Si es viable o no viable, ellos pueden ser que aprueben su proyecto, el proyecto no se apiche, como puede ser que diga,
+che, está bueno, o puede ser que digamos, muchas gracias muchachos, vamos a ir con lo que más nos prepara.
+
+El objetivo no es amplazar el sistema, sino que ya va a ser un proyecto sin poder sacar otro efecto. No, no, no, no.
+Podemos amplazar. Generalmente, estamos hablando de la gestión de disfunciones. No, pero cuando hablamos de reemplazo,
+estamos hablando de todo el tema de la gestión de disfunciones. No, no, no, no. Si hablamos de un sistema de stiffia,
+tendría que ser un poquito más caro. Por ejemplo, un planteo de esa satelita para que salgan carpes en un proceso de...
+Es hérbido. O es igual, mira, hay que hacer un registro de ciertas cosas en ese satelite.
+
+O si no yo, no hay definidas interfaces para que esas actualizaciones se hagan automáticamente. Entonces yo, en base a
+su información, yo voy a tener que hacer la impresión de un informe que automáticamente le permita manualmente, como
+usted lo viene haciendo, cargar en su sangre. Por ejemplo. O si vos tengas que hacer la previsión del ingreso, che,
+¿cómo hago para que una ventana y un pavó haya una forma de que se genere la previsión del ingreso automáticamente y no
+dice, sí, mira, hay una posibilidad de que, dándole a la diáloga, en sí se ha atado, automáticamente se cree...
+
+Sabéis que es por eso que hicieron otra vuelta. Dicen que ahí estábamos... Que después sí, no, no, no, no. Buenísimo. No
+vamos por ahí. Lito. Bueno. Disponen ustedes 15 minutos para charlar con ellos? Sí. Igual sea que sea más de una
+enestidad que los últimos dos días entre los cuatro al menos. Está bien. Nosotros el problema que nosotros aportamos es
+que no tenemos la herramienta de que se puede hacer el ingreso. No, y aparte de no abusar. Dos personas que... Sí, el
+trabajo es un elemento. No, no, no, no, no, no.
+
+Pero pido eso porque tiene cosas de balance y... Sí, claro. El trabajo de ellos dos es mucho más claro de explicar en el
+signo manual. Así que si, entran a Inchart. Porque no los quiero interferir más los días entrefriendo. ¿En serio que
+tienen un parcito nada? No, no, no. Bueno, 15 minutos. 15 minutos, 20 con más no para no sobrepoder el tiempo.
+Aprovechen bien. Cualquier cosa. Sigue hablando con Ari. Y seguimos reuniendo nosotros. Gracias chicos. Bien. Bien. Ese
+huele. No, no dice nada. Yo tenía una consulta.
+
+Como la idea era como lo comentaba Sebastián. Que el pago sea lo primero de todo, ¿no? ¿Se puede hacer el pago, se
+supone que el de la matrícula no, porque todavía no está ese alumno como dado de alta o como aceptado? Ese pago se puede
+de alguna forma como pagar y dejar en reserva hasta que el uno esté en condición de darse de alta y ahí se paga todo el
+pago. El que se adentra por un huevo al difícil. Fue una cosa el lago de alta. El sistema académico. Que es la parte de
+debajo del alumno. Y otra cosa es el alta de hoy.
+
+Por lo menos, el que se va a cambiar. Es el alta económico. En el que se genera la deuda y el huevo. Claro. Yo tenía esa
+secuestra. El problema es que el problema queda ahí. La primera parte. La parte académica. Una miéntra más ahí porque
+una vez que ellos valían todo el documento, la matrícula y todo ya lo pasan así a sacar por lo que no dijeron. Y ya
+está. Ahí nos termina nuestra parte. La parte que nos interesa es el tema de robrindar el tema de los pagos. La parte
+efectivo y lo que no podemos...
+
+Y manejar el problema. Es que no es lo mismo si es efectivo o transferencia. Esos procesos es exactamente el mismo.
+Cátera de difusión. El mayor problema que hay que tener es las transferencias. Más que nada por el usuario no tanto por
+el usuario sino porque no se entiende que tiene que mandar el comprobante y no lo manda. Si no es su cuenta tiene que
+mandar el comprobante sin el detalle. Yo llevo un momento con un comprobante de transferencia. Sí, sí, sí. Y después
+tenemos un sistema bandario que es humanísimo en el cual no siempre te lo relaciona el comprobante ni el efecto con las
+personas.
+
+O sea, me ponen que de 50 pagos recibo un día 5 o 6 y me detienen los datos de la persona, entonces lo puedo ahorrar al
+respecto. Los otros están ahí... Tienen que estar ahí... Tienen que estar ahí unos días porque tienen que ver a 24 o 48
+horas a veces se les está chiquita de antes por el nombre y si no se te acarita ir viendo lo que te va quedando e ir
+poniéndolo. Y el problema es que por ahí, y eso es lo que pasa te olvidaste de mandar un comprobante. Mando él, por la
+misma fecha que vos. Pero el de él no entró ese día.
+
+Entró al día siguiente y sin el nombre. Entonces como el comprobante tenía fecha 14, yo tengo fecha 14 y vos 20 y afuera
+cuando se comprobaba. Y no tienes movimiento de 14. No es tan sencillo registrar un pagado. Hay un montón de variables.
+Sí, porque estás... Y no siempre... Y cuando el ingreso se saca una<|hi|> y el chico le pone no siempre el comprobante
+que era lo que ellos pretendían tomar significa que este el comprobado. Por lo que me ha pasado que yo con el
+comprobante soy un apócrifo. Eso se lo cantemos en un momento también como hacían con el comprobante.
+
+Claro, le ves abierto a donde cuenta pero como no te comprobaste te olvidaste de besar. Claro, te arregló la
+transferencia. Sí, nosotros, por eso... No, no, no, no. Cuando ustedes quieren hacerlo van a tener que verlo con su
+realidad. No sé si los datos van a poder ser sacados si obviamente es a mí. Pero bueno, es lo que ustedes están
+intentando hacer. Igual yo no sé si van a ser sacados si habéis podido. Ya no sabía lo que estaban pensando. Que no, que
+no. Que es un recorte de clavos que se puedan sacar.
+
+No, no, es un recorte de clavos que al reír de la vista que yo voy a señalar desde los ingresos que es la que le pasó a
+ellos, que es la que les pasa a ellos. Y lo pueden compartir con su realidad. Vamos a pegarse a verlo. Es un recorte de
+clavos que uno tenga que pasárselo a ellos. Y que se pueda exportar al final del día y la subiza al sistema. Y ellos
+para el procesamiento del sistema es un filtro. Pero que es... Lo probar. El filtro para evitar mandar... No, el idea
+que hacemos de haberme quizás...
+
+Y que hay una sistema que diga... No sé si lo hacemos en general. Sí, pero... Para ver si se puede hacer exportación o
+el sistema, la interfaz... Si es a mí, el que sabe, yo apenas toco algunas cosas. Si sacar sí en la parte académica que
+conozco más. La mayor forma de interfaz y algo masivamente algunas cosas es generando extracción BSNX o importando lo
+que no te lo dejas en estos clavos. Hay que ver si hay cosas que... Bueno, el sistema no puede ser insulgado. Nosotros
+no podemos entregar las comprobaciones que hace el sistema.
+
+O sí utilizar la interfaz. Pero quizás se pueden entregar los archivos. Si las vistas que se utilizan... No sé si el de
+la previsión te lo deja. No, más de las previsiones deberíamos hacerlo desde los ingresos. A ver si permite hacer cargas
+masivas. Quizás que el sistema haga una exportación que ellos puedan hacer. Y... Y a chequeo los datos. Exactamente. Y
+no hacemos nada por atrás. Que no se puede... Si no se puede generar el Excel que se ha creado en algún lado hoy.
+También generar un rol para administración, para que cargue, como dices a usted.
+
+Pero bueno, no era la primera idea porque no era la idea de las canales de trabajo en la tesorería y nada. Pero si lo
+ven como una opción, también se puede. En un mundo ideal, como somos hoy que si hay algo que todavía el sistema no lo
+tiene, a presencia de que se están haciendo algunas pruebas, con algún medio de pago online donde vos pagues. No, no.
+Nosotros apuntamos a una técnica que se apunta en el mercado. Porque... Por facilidad. Ya les digo que era una visión
+del Estado. Está prohibido el Estado.
+
+No lo podés usar. Claro. Yo porque ya he usado una venda. Será en el mercado y será bien. Si no, pínense con BAU360. No,
+no. Tienen que estar bien. Y también la pina de la obra. La gente que va a votar hacia esta venda, o sea, la están
+militando o la están... En algunos lados ya está empezado a militarse y vamos a hacer un convenio de la vanda. Ah,
+exacto. La idea era que sean las dos posibilidades. Que puedan tener una pasanela de pago. En todo lo que es una visión.
+Pero igual, está prohibida el nuevo Estado.
+
+Tiene que ser un piso. Antes ya teníamos la idea buena, pero... Yo creo que se puede implementar. No, no, no. Yo tengo
+un día... Porque realmente es usted el que me va a dar esa posibilidad. Sí, sí. Pero sería bueno hacer el proyecto y
+invitarle ganas para esa cosa. Yo sé que pago en la C60 estamos en el 3 Paotic. Ah, ese está en la plana. La idea es que
+sean los más realistas posibles y los más riables posibles dentro de la C60. Y con chequear la posibilidad. La pasanela
+y también la parte habitual.
+
+Contemplar las dos camiones. No descartar ni un día de la pasanela. Y también la parte habitual. Contemplar las dos
+camiones. Los dos camiones. No descartar ni un día de la pasanela. Para no unificar y terminar teniendo un embudo igual.
+No, de hecho, al menos como recomendación de un tetanín, pueden implementar algo en el mercado libre y en parte de
+chequeo. O puedes habilitar como que se presenten los pagos. Pues bueno, hoy es pagos 360. Listo, pagó 360. Pero mañana
+decenlo, se cayó el convenio y tenemos que volver a el administrador de ese sitio donde está asignito.
+
+No, pero está lo presionando con la adaptadora que no tiene ese problema cuando si hay alguna... El sistema se fue, pero
+aquí es la parte que vamos a tener una pesadilla de aplicar. Está preparado para esos dos plataformas. No, no creo que
+vayan a llegar a la otra porque las demás en realidad no son billeteras, sino que son empresas de cobro, de decoranza.
+Se seca dos, el mercado pago es una billetera virtual que está fuera del sistema financiero. Igual en cuanto a la de la
+ley y de lo que terminan se habría que tener en su bolsillo, no puedo que tocan...
+
+Sería genial por usarlo porque... No, no, no, no. Es familia, ha ido con la gente y por lo menos... Por eso el mercado
+pago... No, no, no, no, no. El tiempo que estamos de aquí pagamos, por la noche, los subo... La parte de tenerlo... Yo
+no sabía que no se ponían, pero en el webcoop te notifican que es mucho más completo. Sí, está tan... Vengo peleando
+hace un año tenemos... Tenemos un postre, tenemos Fart Data. Y vengo peleando hace un año para lograr encontrar cuál es
+mi contacto para que me habilite mi toda la parte virtual de pago para poder encontrar mi link de pagos.
+
+Claro, mira solo... Sí, sí, porque hay un link de pagos con la mano de un año y no pasa ningún otro y es más que mal.
+Claro, no, totalmente. Claro, está buenísimo y por eso tenemos el problema de las instituciones que es... Vosotros ya no
+es chico. Claro. A mi cualidad, ya es que año no puedo hacer eso directo. Es una abastecimiento. Ha policinado. Él se lo
+pasaba a Seba. Seba fue uno de los chicos que lo pasaba a mí. Yo bajaba listado de todo lo que se escribía. Sí. Una vez
+que le inventaba lo que se escribía, me iba llegando los mails de los pagos.
+
+Una vez que calificaba le marcaba en el archivo y le ponían pagos, pagos, pagos, pagos... Una semana devolvía el archivo
+con lo que pagaba. Hace hoy se lo devolvía él. Yo ya me lo devolvía. Una vez que pagaba todo lo que decía y me lo
+devolvía él a mí para crear los usuarios. Yo ya me lo decí. Vamos a verlo en el archivo. Claro, vamos a verlo en el
+archivo. Y luego se va a seguir. Entonces, por lo que dicen, si saca no te preocupes con la base de datos. O sea... Si
+saca y si sale un minuto, son dos sistemas.
+
+Eso para no decir si es una misma. Que es la misma. Interactúo es para hacer la información segura de la base de datos.
+Ahora, toda la información está en el SQL y los procesos fueron dentro del... Claro. Por ejemplo, pareces un ejemplo del
+si saca que no conoce. Es lo que yo reconozco, pero es lo mismo. Si yo tengo un curso en la base de datos, con la parte
+de la base de datos, y si yo borro el curso, los alumnos no me avisan, no me avisan nada. Y queda información. Imaginad
+esa información de pagos, de cosas...
+
+Toda la lógica, vos cuando querés borrar un curso, ojo, que hay material que tiene el alumno, que tiene un logo. Acá te
+lo dicen. Pero si lo queremos ver de la base de datos, que no hay nada, que por eso le decían, en las relaciones, no
+están dadas en la base de datos, para que te digan, chele el otro borracho y se está usando en otro lado. Pero la
+amistad de consulta entonces es imposible, porque yo sí carga. Lo que yo te planteaba es que en una amistad simplemente
+de consulta. Bueno, eso es lo que hay que ver.
+
+Si es imposible, lo veo en SysAx1 es un poco más complicado. No es un teleclanismo, sino que simplemente íbamos a
+consultar eso. Igual ya lo que viste que era un poco viable, un ejemplo chiquito por ejemplo en el servidor de usted.
+Porque lo manejarían ustedes porque no tendríamos... Yo sé que lo complicado es dar acceso a un tercero, lo que sea. El
+problema, el mayor problema también, es que estos son sistemas que no lo gestionamos nosotros. Entonces... No es que es
+un lado, no es que es otro. Sí, sí, bueno.
+
+A partir de la reformación no se guarda en esa tabla, se guarda en otra, a ver, en una columna. No te entregan lo que
+pasó y todo lo que hicieron ustedes no sirve más. Yo lo exporto. Ojalá. Obviamente se está viendo, pero se está
+calificando, hay algunas cosas que no tendría que haber hecho. Pero así no lo hice. Y después me dijeron que cambiaron
+cosas y no funcionaba. Así estuvo lindo. Y después... Es el 100 día de Vuelta. Se hacen 5 procesiones. Exactamente. Lo
+que te actualiza es general, mejora en el proceso de pago.
+
+Cada vez que hay una... El que acabe en la actualidad. El que acabe en el proceso de pago, lo tenés que saber de
+memoria, el programa comentaba antes, y cambió. Exactamente. Exactamente. Por eso...
+
+--- BLOQUE 2 [00:30:00 - 01:00:00] ---
+
+¿Se hace más fácil que usted traje en algún report? ¿Puedo aprobar? Sí, sí, sí. Porque... Claro, es decir, la fase con
+exportar y exportar es archaic, no sí, pero quizás es lo que... Por el sistema. El sistema no lo tiene porque tampoco
+tiene ninguna... No, no. No se ve entre los sistemas. No se ve entre los sistemas. No se ve entre los sistemas. Vamos a
+hacer un proceso en el cual dice importar y exportar. Como ahí se agregan las personas, se agregan el sysadmin y se
+agregan el sysacar y hay dos tablas personas.
+
+Por ejemplo, si hay dos tablas personas, todos serán muy distintas y viene a la misma información. Bueno, está. Y
+normaliza. Si la persona es de la universidad, digamos, pues un centualgo, y se muda, no la puedes cambiar. Tienes que
+mandar el correo por un punto de lado para que le cambien la persona. La persona. No. Así que no se puede. Claro, claro
+que es un... Hay hasta que... De hecho es algo que hace años se venía no cambiado, pero por ahora... Hasta que no la
+vayan estructuralmente. No, no.
+
+Pero si te das un divino pendiente de cerca de 35 solicitudes de publicidad si acuerdas. En los últimos siete años. Sí.
+Y luego... Y luego primero. No, no, no, no, no, no es un chiste eso. No, no, no, no. Es un chiste que se ha terminado.
+Sí. El de reír se va a llorar. Está jugando. Bueno, a veces puede ir a que me... Una ventanita que le diga donde yo
+puedo poner acá proveedores. ¿De qué rubro son? Mirá, si quieres una, pero lo deje. En donde es una base de datos,
+rubro, proveedores, una ventanita que se le diga y yo cargo todo.
+
+Es una ventanita. Claro, sí o no es una ventanita. Sí, es un... Seguiendo reestructurando. Y tal, y de golpe te hagan
+hacer un cambio que cambia un montón de cosas que... De hecho, no, vamos a verlo con el sistema de manera otra. Estamos
+viendo eso porque nos conectamos. Y de golpe dejó de funcionar y no se ve... No podemos montar. Ah, bueno, porque cual
+más hacer ellos están viendo entre los dos sistemas para poder justamente hacer esta importación de... De pagos. Claro.
+Pues, cuando el sistema va a avanzar, todo lo que es el sistema de cobros y de cuotas se modifica.
+
+Ya no estaría tanto en la parlamentación, sino que se va más en la parte académica. Y cuando un alumno, vamos a hablar
+de una tecnología o cualquier carrera que sea de otro lado y se apaga. Cuando un alumno se registra dentro de la área
+académica se le va a ganar las cuotas a ese alumno. De lo que debe pagar con el importe. Después, con un proceso, se van
+a mandar a lo que es el sysadmin y me bajan la miga cuota. Pero entre todo ese medio, que es lo que yo lo he sacado en
+pagos de 60 o pago sticks y...
+
+El sysacal le va a mandar un mille de pibes y le voy a unir este pago y le va a mandar al empresa el archivo con las
+corazas. Después, el sysadmin va a migrar porque ya no va a ser que voy a encargar todos los pagos manuales. Sino que
+voy a bajar dos archivos. Uno de quién me pagó y quién me depositó. Porque quién me pagó no es lo mismo que lo que yo
+les he explicado antes. Me va a decir quiénes pagaron, entonces va a tener ya una instantánea más rápida de quiénes
+pagaron. Eso significa que yo ya he pagado la plata también.
+
+Por lo menos se va a ayudar más. Me debería más confiar que el sistema está en el que yo no me pagó. Y sí, porque ya se
+nos cobró un número. El número me ha estado alante del punto que tengo que hacer y me ha dispuesto a pagar. Estamos
+todos viendo a la vez. Más o menos sería lo que podría haberneado una idea de qué creo que es lo que más o menos se va a
+querer. El problema es que no hay ganas mini-presas. El problema es que tenemos siempre pagó, nos pagó, sobre todo. Yo
+no, pero mira que me pagó, nos que te llevó...
+
+Y también, quizás estos dos sistemas que sí están y que se puedan... que va a poder contratar a la facultad, a Cuba, a
+bien investigar si eso... también tienen, supongo yo, que van a tener un gapi o algo donde se pueda hacer un consumpto y
+demás. Y quizás ahí sí se puede hacer algo que sea más citatario. Más citatario, porque ahí sí va a aparecer el pago a
+través de una aplicación aprobada por... Por un federal de OCEAN. Sí, sí. A ella, cuando esto simplemente llevara un
+archivo de la empresa de pago, que va a mandar la información de quién pagó.
+
+Claro, claro. Ya por lo que tú estás... Ahí va a ser distinto. Podría que hubiese más o menos que tú con la de los dos
+pagos. Debe ser algo similar. Y si no te acabe el arco y te avisa quién pagó, pero en algún momento más adelante te dice
+que te deposite todo el... Claro, funciona en todas las partes. Por eso, quizás ahí sí se puede hacer algo que sea más
+citatario, que es lo que quiere ser. Cargar los datos iniciales de la persona, ver, hacer... Y también cambiar el
+sentido que existe ahora del proceso de inscripción.
+
+Y lo primero que hay que hacer es capturar el pago para que inicie todo el proceso de validación de documentos y demás
+para reservarlo acá. Tú tienes que arrancar enseñando algo de lo que puedes escribir. Claro, claro. Con una pre-cursión.
+Claro, una pre-cursión. Pero... Pero va a ir ese informe. Y que ese pago... Claro, claro, esa idea. Yo creo que el año
+pasado o el año anterior pasado, para el proyecto final de la tequilnatura, lo hicieron con extensión. Hicieron algo
+medianamente parecido. Claro, porque la idea es esa, principalmente.
+
+Pero el tema es cuando hay interacción con un sistema como SysAmin, nosotros lo tenemos visto. Tenemos que esperarse en
+un tipo Carghe y confiar. Por esto yo te preguntaba a Oscuro si se puede ponernos a pagar una manipulación antes de que
+esté cargado los datos de la persona. Claro, porque yo mismo amo a los datos. Y no, porque no me parece como atrita de
+ayer. Si o si, el proceso tiene que iniciar con una pre-cursión. Claro, con una carga de... Que es algo muy... Que es
+algo más respeto que esta que la realizan.
+
+Claro, claro. La vamos a ver que es el que hace el tránsito. Sí, sí, de su formulario. Bueno, la idea era arrancar una
+planilla, cobrar un pago, después de recibir los datos de la planilla, que es el momento de cobrar un pago, pero no de
+una matrícula, sino como de una reserva. O sea, se te cobra la reserva. ¿Qué es la matrícula? Claro. ¿Qué es la
+matrícula? Conciertualmente es lo mismo. Conciertualmente es lo mismo. Claro, sin ser la matrícula. Es lo mismo. En el
+momento que vos, ahí ya después de que nosotros recibimos el pago...
+
+Sí, o sea, para la bancal, después del mismo... Claro, porque no le interesan... Claro. Conciertal. Claro. Pero es que
+era la idea que Sebastián tenía para que las personas que inician el proceso de inscripción sean las que de verdad
+quieren inscribirse. Yo para registrar un pago, que sea el de la foto de la deuda o registrar un pago, si os hiciste
+continuar adelante en la persona. Claro. Por eso necesito todos esas personas. Por lo tanto, el inicio del proceso es
+ese. Claro. Nosotros lo que hacemos es la inscripción.
+
+Como te dirían, es como una plataforma de inscripción. Todos los datos te referís a toda la documentación o a los datos
+mínimos. Datos que ya tenemos. El nombre, el número de documento, un número de documento, make y presión. Perfecto. Sí,
+eso es perfecto. Porque nosotros lo que vamos a hacer es lo que vamos a hacer. Claro, es lo que vamos a hacer. La carga
+mínima con los datos porque se necesita absolutamente. Por eso les puedo hacer un inscrito de los datos, porque es
+sistema. Claro. Y te digo cuál es el son de los datos.
+
+Short man es para los prejuicios. Uno se charla a html como para tener un visual, para dar una idea y era justamente
+eso. Primero aceptás unas condiciones, en el sitio cuando entiendas, lo que lleva. Todo tu dato. Y después ingresas
+todos los datos, procedes al pago y después procedes a ingresar todos los documentos que empezás a chequear. En el
+momento que el documento se valina también, ese pago ya se toma para darte el alti y pagarte la matrícula. Esta es la
+idea principal. El pago tiene un icono de pago, por eso no podías registrar el pago.
+
+Claro, sería una cuestión de decir que todo tu matrícula, que no es tu matrícula todavía, va a ser una reserva. Y en el
+momento que vos ya tenés la documentación. Lo que pasa es que ahí lo que va a traer es un punto más cómodo. Hicimos esa
+parte de la pre-iniciación. Si no más pagaste el porcentaje que tenés que pagar, presentás la documentación, es
+imparable. Sí o sí, igual lo tengo que pagar en el signo. Porque para poder generar la devolución de esos fondos, en el
+caso de corresponde, tengo que haber calculado el ingreso.
+
+Claro, eso era una cuestión también que... Yo al principio... Si se arma esta carga de datos iniciales que se tiene que
+generar y se hace el cobro en el momento, a través de una de estas plataformas que están muy difíciles. ¿O podría ser el
+otro día que amagamos y que quede en un pendido? ¿O que amagar el otro día en el sistema? Como parecía el otro día,
+porque no tengo la pre-iniciación. Yo trabajo un día para la masa. Porque yo mañana voy a venir a contarte todos los
+días que me ingreso a Bangkok.
+
+Nosotros trabajamos para realizar un pago. A mí no me importa si me pagaste eso. Si yo no lo tengo registrado en el
+mismo coche, a la madre la transferes. Si es efectivo hacer registro en el momento, pero la plata se vio ya. Pero en el
+caso de lo que ustedes plantean, supongamos que la dotación no es válida, si o si vuelve con algún punto, lo tengo que
+dar de ayer. Claro, en un principio yo lo planteaba como un caso de decir, si tú me coges en una documentación
+maliciosa, francificada, lo que sea, el pago no se te va a repasar.
+
+En un principio como diciendo, para hacer una marca y hacer una marca de la base. La base es la parte de la base. La
+base es el dinero que tiene el cobro. Claro, pero yo lo decía para hacer un producto mío, un producto real. Lo que pasa
+es que Sebastián hizo un comentario, que la devolución de la demenada, lo que más le interesa es que la gente pague para
+habilitar todo el flujo. Entonces, después si hay un problema, lo hablamos de ti. Palabra de no hay problema con la
+devolución y como que se arregla.
+
+A mí me dicen ahí 130 dolares. Yo puedo decir 150 dolares. Porque el que paga es el que paga. Después. Bueno, eso es lo
+que está pasando. ¿Cuál es el problema? Porque es el comentario que está en el inicio. El link está ahí. Entonces, ahí
+encima, pero yo tengo que bajar un día más arriba. Claro, bueno. No, no. ¿Cómo no te hay que acariciar? Bueno, no lo
+creo. Siempre hemos pensado que hay que meter la gata al frente. Pero, igualmente, sí o sí, en base a lo que vimos
+manejando con Seba, tiene que pagar el total.
+
+Sí, sí. También no sé si el tema de la práctica es el 100% de la una. No sé. Es un valor que no se puede pagar. Es una
+bota. Claro, es una bota de chacho. Aparte que sea una intención real. La recelora acá tiene una bota. Quiere que le
+diga la bota. No, no. No es una descripción. Claro. Entonces, ¿a vos te serviría? O sea, la posibilidad ahora sería una
+exportación de un premio hacia nosotros. Y nosotros repartíamos eso y... Oye, si lo necesitas rápido, yo... Hay un
+informe que me mando... En realidad, me mando un mensaje de los premios.
+
+Hay un informe, yo tengo un mensaje de adan, un informe donde me pide qué cuento pagó, y el cuento de qué pagó. Claro.
+Eso no sale de la parte donde me encargo la derecha, sino que a mí me dice que en qué periodo, que me mando todas las
+primeras semanas, que se pagó el mes anterior. Eso se pasa por Dios, porque es una vista que yo ya no creía, era un tipo
+de mirada. Me bajo con un CBOX y un X también. Y eso no me complica. Digo, eso lo puedes transformar en una base de
+datos. Claro, claro. Y si ahora, a nivel de...
+
+Digamos que todo el proceso salió bien, se recibe el pago, se recibe la documentación, está todo bien, se paga la
+matrícula, todo. En voz, ¿qué datos nosotros deberíamos exportar hacia el sistema para dar el alta de su usuario? O sea,
+¿qué datos necesitas que nosotros tenemos? Obviamente, prácticamente todo lo que tenemos. Para la matrícula, que es
+primero los básicos. Claro, eso sí. ¿Eso lo tenés que tener? Sí. Después vienen otros datos que sirven para la gente de
+la técnica, para los estudiantes de edad y demás, que estaría bueno, pero que se hagan después del primer paso que se...
+
+Una vez que esté ingresado. Está ingresado. Seguir cargando cosas. Que las vas a tener que estar cargando porque si no,
+igual después lo que pagaste... Se uniría con el proceso de inscripción. Ahí hay información... No hay nunca ahí de
+colegios, demás colegias que ya no se están tomando en la técnica clave, porque como hay un reservo y el sistema que
+estaba en este piezo de solo un gran formulario, si tu colegio no está, te genera demoras y para que no carguen
+cualquier cosa, no se pide. Pero eso es un dato que a la Secretaría de Réalidad, por ejemplo, le importa mucho, una vez
+que estáis, ¿a qué colegio tenemos que ir a intentar hacer con mecanismo?
+
+Y la cosa es que más alumnos no creen en la técnica clave. Por ahí, de nada, se lo que no tienen que hacer es la bici.
+Yo preguntaba más que nada por una cuestión de decir, después de, por ejemplo, el programa, la AC o lo que sea que es el
+programa, no nosotros, termina el proceso, y usted le sirve que simplemente le demos un archivo, hacemos un ccd o en qué
+forma... El sistema es para que importe archivos de Excel. Claro, con todos los Bs. Ya está. De todos los Bs. Y luego
+con todos los que ya estarían completos.
+
+Esto ya, así nos pasan los posos del sistema. Después hay una parte que es formatear los datos para, como el grupo de la
+secretaria, con secretaria de non-seas admin, tienen su forma patrónica, tienen sus tablas ya definidas de valores, por
+ejemplo, qué código es el DNI, qué código es el pasaporte. Todo eso después viene por otro lado para las bajas que...
+Pero que lo generemos ya con ese formato para hacerlo con el NAP. Este tendría que ser así. Claro, eso era lo que yo iba
+a decir. Si ustedes sí o sí lo tienen que generar.
+
+O si nosotros podemos dar un Excel con todo ya... Cuando el NAP es un NAP de que hay uno... ...de personas puede ser que
+se pueda animar tablas todo. No me lo reconozco, solo no sé por qué se saca de pie. No, no, no. Sí. No me reconozco. Es
+una sola tabla. Es una tabla. Es una tabla, pero no es... La carga va una sola tabla. Va una sola tabla. No es como...
+No, no. No, no. Y después tenés... No, esa es la tabla, una sola tabla. Por eso te haces... Exacto. Entonces decís,
+bueno... No, para muchos, no.
+
+Yo voy a cargar una tabla. Una persona. Yo voy a cargar, en principio, un regito que sea más cara o un inicio. Una vez
+que cargo eso, tengo que entrar con un comando a otra parte de eso, que es una tabla. Y donde la relación es la debo. Y
+no me preguntes dónde va, porque si no me interesa dar un move. No, no, no. Pues... Usted se usaba a mí. No... No me lo
+he metido a los datos. Si sacás sí, cuando era joven y ruido, me... Ya pareció una cosa. Ya pareció una cosa. Pero
+porque... Nada. Porque quise instruir un poco más la estructura de datos.
+
+Por eso le digo que cambia todo el tiempo. Y por eso es que hay un inmenso momento hacer algunas aplicaciones que
+después decís... No, para que no... Para... Porque después se rompen. Está buena, gente, se acostumbra a decir, está
+buenísima, aquí existe, pero... Venden una actualización y la rompieron y decís... ¿Sabe para uno? No hay una
+comunicación, porque si al menos vieron a mí. ¿No hay? ¿Cuántas hay en la... Hay, está abrónmente. Entonces se
+convirtieron en errores. Se convirtieron en errores.
+
+Y no sabían... O se implementó tantas cosas, pero no dicen que cuando implementaron un cara a la estructura... El autor
+es un malvado. Esa es la parte más complicada. Pero el hizo tutorial en... No, no, no. No, no, no. No, no, no. No, no,
+no. No, no, no. No, no, no. No, no, no. No, no, no. No, no, no. No, es que por ahí... A ver, tenés los monones básicos
+del comienzo del sistema. Como para arrancar a decir dónde están algunas cosas, pero después se se usaron luego y...
+Pero el tema es que... Cuando coincitan algo, no tenés...
+
+Las opciones... No, no, no. Yo, en lo que yo vine, entonces, si no, si me mire cualquier cosa, porque ya algo re
+viejo... Porque también, claro, yo me fui a buscar la documentación. No, yo decía lo del ser y todo, pero... Que, capaz,
+ya no hay nada que ver con lo que yo vine. No, no, no. Pues, ya, yo he sentido. Quizás, en el reúno humano, un módulo de
+certificado a un médico se agrega a funcionalidad para mejorar la gestión de certificados. Pero no tenés que hacer. No,
+no, no. No tenés que irte a OVN.
+
+No. A ver, es para recordar. Muy buena la convicción. Pero, ya, ya. Pero, ya, ya. Pero, ya, ya. Previsión de ingresos
+que no me importa. Se agrega la relación entre el concepto sexual rural y concepto de ingresos en las previsiones. Y ya.
+Es como cuando te ponemos cada letra en el SMS. Ya, ya. Ya, ya. ¿De qué te pones? De la sensación. Y bien, ya, ya.
+Porque así es como te pones. Sí, si te quedas igual. Por eso hay que traducir los canales que te permiten y haciéndolas.
+Lo que se puede hacer, quizás, exportando información en un format.
+
+Es el que se acuerde. Las informaciones normalmente se hacen en Excel. Que se pueda utilizar y ahorren. También la
+verdad es que esa mano es un golazo que se puede llevar. Y que tendría que estar formaciado y... Formaciado a lo que
+usted necesita. Exactamente. Y va a haber cosas que no se pueden ir a la mano. Igual mañana te caen. Claro, sí. Yo lo
+que preguntaba era si, si... Pero no sé cómo quedaría en Excel. Habrá que verlo después. Habrá que verlo. Habrá que
+reemodarlo. Más que nada, porque cuando ustedes me dicen, no, no podemos recibir un Excel de ustedes cargables
+automáticamente.
+
+Y no se puede decir si o si tiene que ser a mano uno por uno. Sí. Depende de las pantallas. Por eso lo que decía, claro.
+Hay pantallas donde te permita hacer la importación en base a un Excel. Lo mismo que la exportación hacia un Excel. Y
+hay pantallas que no. Que no estén en Excel y no podés cargar más o menos. No puede ser. ¿Por qué? Porque dicen... No
+sé. Como es muy peligroso no lo estamos haciendo. Pero sí... No lo vamos a hacer. Sí, sí. Por ejemplo, la... El que se
+acaba de cargar alucinus, vacíamente, en los juzgos.
+
+Ahora solamente lo puede hacer el administrador absoluto del sistema. No lo puede hacer el sistema. Siempre estoy
+cargando 40 y otros servicios de versión Excel cuando llegas, pero nada más. Bueno. Los aurorópolis dicen que es
+peligroso. Imagínate... La mentalidad... ¿Cómo explicaste la mentalidad de... O sea que hay gente que va quitando y hay
+lugares donde ni siquiera puede... El administrador puede cargar o modificar cosas. Tenés que mirar en todo lado que yo
+no cabre, no acuenizas a vos. Hay cosas que te acuerdan.
+
+Por ejemplo, hay bucatillas y... Te las acuerdan y vos decís... Che, ¿qué pasó? No, no, si lo bloqueamos no se acuerdan.
+Ah... Pero soy el administrador. Pero no es un administrador. Si no es un administrador, es el administrador. Claro. El
+administrador es el administrador. Exactamente. Por eso tienen esas cosas. Y... Por eso me arrepentí. El tema está
+buenísimo de poder hacer... Tener una alternativa para el tema de las infecciones. Que se ajuste al camino que queremos
+tener nosotros. Además de lo que está amamando el retoado por su lado.
+
+Que después se verá. Pero bueno, está malo tener algo por lo nuestro. Pero tratando de hacerlo útil. Que si lo veamos a
+la noche. Al lado de decir, agarren. Imaginen que es esto así. Imaginen que algo como esto. Y después trabajarlo. Y que
+el sistema está buenísimo. No, que es exactamente eso. Para importar la... La infección que se ha sacado. Porque no sé
+cómo es que lo hace. A ver, en el hecho piensa para que es nueva. Quizás sí, pero a mí te importa masivamente. No, no,
+no. Se podría... Se podría crear un archivo de todo lo que tengas.
+
+Generaos un archivo manual. Y después de eso, todas las personas. Y después lo que importa es cómo... Bueno, eso es lo
+que... Lo que más le vale a usted es que puede llegar a ser en el modo de pago. En ventanilla. Y eso lo hacen... O sea,
+cuando abren las inscripciones. Porque sería la parte que nos interesa mayormente. Ustedes importan por día, hubieras
+dicho. O es una vez a la semana. Pero cuando abren las inscripciones. De la medida que van llegando. O sea, van... Se
+van dando de alta en el formulario de Luis.
+
+Y lo voy bajando todos los días en formulario Joy. Me voy bajando ese tiempo a una novedad. Y se van dando de alta a
+esas personas. Bien, estamos hablando de la parecidad de la gente. Exactamente. Ese otro que está bien, bueno. Claro,
+pero ahora... Te sumaríamos un trabajo. Si te pedimos la exportación. Claro, pero ese es nuestro problema. Es una vista.
+Es una vista. Yo estoy con una vista. De la edad, de lo que pago. Pero ahora, tenemos que decir de dónde vamos a ir. Si
+van a quedar en el que me pago.
+
+O el que se cargó. Una cosa que yo... Claro, lo que más me interesa es... Confirmar el pago. Porque se supone que la
+gestión... La vamos a hacer por otro lado. Eso es lo que nos informa de ello. Claro, quedamos en el pago una vez. Cuando
+es la inscripción, lo informo una vez por semana. Pero no estoy informando con el formato del sistema. Si lo estoy
+inventando con el planillo. Esa es la distancia del formulario. Para que tenga la misma forma lineal. Para que tenga el
+mismo número de inscripción.
+
+Yo no manejo si no lo inscribo. Si eso, quizás se pueda hacer una interfaz. Para dar también... Para dar también una
+caractereza del sistema. Pero eso te queremos nomas. Lo más... Como te decía. Lo más... Como te comentaba hace un rato.
+Una de las posibilidades era generar un rol para la gente de administración. Que nos porte o nos comunique con el
+sistema. Confirmando el pago. Pero bueno, no queríamos cargarle... No queríamos generar un problema. Pero si ya lo
+hacen, por ahí le sirve. Que le generemos un rol en nuestra solución.
+
+Y que... Envíen ahí la portación. En vez de estar mandándola por mail. O no sé cómo las enamoran. Sí, ahora sí. Pero no
+sé si el sistema que va a permitir generar el rol de esos. No, no, no. Que generar de nuevo. Bajar uno al lugar. Que el
+producto me dé un lugar y todo llueve. Pero para tener la sensación de no hacer eso. Claro. Pero pensalo que hoy en día
+es el formulario. Que él lo ve y él informa a las personas que tiene espada. No. La caractereza es la parte que el
+sistema que usted tiene que...
+
+Informar. El formulario. El reno que yo salieron de los pavos. Que los pavos al diario. Exactamente. O sea, que todo el
+tiempo... Creo que esa es la parte que usted decía. Que generaste el rol en nuestro sistema. Para que a Incares, en vez
+de enviarlo por ahora, le envías por mail. O poder ver quién es esta gente. Para que nosotros lo agarremos y lo pasemos
+a lo que necesitemos. No, no, no. Dentro de alguno de los aspectos de la red. Yo pongo a la archivo y lo tomo
+directamente de ahí. También puedo hacer eso.
+
+O te lo paso para que... No te lo paso por mail. Si tenemos un problema, claro. Que sea en el día, no en el día. No se
+lo voy a pedir al desarrollador. Quizás se podría ver si el listado de alumnos está en el sistema. Es ahí donde se puede
+marcar quién pagó y quién no. O no manualmente. Y también en el situa ese. Bueno, pagó, lo mando como que pagó. Y se va
+a tener su reporte dentro del mismo sistema. Claro, si te podemos hacer un... Si te pasaran, va a tener que ser... Si no
+es un problema, que tengan un rol para ingresar a nuestro sistema.
+
+Y cargar y confirmar los pagos. Sería lo más directo. Pero bueno, no fue la primera opción porque era... 40, 40, 40. Eso
+funcionaba con intención de un buen problema. Claro. Claro, ¿verdad? Eso va a tener que ser... Ah, gracias. Si no, no.
+Si no, si no tiene que entrar a bajar lo cojón, lo tendrían pagado los tibes. Y confirma que hayan pagado pagos. No, si
+no, si no es interesante, se lo tienen que exportar. Nosotros me cagamos de decirle a Pesima y Paz. Claro, por eso. Pero
+si puedo confirmar, si puedo pasar, para que veas cuál es el estructuro del archivo que yo quiero.
+
+Y cuando te irá a salir al archivo. Y cuando lo podés adaptar a la información que hoy está funcionando. Claro, por eso.
+O salvo que el informe urbano de él... Ya no existe un buen momento para hacer el hecho. Deja de existir. La inscripción
+se haga desde ustedes. Claro. Ahí le vamos a pensar los datos que tiene que tener. Si es el principio de ustedes,
+seguro. Yo te paso la estructura de lo que tengo. Para ver cuáles son todos los datos. Yo tengo limitado a los más
+básicos. Que es la fecha que pagó, quién pagó, los documentos, quién consente pagó.
+
+Porque no hay un chico de salud que pueda agregar eso. Que cuesta ese, ese, ese. Claro que nosotros ya teniendo eso. O
+sea, teniendo... El tipo va a confirmar el pago por nuestro sistema. Y vos me pagas la comprensión y el machado. El
+machado y lo que ya está. Y ahí se confirma. Si le hacía que me mande un mail con un mail de ustedes. Autorizándome a
+darles información de... ¿Cómo? La fecha de... Sin deneguir porque no podés meter ahí... ¡Va a meter ahí! No te
+preocupes. Nos pagamos las revisiones.
+
+Seguimos pagando las revisiones a mano. Pero ahora que me he encontrado en el sistema, la idea me la he formado a este
+con tres años. Y ahora está en su cuerpo. Y la cosa es que no lo he visto. Antes cargábamos cada cuota. La cuota de la
+matrícula, las cuatro cuotas de la catorza. Se cargaban uno por una mano. Ahora me encontré que puedo cargar a la
+persona. Y decir que va de acá hasta acá. ¡Au! Me dijeron un archivo. Y después le iba a importar a las revisiones y me
+mandaron todas las cosas con matrícula.
+
+Y luego de eso se sacaron estas necesidades. Y nunca me lo dejaron. Y después esos fibes te cargaban y todos los propios
+la van. Por favor. Por eso se hizo una operación de 150, 600, 600 fibes. Más edición, más la ferroviaria, más... Por eso
+acá se entiende ahora el queso que no me entendés. Ah, pues bueno. Por eso, entiendo el registro de pago sobre cargadas.
+Porque si no tenés todos los datos, luego no vamos a avanzar en un mundo ideal. Y va a haber que tomar el reparto que
+difieres siempre lo que decís en la ceba.
+
+Alumno que yo te paso que pagó, es alumno que está confirmado que pagó y es ese alumno que está en condición de estar a
+100% que seguirá avanzando. Claro. Es que es el dato fundamental que nos interesa más. Quien confirma que el fibra
+realmente pagó es quien le interesa en ese día y no es el que le interesa a nadie. Por eso, ¿sí? Por eso nos interesa
+hacer esa operación. Eso yo que me haría de este tipo de videos, si crees que se va a poner una vida, yo te lo voy a
+instruccionar arriba con esa información.
+
+Más allá de qué pónica tengo que estar utilizando para habilitar a hoy. Bueno, buenísimo. Lo tomamos por ese lado donde
+te podemos armar un ingreso a vos para que exportes. Para que nos mandes la... Cuántos datos iniciales con esos siglos.
+Sí, es lo primero que pasa. Y el otro ya tiene que cargar para poder... Para generar algo, no minlo, por favor. Por el
+que paga, se carga el pago de la opción y ahí puedes disparar después el guano. Listo. Ya está. Y ya está. Y ya está. Y
+lo cago a la noche con paro como vas a la la vida de mañana.
+
+Claro. Ya está. Claro, bueno. Pero ahí simplemente es decir la confirmación del pago dura un día. Por los 24 horas en
+habilitarse. Sí, pero el efecto de comunicarle bien a la gente... Por eso lo que yo digo.
+
+--- BLOQUE 3 [01:00:00 - 01:13:00] ---
+
+El proceso de pago se demora 24-48 horas y dito. Es igual. De que se puede ahora, el chávez, que es uno que se paga para
+preferencias, ustedes mandan el comprobante y les llega el pago. Sí, sí, sí, sí. Son de 24, yo puse 72. Dígame que era
+de Chachuey. No hay 10 millones de dólares. Sí, sí, sí. Todas esas cosas se pueden automatizar en el sistema. Claro, qué
+me dice. Todas las redes de correos que... Por ejemplo, si me paga la picha de chávez, le puse un correo grabando, le
+damos el convenido, ya tenía que pregúper...
+
+Todo eso que no sé qué. No sé a quién lo tiene que escribir, sino cuando lo cargaste, que son... Y el parrero, pum, le
+mandan los mensajes a la hora. Es más un parrero que... Se le han parado de agilizar un poco las cosas. ¿Los cartos? No,
+ya están desistiendo. Quieren cargar a la madre. Quieren cargar a la madre. Vamos a un blog de Gojai. Y así, en una
+cámara de... Vale, pero... Sí, pero ustedes los graban toda la noche, y tienen los audios todos... No, yo les decía,
+para realidad, el vídeo de la voz está en la misma.
+
+Está dando copias para ver si hay información de ingresos. La que yo les pasó a mí, en la reaccionada, la información
+que no está autorizada. No, yo no lo sé, con eso yo me hago la estructura básica de lo que interesa para que empiecen a
+ver, y después vamos a empezar a avanzar. Porque si tampoco tienen que ir en el sistema de información... ¿Con qué vamos
+a empezar? Pero, por eso, ya, no hablamos. El pago es lo único. ¿Eh? El pago es lo único. Ah, ¿no? No puede ser todo
+dentro de la persona. Y estos datos mínimos.
+
+Unos datos mínimos. Y lo que decíamos antes... Eso no es problema. Para cargar el pago, ese, por más que sea una
+precuota, o sea, la matrícula no lleva más vida, tiene que estar al lado de él, de la persona, si es. Pero vamos a ver.
+Por eso, yo voy a meter a pasar también la máscara de los datos mínimos necesarios, para que se necesiten bien para
+cargar. No, no, no. Esa es la idea. Quizás es una pagada, pero lo que hicieron fue capturar esos datos, capturar el
+pago, y informar el pago y los datos para colegir.
+
+Claro, él me dice que no tiene problema que le generemos un rol para que entre y no se corte los datos nada por día.
+Cuando tenga que controlarlo. Sí, pero usted recuerde que ahí no va a coger. Nosotros lo que tenemos que dedicar es el
+gris, el ingreso de los datos, y el pago. Ahí se nos va todo el cacho. Es decir, no hacemos nada hasta que también se
+nos coja. Por eso, que confirma que el gris está limitado para seguir avanzando en la carga de los parales y que fuera,
+en la desobediamos, te dice el pago.
+
+Claro, pero no es un pago. El privilige te manda el comprobante, que te ha pasado, manda el comprobante, y me encuentra
+registrado por lo que es algo apócrico. Que ha habido una persona, son dos hermanos, y te mandan el mismo comprobante.
+No, parte, porque si es la franboludo que le hiciste a la dictadura que no entubaba. A nosotros lo que le ha pedido al
+pago es porque, porque, a que quitamos el pago, que va el correo que la ronquilla tiene por su vida, ni lo sea, y de que
+quitamos el pago y el que efectivamente paga, tenemos que decir que uno lo sacamos, y que el que saca el otro no, otro
+que podía hacerlo y se va al pago para no tener una salida.
+
+Muchos pago de tarjeta, en efectivo, solo tenemos problemas, porque si vienen acá, ya estamos seguros. El problema es el
+hermano, la transferencia es una mala comprobante. Lo manda y el banco no te relaciona el movimiento con el amo,
+entonces no sabes si es lo que viene. Hay 10 millones de cosas y después muestra, ha pasado que no ha reobotado los
+pagos. O el chico que te manda en agosto, que esta semana que vi, para la primera hora, lo que quiero enviar, te mandan
+5 o 6 pagos. Y vos decías que tienes que pagar un poco.
+
+¿Por qué no me lo mandaste cuando no tenías que mandar? Sí, sí. Vamos a decirlo, cuando quiero que te pague, te que yo
+me quedo un poco, porque encima está diferente. No siempre está lineal. Lo ideal sería que cuando se valga el parámetro
+tenés que tener la cosa aquí para no caerte el otro. Ahí ya me lo acaraste. Entonces, de a caso de que, ustedes se
+llaman la institución. Pero igual en la institución no juega. Claro. La idea es que yo uno, el principio de septiembre,
+de que pago la parte más en abuso, pero que yo uno, que nosotros le hemos confrontado una película con él en julio,
+nunca respondió, nunca respondió, yo ahora hice un depósito, bien, un ser abuso.
+
+Pero yo pagué. Yo pagué. Bueno, bueno. Sí, también es. Y no sé, los chicos les pagan más. Le tomas la vuelta. No, pagó
+la matrícula. Le tomaron la vuelta la matrícula. Creo que pagó más. Le descargaron la deuda. Porque como ya pagaste más,
+bueno. Nunca más pagó. Y se le fueron bien. Entonces yo sé que en septiembre les manda un pago a la vacina y dicen, che,
+bien, es de deudir. Ah no, pero yo me pago de baja. Se apagó. No hay baja. No, no, no. Salvo un caso. Si alguien se me
+agarró el tren, no pudiera cruzar.
+
+Se avisa igualmente. Apenas. En el momento que dicen que es la verdad, es que es la verdad. Es lo que es. No, no, pero
+ya baja. Es baja. Claro, claro. Claro, claro. Matrícula. Todo el tiempo. Porque ellos OUTRU PLAYINGSUCH). O sea, se
+delvewonle. Se dan las madrubas y no son poco objetos. Pero en ese no es, lo que no九, las madrubas sin enád devotion sus
+watches a las mad globally, eso se den Kerbal. Sin shoulder too. Cheers. Strong Model. Yay. Gracias. Whoa. Fijate en mis
+vídeos que los awesome.
+
+¿O usaban un tirán que se usaban sin pagar? Las otras... Pero no creo que se puede cerrar en eso y vestir en sí lo de...
+Para obtener una hipotip, a ver si hay una opción a través del arte para poder meter la parte del... Eso de que no hay
+sin poder es una sorpresa que puede hacer vida de la gente. Sí, sí, es una sorpresa que puede bien. Y ya no queremos
+manizar la opción, es que hay que hacer lo que sirva. También revisando lo que es pago. Yo creo que lo que yo haría en
+un sector inventativo, sugerir por pago de 60.
+
+Pero fue una cuestión de facilidad mía, porque tuvimos un contacto en otra región que ya no vino usando esa opción. Hace
+unos 6 meses, la homenaje en área de lo que he explicado a los chicos no ha usado. Así que no es muy difícil porque va a
+trabajar los archivos, pero por las dudas, cosas que vayan a pasar, si sé que hay alguien que lo use me puede dar una
+mano clar. Creo que vamos a ir por pago de 60. Por eso se llama para que lo investigan porque esa empresa va a generar
+un archivo que me va a decir a mí que es pago, por ahí no sé por qué voy a llegar a hacer el archivo.
+
+Entonces, no sé qué va a hacer. Por eso no sé cómo hacer por eso. Titean, por eso está diciendo. ¿Vos no has visto a
+Ototipo en su video? ¿A quién mandamos? ¿Tan bien? Sí, bueno, ya está. Sí, yo lo quiero. Pero... Sí, me dejas. Me mando
+un mail y te lo dejo. Estábamos hablando que... Sí, yo también pensaba en el programa. Muy bien, gracias. Muy bien,
+conseguimos trabajar con él. Y si teníamos la mano llena, que es más que un año de estados, todo estaría bien. Y luego
+está buena la Olimpia de la Ombra.
+
+Claro, esa es la mejor. Creo que es que venía a todas estas partes que del lado de ingeniería no hacen falta. No hay
+palos. Claro. Son datos académicos y todo un poco más sencillo el tema de interfaciar con los sistemas. Pero bueno, yo
+creo que se va a poder hacer. Ahora no sé bien el diagrama con Seba de qué es lo que les vaya a pasar a Criter, de qué
+es lo que se necesita, de cuál amistad que está. Y después sí pasamos al... si quieren el formato de los datos. Sí, más
+el fésín, todo lo de cómo...
+
+¿Qué código es cada cosa? Claro, tenemos que decir primero el flujo general porque todavía no teníamos claro. Estábamos
+armando algo, pero ahora con los ingenieros ya no sirve porque lo tenemos que modificar un poco. Después sacarle el uno
+al momento del otro. Claro. Eso ya es... con cuál te se acomodó hace un poco, pero sí, sí. Probó un poco el código. A mí
+no necesito armar un manteco. Pero... No, sí, medio, medio. El número... Yo me voy a cambiar de idea. Bueno. Que nada,
+que nada. Si me han dicho que puede poner un vídeo de partida de...
+
+Bueno, intentámos máximo posibles que se haga algo que se vaya también a pasar. Claro. Y a por lo general, gente, de
+decir, mira lo que hice. Exacto. O sea, que lo ha hecho también. Sí, que después... Tal cual sí siempre la cara se va a
+reflexionar. Sí, sí, sí. Al igual. ¿Qué sentido teníamos? ¿Qué teníamos pensado? Lo que más me ha gustado es, como se
+yo, esto... No, no, no. Exacto, estamos pensando en el transcript. Claro. Lo que es pronto, ¿no? Un cerreo, que... Y
+usar tu para todo lo que es autenticación, como eso de...
+
+¿Cómo se llama? No, ya. No vamos a investigar realmente, pero... No tiene falta en el tema de digital archivos. Si,
+claro, pero tengo que tener una visual de lo que hicieron estos... Para que... No, después puede ser... Sí, me mando
+una... Para venderizar las imágenes o PDFs. Ah, sí, sí. Para ayudar a la documentación. Claro, sí. Y luego... No, no,
+no, no. Es que se va a decir, a ver, uso el delinco en el que estaba. Sí, sí, sí. Al cual sí. Sí, eso sí. Y pasa que por
+ahí no estaba en el primer, o en el MVP, como se dice.
+
+Claro. Primero a los primeros, después lo que quiere cobrar. No, regresa lo que se puede. Y después meter cosas, porque
+hay varias cosas que se pueden meter. Todo lo demás es... Son chiches, pero que ayudan. Esos se ven. Después a los
+muchachos tienen que verificar todos los datos. Claro, te dicen. Para verificarlo, tienes que ver todos los documentos.
+Claro, es parte también... Es parte del procedimiento que es... Sí, ahora. Lo esencial de hoy en día, que es el... Como
+se dice, captar el pago como no es posible.
+
+Sí, lo es. Va a ir a bueno porque además te ayuda a significar a la vida. Ajá. El objetivo del juego te hace que le
+gustes tu sistema y que lo adopte enseguida y no generes muchachos. Así que bueno, chicos. Gusto, después... Puedo...
+¿Alguien conciera para que nos mande... Primero a tu intención. Sí, sí, con los datos de ustedes de cinefacil. Primero,
+para que ya lo explicamos. Bien, por favor. Quienes son. Bien, porque yo los nombres de las caras no me voy a joder,
+pero no me hagan eso. Claro. Así queda y bueno, sí, se puede pasar la info.
+
+Un poco más sensible. Ya autorizado. Sí, sí, bueno, eso es. Pero ya lo avisamos. ¿Vos le echas? No, por ahí. ¿Veo por
+ahí? Sí. Yo me siento sacatando de esto. Lo que ando la forma. Ah, no, no, no. Ah, me diste, me diste. Eso duro y... No,
+no, no, no. Tú, tú. Sí, pero me hiciste. No, no, no. Bueno, bien, bien. Para mí, para mí sí que es más. Es todo el ayer.
+Aparte, si nos queda bien, le solucionamos un par de cosas. Sí, sí, sí. Si algo que estaban pensando.
