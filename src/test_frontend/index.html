@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carga de Datos.html</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col justify-between">
+  <!-- Header Institucional UTN Haedo -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-10 h-10 rounded-lg bg-[#005a9c] flex items-center justify-center text-white font-bold text-xl shadow-sm">
+            <i class="fa-solid fa-gear"></i>
+          </div>
+          <div>
+            <span class="text-xl font-black tracking-tight text-slate-900">UTN<span
+                class="text-[#0284c7]">.FRH</span></span>
+            <span class="block text-xs font-bold text-[#005a9c] tracking-widest">HAEDO · TUP</span>
+          </div>
+        </div>
+        <div class="hidden md:block h-6 w-px bg-slate-300 mx-2"></div>
+        <div class="hidden md:block text-xs text-slate-600">
+          <span class="font-semibold text-slate-900">Portal de Ingresantes</span> · Tecnicatura Universitaria en
+          Programación
+        </div>
+      </div>
+      <div class="flex items-center space-x-3 text-xs text-slate-600">
+        <span
+          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-[#005a9c] font-semibold border border-blue-200">
+          <i class="fa-solid fa-shield-halved"></i> Inicio de Trámite
+        </span>
+        <div class="text-right hidden md:block">
+          <span class="text-[11px] text-slate-400 block">Regional Haedo</span>
+          <span class="font-bold text-slate-700">Ciclo Lectivo 2026</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Central -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+    <!-- Breadcrumb / Etapa de Flujo -->
+    <div class="mb-6 flex items-center justify-between">
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/70 text-[#005a9c] text-xs font-bold">
+        <i class="fa-solid fa-clipboard-user"></i> PASO PREVIO · IDENTIFICACIÓN
+      </div>
+      <span class="text-xs text-slate-500 font-medium">Requisito administrativo obligatorio</span>
+    </div>
+
+    <!-- Contenedor Principal del Formulario (Inspirado en el Wireframe) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-md p-6 sm:p-10">
+      <div class="border-b border-slate-100 pb-6 mb-6">
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Carga de datos</h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+          Ingresá tus datos personales y fiscales básicos para iniciar el expediente del trámite, emitir la factura
+          correspondiente a la reserva de vacante y darte acceso a las siguientes etapas.
+        </p>
+      </div>
+
+      <form action="01-bienvenida-requisitos.html" method="GET" class="space-y-5">
+        <!-- Fila 1: Nombre y Apellido -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between" for="nombre">
+              <span class="">Nombre/s *</span>
+              <span class="text-[10px] text-slate-400 font-normal">Como figura en tu DNI</span>
+            </label>
+            <input type="text" name="nombre" id="nombre" required="" placeholder="Ej: Lucas Martín"
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm text-slate-900 focus:ring-2 focus:ring-[#005a9c] focus:border-[#005a9c] outline-none transition shadow-sm placeholder:text-slate-400 bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between"
+              for="apellido">
+              <span class="">Apellido/s *</span>
+              <span class="text-[10px] text-slate-400 font-normal">Completos</span>
+            </label>
+            <input type="text" name="apellido" required="" placeholder="Ej: Rossi" id="apellido"
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm text-slate-900 focus:ring-2 focus:ring-[#005a9c] focus:border-[#005a9c] outline-none transition shadow-sm placeholder:text-slate-400 bg-white">
+          </div>
+        </div>
+
+        <!-- Fila 2: Correo Electrónico -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between" for="email">
+            <span class="">Correo electrónico *</span>
+            <span class="text-[10px] text-slate-400 font-normal">Aquí recibirás comprobantes y notificaciones</span>
+          </label>
+          <div class="relative">
+            <input type="email" name="email" required="" placeholder="correo@ejemplo.com" id="email"
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm text-slate-900 focus:ring-2 focus:ring-[#005a9c] focus:border-[#005a9c] outline-none transition shadow-sm placeholder:text-slate-400 bg-white">
+            <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+          </div>
+        </div>
+
+        <!-- Fila 3: DNI y CUIL -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between" for="dni">
+              <span class="">DNI *</span>
+              <span class="text-[10px] text-slate-400 font-normal">Documento Nacional de Identidad</span>
+            </label>
+            <div class="relative">
+              <input type="text" name="dni" id="dni" required="" placeholder="Ej: 43829114"
+                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm text-slate-900 focus:ring-2 focus:ring-[#005a9c] focus:border-[#005a9c] outline-none transition shadow-sm placeholder:text-slate-400 bg-white">
+              <i class="fa-regular fa-id-card absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">Género
+              / Sexo Registral
+              *</label>
+            <select defaultValue="Seleccionar" required
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm text-slate-900 focus:ring-2 focus:ring-[#005a9c] focus:border-[#005a9c] outline-none transition shadow-sm placeholder:text-slate-400 bg-white">
+              <option value="" disabled selected>Seleccionar</option>
+              <option>Masculino</option>
+              <option>Femenino</option>
+              <option>No binario / Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 4: Teléfono con prefijo +54 -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between" for="telefono">
+            <span class="">Teléfono celular *</span>
+            <span class="text-[10px] text-slate-400 font-normal">Con código de área, sin 0 ni 15</span>
+          </label>
+          <div
+            class="flex rounded-xl shadow-sm border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-[#005a9c] focus-within:border-[#005a9c] bg-white">
+            <span
+              class="inline-flex items-center px-4 bg-slate-100 text-slate-700 font-bold text-sm border-r border-slate-300 select-none">
+              +54
+            </span>
+            <input type="tel" name="telefono" id="telefono" required="" placeholder="11 6543-9821"
+              class="w-full px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 bg-white">
+          </div>
+          <span class="text-[11px] text-slate-500 mt-1 block"><i
+              class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Se enviarán recordatorios de vencimiento de
+            vacante y avisos académicos.</span>
+        </div>
+
+        <!-- Fila 5: Dirección -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between"
+            for="direccion">
+            <span class="">Dirección *</span>
+            <span class="text-[10px] text-slate-400 font-normal">Calle, altura, piso/dpto y localidad</span>
+          </label>
+          <div class="relative">
+            <input type="text" name="direccion" id="direccion" required="" placeholder="Ej: Av. Rivadavia 16240, Haedo"
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm text-slate-900 focus:ring-2 focus:ring-[#005a9c] focus:border-[#005a9c] outline-none transition shadow-sm placeholder:text-slate-400 bg-white">
+            <i class="fa-solid fa-location-dot absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+          </div>
+        </div>
+
+        <!-- Términos y Consentimiento Legal Mínimo -->
+        <div class="pt-4 border-t border-slate-100 space-y-3">
+          <label
+            class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 cursor-pointer transition">
+            <input type="checkbox" id="chkTerminosFacturacion" required=""
+              class="mt-1 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+            <span class="text-xs text-slate-700 leading-relaxed">
+              Declaro bajo juramento que los datos ingresados son fidedignos y autorizo a la <strong>Universidad
+                Tecnológica Nacional - Facultad Regional Haedo</strong> a emitir la factura legal y generar mi legajo de
+              postulante para la <strong>Tecnicatura Universitaria en Programación (TUP)</strong>.
+            </span>
+          </label>
+
+          <label
+            class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 cursor-pointer transition">
+            <input type="checkbox" id="chkReglamento" required=""
+              class="mt-1 w-4 h-4 text-[#005a9c] rounded border-slate-300 focus:ring-[#005a9c]">
+            <span class="text-xs text-slate-700 leading-relaxed">
+              Entiendo que al presionar <strong>Siguiente</strong> pasaré a la lectura de los requisitos académicos,
+              condiciones de la seña de reserva de vacante y métodos de pago.
+            </span>
+          </label>
+        </div>
+
+        <!-- Botón Siguiente (como en el wireframe) -->
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="text-xs text-slate-500 flex items-center gap-1.5">
+            <i class="fa-solid fa-lock text-slate-400"></i> Tus datos fiscales están protegidos (Ley 25.326).
+          </div>
+          <button type="submit" id="btnSiguiente"
+            class="w-full sm:w-auto min-w-[220px] px-8 py-3.5 rounded-xl bg-[#005a9c] hover:bg-[#00487d] text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+            <span class="">Siguiente</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Mini Banner Informativo de Facturación UTN Haedo -->
+    <div
+      class="mt-6 bg-blue-50/80 border border-blue-200/80 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-blue-900">
+      <div class="flex items-center gap-2.5">
+        <i class="fa-solid fa-circle-info text-[#005a9c] text-base"></i>
+        <span class=""><strong>Facturación Oficial:</strong> UTN Facultad Regional Haedo · CUIT 30-54667232-4 · IVA
+          Exento.</span>
+      </div>
+      <span class="text-slate-500 font-medium">Arancel de Reserva TUP: $100.000 ARS</span>
+    </div>
+  </main>
+
+  <!-- Footer Institucional -->
+  <footer class="bg-white border-t border-slate-200 mt-10 py-6 text-center text-xs text-slate-500">
+    Universidad Tecnológica Nacional · Facultad Regional Haedo · París 532, Haedo · (011) 4443-5246
+  </footer>
+
+
+
+
+</body>
+
+</html>
