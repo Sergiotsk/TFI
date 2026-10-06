@@ -6,11 +6,26 @@ Visión técnica de la solución: cómo se estructura el software y por qué.
 > [`../decisions/`](../decisions/). Acá va la **vista** consolidada (diagramas,
 > capas, componentes) que esos ADRs producen.
 
-## Contenido (pendiente)
+## Contenido
 
-- `overview.md` — diagrama del hexagonal: dominio, casos de uso, puertos y
-  adaptadores.
-- Diagramas de apoyo (DER, secuencia, despliegue) a medida que se necesiten.
+- [`overview.md`](./overview.md) — flujo invertido, hexagonal, paquetes del monorepo y sus
+  dependencias, estados de la Postulación e integración con la facultad.
+- [`secuencia-pago.md`](./secuencia-pago.md) — pago en ventanilla, informe de SysAdmin cargado por Tesorería,
+  carga diaria del informe de pagos y alternativa Pagos360 (por confirmar).
+
+### Cómo editar los diagramas
+
+Los diagramas son bloques ` ```mermaid ` dentro de cada `.md`, así que se editan en el lugar y
+GitHub los renderiza. El estilo (paleta azul marino, clusters oscuros, punteado para lo pendiente)
+va en la línea `%%{init: ...}%%` de cada bloque y en los `classDef`; copiar esos de un diagrama
+existente para mantener la coherencia. El fondo es transparente (el de la página).
+
+Para previsualizar o exportar uno, pegar el bloque en [mermaid.live](https://mermaid.live).
+
+### Pendiente
+
+- Despliegue (Vercel + Supabase): esperar a consultar el alojamiento con Sistemas.
+- DER y otros diagramas de apoyo, a medida que se necesiten.
 
 ## Decisiones relevantes
 
