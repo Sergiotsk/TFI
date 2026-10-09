@@ -10,6 +10,8 @@ Visión técnica de la solución: cómo se estructura el software y por qué.
 
 - [`overview.md`](./overview.md) — flujo invertido, hexagonal, paquetes del monorepo y sus
   dependencias, estados de la Postulación e integración con la facultad.
+- [`estructura-codigo.md`](./estructura-codigo.md) — guía práctica del código: árbol del monorepo,
+  regla de dependencias, puertos vs. tipos, un caso de punta a punta y cómo agregar una feature.
 - [`secuencia-pago.md`](./secuencia-pago.md) — pago en ventanilla, informe de SysAdmin cargado por Tesorería,
   carga diaria del informe de pagos y alternativa Pagos360 (por confirmar).
 

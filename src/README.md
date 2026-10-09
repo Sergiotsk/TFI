@@ -4,27 +4,23 @@ Código fuente de la solución.
 
 ## Estado
 
-🚧 **Sin código todavía.** El proyecto está en fase de **discovery** (ver
-[`../docs/discovery/`](../docs/discovery/)). La construcción arranca cuando cierre
-el descubrimiento y se defina el stack.
+🚧 **Sin código de producción todavía.** `test_frontend/` contiene maquetas HTML de las pantallas
+del postulante, usadas para validar el flujo; no forman parte de la solución.
 
 ## Arquitectura
 
-La solución seguirá **arquitectura hexagonal** (puertos y adaptadores), según
-[ADR-0001](../docs/decisions/0001-usar-arquitectura-hexagonal.md): el dominio
-aislado en el centro, la infraestructura y la UI como adaptadores
-intercambiables.
+La solución sigue **arquitectura hexagonal** (puertos y adaptadores), según
+[ADR-0001](../docs/decisions/0001-usar-arquitectura-hexagonal.md). El stack y la estructura ya
+están definidos en la constitución (`../.specify/memory/constitution.md`, Principio I y sección
+Stack): TypeScript, Next.js y Supabase, en un **monorepo pnpm** con `packages/domain`,
+`packages/application`, `packages/infrastructure` y `apps/web`.
 
-## Por qué esta carpeta está (casi) vacía
-
-La estructura interna (`domain/`, `application/`, `infrastructure/`, ...) **no se
-define todavía a propósito**: su forma concreta depende del lenguaje y framework,
-que aún no se eligieron (ver §6.2 del `DOCUMENTO-SEGUIMIENTO`). Anticipamos el
-cambio en el **diseño** (ADR-0001), no lo pagamos en la **estructura** hasta que
-haya código real. Ver también [ADR-0002](../docs/decisions/0002-disenar-para-multi-institucion.md).
+Antes de escribir código, leé la guía práctica:
+[`docs/architecture/estructura-codigo.md`](../docs/architecture/estructura-codigo.md). Ahí está el
+árbol de carpetas, la regla de dependencias, un caso recorrido de punta a punta y cómo agregar una
+feature.
 
 ## Próximo paso
 
-Al elegir el stack, se documenta el layout hexagonal concreto en
-[`../docs/architecture/`](../docs/architecture/) (y, si amerita, un ADR nuevo) y
-recién ahí se crea la estructura de carpetas.
+Al arrancar la primera feature se crea la estructura del monorepo en la raíz del repositorio
+(`apps/` y `packages/`), y esta carpeta deja de usarse para el código de la solución.
