@@ -1,0 +1,13 @@
+# Spec Kit: herramienta local y opcional. Solo se versiona la constitución
+# (y las specs en specs/ cuando existan). Para reinstalarlo: specify init --here
+.specify/*
+!.specify/memory/
+.specify/memory/*
+!.specify/memory/constitution.md
+.claude/skills/speckit-*/
+
+# Archivos sueltos de trabajo
+arqSanti.jpeg
+
+node_modules
+package-lock.json
