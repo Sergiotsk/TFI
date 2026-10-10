@@ -1,6 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: (plantilla sin completar) -> 0.1.0 (BORRADOR, pendiente de aprobación del equipo)
+- Version change: 0.1.0 (borrador) -> 1.0.0 (RATIFICADA el 2026-10-10 al aprobarse el PR #19)
+- Historial: (plantilla sin completar) -> 0.1.0 (borrador) -> 1.0.0 (ratificación, sin cambios de
+  contenido respecto del borrador aprobado)
 - Principios agregados: I a VIII
 - Ajuste previo a la ratificación (2026-10-05): Principio V pasa de "exportación diaria" a
   importación del informe de pagos de SysAdmin por Tesorería (ver docs/architecture/overview.md).
@@ -13,7 +15,6 @@ Sync Impact Report
 - Secciones agregadas: Stack y restricciones técnicas; Flujo de desarrollo y calidad
 - Secciones eliminadas: ninguna
 - Pendientes diferidos (TODO):
-  - TODO(RATIFICATION_DATE): se fija al aprobarse el PR por el equipo; ahí pasa a 1.0.0.
   - TODO(DESIGN_MD): el DESIGN.md de UTN FRH todavía no existe (Principio VIII); definir ubicación.
   - TODO(RETENCION_DATOS): política de conservación de documentos de aspirantes sin respuesta.
   - TODO(EXCEPCIONES_VACANTE): confirmar con el Director si hay excepciones a "pago = vacante".
@@ -156,4 +157,4 @@ PATCH por aclaraciones. Toda revisión de PR MUST verificar el cumplimiento de e
 la complejidad adicional MUST justificarse. Spec Kit es una herramienta de apoyo; la constitución es
 un artefacto del repositorio y rige para todo el equipo por igual.
 
-**Version**: 0.1.0 | **Ratified**: TODO(RATIFICATION_DATE): pendiente de aprobación del equipo | **Last Amended**: 2026-10-09
+**Version**: 1.0.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10
