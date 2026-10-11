@@ -53,8 +53,8 @@ stack. Todavía no hay código de producción.
 - **Arquitectura hexagonal** ([ADR-0001](docs/decisions/0001-usar-arquitectura-hexagonal.md)): el
   negocio vive aislado en el centro y todo lo de afuera (UI, base de datos, pagos) se conecta por
   puertos y adaptadores intercambiables.
-- **Monorepo pnpm**: `packages/domain`, `packages/application`, `packages/infrastructure` y
-  `apps/web`. Las dependencias apuntan siempre hacia `domain`.
+- **Monorepo pnpm en `src/`**: `packages/domain`, `packages/application`,
+  `packages/infrastructure` y `apps/web`. Las dependencias apuntan siempre hacia `domain`.
 - **Stack**: TypeScript estricto, Next.js, Supabase (PostgreSQL, Auth, Storage), Zod, Vitest,
   Tailwind CSS + shadcn/ui.
 - **Pensado para crecer** a otras instituciones
@@ -81,17 +81,20 @@ TFI/
 │   │   └── ideacion/                 ideas evaluadas y su ranking
 │   │       └── ideas/                una ficha por idea
 │   ├── product/                      historias de usuario y gestión del backlog
+│   ├── prototipos/                   maquetas HTML de las pantallas del postulante
 │   └── _referencias/                 material de apoyo ajeno (ejemplo SADA, transcripciones)
-├── src/
-│   └── test_frontend/                maquetas HTML de las pantallas del postulante
+├── src/                              CÓDIGO: raíz del workspace pnpm
+│   ├── apps/web/                     Next.js (adaptador de entrada)
+│   ├── packages/                     domain, application, infrastructure
+│   └── supabase/migrations/          esquema de la base
 ├── AGENTS.md                         instrucciones para agentes de código
 ├── CONTRIBUTING.md                   cómo aportar: ramas, PR y revisiones
 ├── README.md
 └── .gitignore
 ```
 
-> El código de la solución todavía no existe. Cuando arranque, irá en `apps/` y `packages/` en la
-> raíz (ver la [guía de estructura del código](docs/architecture/estructura-codigo.md)).
+> Todavía no hay código: `src/` tiene la estructura armada con un `README.md` por carpeta que
+> explica su función (ver la [guía de estructura del código](docs/architecture/estructura-codigo.md)).
 
 ## Cómo trabajamos
 

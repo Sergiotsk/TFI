@@ -21,43 +21,51 @@ entera.
 
 ## 2. El árbol
 
+Todo el código vive en **`src/`**, que es la raíz del workspace pnpm (ahí van `package.json`,
+`pnpm-workspace.yaml` y las configs). La documentación (`docs/`, `.specify/`, `specs/`) queda afuera.
+Los comandos de pnpm se corren desde `src/`.
+
+Los paquetes y las apps son **planos**: no llevan un `src/` interno. Así se evitan rutas como
+`src/packages/domain/src/...`.
+
 ```
 TFI/
-├── apps/
-│   └── web/                          Next.js: adaptador de ENTRADA y raíz de composición
-│       └── src/
-│           ├── app/                  páginas, layouts y route handlers (app/api/**/route.ts)
-│           ├── components/           UI (shadcn/ui). Sin reglas de negocio
-│           ├── http/                 schemas Zod de requests y mapeo de errores a respuestas HTTP
-│           └── composition-root.ts   arma los casos de uso con sus adaptadores reales
-│
-├── packages/
-│   ├── domain/                       el NEGOCIO. TypeScript puro, cero dependencias
-│   │   └── src/
-│   │       ├── postulacion/          entidad Postulacion, estados y transiciones
-│   │       ├── pago/                 value objects del pago
-│   │       └── errores.ts            errores de dominio (ej. TransicionInvalida)
-│   │
-│   ├── application/                  CASOS DE USO y PUERTOS. Solo depende de domain
-│   │   └── src/
-│   │       ├── casos-de-uso/         un archivo por caso de uso (AcreditarPagosDelInforme, ...)
-│   │       └── puertos/
-│   │           └── repositorio-de-postulaciones/
-│   │               ├── puerto.ts     la interfaz (el contrato)
-│   │               ├── fake.ts       implementación en memoria para tests
-│   │               └── contrato.ts   suite de tests de contrato reutilizable
-│   │
-│   └── infrastructure/               ADAPTADORES de salida. Implementan los puertos
-│       └── src/
-│           ├── supabase/             repositorios, cliente, tipos generados y mapeos
-│           ├── informe-de-pagos/     lector del CSV/XLSX de SysAdmin (+ schema Zod)
-│           ├── exportacion/          exportador de confirmados (a definir)
-│           ├── pagos360/             adaptador de PasarelaDePago (por confirmar)
-│           └── mail/                 notificaciones (post-MVP)
-│
-├── supabase/migrations/              esquema de base versionado (Supabase CLI)
-└── specs/                            specs de cada feature (Spec Kit, opcional)
+├── docs/  .specify/  specs/          documentación (fuera del código)
+└── src/                              RAÍZ DEL WORKSPACE (package.json, pnpm-workspace.yaml, configs)
+    ├── apps/
+    │   └── web/                      Next.js: adaptador de ENTRADA y raíz de composición
+    │       ├── app/                  páginas y layouts por portal
+    │       │   └── api/              route handlers (app/api/**/route.ts)
+    │       ├── components/           UI (shadcn/ui). Sin reglas de negocio
+    │       ├── http/                 schemas Zod de requests y mapeo de errores a respuestas HTTP
+    │       ├── public/               archivos estáticos
+    │       └── composition-root.ts   arma los casos de uso con sus adaptadores reales
+    │
+    ├── packages/
+    │   ├── domain/                   el NEGOCIO. TypeScript puro, cero dependencias
+    │   │   ├── postulacion/          entidad Postulacion, estados y transiciones
+    │   │   ├── pago/                 value objects del pago
+    │   │   └── errores.ts            errores de dominio (ej. TransicionInvalida)
+    │   │
+    │   ├── application/              CASOS DE USO y PUERTOS. Solo depende de domain
+    │   │   ├── casos-de-uso/         un archivo por caso de uso (AcreditarPagosDelInforme, ...)
+    │   │   └── puertos/
+    │   │       └── repositorio-de-postulaciones/
+    │   │           ├── puerto.ts     la interfaz (el contrato)
+    │   │           ├── fake.ts       implementación en memoria para tests
+    │   │           └── contrato.ts   suite de tests de contrato reutilizable
+    │   │
+    │   └── infrastructure/           ADAPTADORES de salida. Implementan los puertos
+    │       ├── supabase/             repositorios, cliente, tipos generados y mapeos
+    │       ├── informe-de-pagos/     lector del CSV/XLSX de SysAdmin (+ schema Zod)
+    │       ├── exportacion/          exportador de confirmados (a definir)
+    │       ├── pagos360/             adaptador de PasarelaDePago (por confirmar)
+    │       └── mail/                 notificaciones (post-MVP)
+    │
+    └── supabase/migrations/          esquema de base versionado (Supabase CLI)
 ```
+
+Cada carpeta de `src/` tiene un `README.md` corto con su función.
 
 ## 3. La regla de dependencias
 
@@ -93,7 +101,7 @@ Es la confusión más común, así que vale la pena detenerse.
   alguien de afuera tiene que cumplir:
 
 ```ts
-// packages/application/src/puertos/repositorio-de-postulaciones/puerto.ts
+// src/packages/application/puertos/repositorio-de-postulaciones/puerto.ts
 import type { Postulacion } from '@tfi/domain';
 
 export interface RepositorioDePostulaciones {
@@ -118,7 +126,7 @@ ilustrativos y están recortados.
 **1. Dominio: la regla.** La transición vive en la entidad. Nadie más puede cambiar el estado.
 
 ```ts
-// packages/domain/src/postulacion/postulacion.ts
+// src/packages/domain/postulacion/postulacion.ts
 export class Postulacion {
   private constructor(readonly id: string, private _estado: EstadoPostulacion) {}
 
@@ -137,7 +145,7 @@ export class Postulacion {
 regla al dominio y guarda. No sabe nada de HTTP ni de Supabase.
 
 ```ts
-// packages/application/src/casos-de-uso/acreditar-pagos-del-informe.ts
+// src/packages/application/casos-de-uso/acreditar-pagos-del-informe.ts
 export class AcreditarPagosDelInforme {
   constructor(
     private readonly postulaciones: RepositorioDePostulaciones,
@@ -166,7 +174,7 @@ export class AcreditarPagosDelInforme {
 traduce a `PagoInformado`. El repositorio de Supabase mapea filas de la base a entidades.
 
 ```ts
-// packages/infrastructure/src/supabase/repositorio-de-postulaciones-supabase.ts
+// src/packages/infrastructure/supabase/repositorio-de-postulaciones-supabase.ts
 export class RepositorioDePostulacionesSupabase implements RepositorioDePostulaciones {
   constructor(private readonly db: SupabaseClient<Database>) {}
 
@@ -183,7 +191,7 @@ traduce el resultado a HTTP. La raíz de composición es el único lugar donde s
 adaptadores concretos.
 
 ```ts
-// apps/web/src/composition-root.ts
+// src/apps/web/composition-root.ts
 export function crearAcreditarPagosDelInforme(db: SupabaseClient<Database>) {
   return new AcreditarPagosDelInforme(
     new RepositorioDePostulacionesSupabase(db),
@@ -208,7 +216,7 @@ composición. **Nunca** consulta Supabase directo ni llama a un repositorio.
 | Verificar el rol del usuario | el caso de uso (RLS es la segunda barrera) |
 | Un componente visual | `apps/web/components`, usando tokens del tema |
 | Variables de entorno | validadas con Zod en `apps/web`, inyectadas al armar adaptadores |
-| Cambiar el esquema de la base | una migración en `supabase/migrations` |
+| Cambiar el esquema de la base | una migración en `src/supabase/migrations` |
 
 ## 7. Errores comunes
 
@@ -220,6 +228,8 @@ composición. **Nunca** consulta Supabase directo ni llama a un repositorio.
 - **Confundir tipos con puertos.** Ver la sección 4.
 - **Zod en el dominio.** El dominio usa TypeScript puro; la validación de datos externos es cosa del
   borde.
+- **Anidar un `src/` dentro de un paquete o de `apps/web`.** La raíz del código ya es `src/`; los
+  paquetes son planos.
 - **Usar "Legajo".** Es un concepto de SysAcad. La entidad nuestra es `Postulación`.
 - **Saltear el caso de uso** desde la UI "porque es solo una lectura". Hoy es una lectura, mañana
   tiene un filtro por rol.
@@ -244,7 +254,7 @@ el fake.
 ### Cómo se reutiliza la suite de contrato
 
 ```ts
-// packages/application/src/puertos/repositorio-de-postulaciones/contrato.ts
+// src/packages/application/puertos/repositorio-de-postulaciones/contrato.ts
 export function contratoRepositorioDePostulaciones(crear: () => RepositorioDePostulaciones) {
   it('guarda y recupera una Postulación', async () => { /* ... */ });
   it('devuelve null si no existe', async () => { /* ... */ });

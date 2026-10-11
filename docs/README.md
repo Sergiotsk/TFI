@@ -12,6 +12,7 @@ entrega de la cátedra.
 | [`decisions/`](decisions/) | **ADRs** — decisiones de arquitectura con su contexto | 🫀 Vivo, crece |
 | [`product/`](product/) | Historias de usuario y cómo se gestiona el backlog | 🫀 Vivo |
 | [`architecture/`](architecture/) | Visión técnica: diagramas (hexagonal, paquetes, estados, pagos) y [guía de estructura del código](architecture/estructura-codigo.md) | 🫀 Vivo |
+| [`prototipos/`](prototipos/) | Maquetas HTML de las pantallas del postulante (etapa Prototipar) | 📸 Referencia del diseño |
 | `DOCUMENTO-SEGUIMIENTO-PROYECTO.md` | Entregable formal (formato cátedra) | 📸 Foto → PDF final |
 | [`_referencias/`](_referencias/) | Material de apoyo: ejemplo SADA y transcripción cruda de la entrevista con Sistemas y Administración | Referencia |
 

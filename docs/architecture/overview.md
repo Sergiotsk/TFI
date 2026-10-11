@@ -63,7 +63,8 @@ uso son **preliminares**: se afinan al especificar cada feature.
 
 Cómo se parte el hexágono en código (constitución, Principio I). La flecha significa "depende de":
 todo termina en `domain`, que no depende de nadie. Un paquete no puede importar lo que no declara
-en su `package.json`, y una regla de lint de límites entre capas falla en CI.
+en su `package.json`, y una regla de lint de límites entre capas falla en CI. Todos los paquetes
+viven dentro de `src/`, que es la raíz del workspace pnpm.
 
 ```mermaid
 flowchart TD
