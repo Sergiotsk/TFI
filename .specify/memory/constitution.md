@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
 - Version change: 1.0.0 -> 1.0.1 (PATCH, aclaración): el monorepo pnpm tiene su raíz en `src/`, y
-  los paquetes y apps no llevan un `src/` interno (Principio I y Stack).
+  los paquetes y apps no llevan un `src/` interno (Principio I y Stack, ADR-0003).
 - Historial: (plantilla sin completar) -> 0.1.0 (borrador) -> 1.0.0 (ratificada el 2026-10-10 al
   aprobarse el PR #19, sin cambios de contenido) -> 1.0.1
 - Principios agregados: I a VIII
@@ -29,7 +29,7 @@ Sync Impact Report
 
 El núcleo del negocio MUST estar aislado de frameworks, base de datos y servicios externos
 (ADR-0001). La estructura objetivo es un monorepo pnpm con su raíz en `src/` (el código queda
-separado de la documentación). Las rutas `apps/*` y `packages/*` son relativas a `src/`, y los
+separado de la documentación, ADR-0003). Las rutas `apps/*` y `packages/*` son relativas a `src/`, y los
 paquetes y apps MUST NOT tener un `src/` interno. Capas y dependencias permitidas:
 
 - `packages/domain`: entidades, reglas y máquina de estados. MUST NOT declarar dependencias de
