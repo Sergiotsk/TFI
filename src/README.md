@@ -1,8 +1,17 @@
 # src — raíz del código
 
-Raíz del **workspace pnpm**. Acá van a vivir `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`
-y la config de ESLint. Todo el código está dentro de `src/`, y la documentación queda afuera.
-Los comandos (`pnpm install`, `pnpm test`, `pnpm dev`) se corren desde acá.
+Raíz del **workspace pnpm**. Acá viven `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`
+y `.nvmrc` (y más adelante, la config de ESLint). Todo el código está dentro de `src/`, y la
+documentación queda afuera. Los comandos de pnpm se corren desde acá.
+
+Requisitos: **Node 24** (lo lee fnm del `.nvmrc`; con otra versión, `pnpm install` falla) y **pnpm**
+(la versión exacta la fija `packageManager` en `package.json`).
+
+```bash
+cd src
+pnpm install      # instala todo el workspace
+pnpm typecheck    # chequea los tipos de todos los paquetes
+```
 
 | Carpeta | Función |
 |---|---|
