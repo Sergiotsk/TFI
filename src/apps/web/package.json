@@ -1,0 +1,16 @@
+{
+  "name": "@tfi/web",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tfi/application": "workspace:*",
+    "@tfi/domain": "workspace:*",
+    "@tfi/infrastructure": "workspace:*"
+  }
+}
