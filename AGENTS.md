@@ -20,7 +20,9 @@ negocio: **pago acreditado = vacante confirmada**; la documentación se revisa d
 
 ## Reglas no negociables
 
-- **Arquitectura hexagonal** en un monorepo pnpm:
+- **El código vive en `src/`**, que es la raíz del workspace pnpm. Los paquetes y `apps/web` son
+  planos: no llevan un `src/` interno.
+- **Arquitectura hexagonal** en un monorepo pnpm (rutas relativas a `src/`):
   - `packages/domain`: entidades, reglas y máquina de estados. Sin dependencias externas.
   - `packages/application`: casos de uso y puertos (interfaces). Solo depende de `domain`.
   - `packages/infrastructure`: adaptadores (Supabase, lector del informe de pagos, exportador,

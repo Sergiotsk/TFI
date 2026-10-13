@@ -1,8 +1,9 @@
 <!--
 Sync Impact Report
-- Version change: 0.1.0 (borrador) -> 1.0.0 (RATIFICADA el 2026-10-10 al aprobarse el PR #19)
-- Historial: (plantilla sin completar) -> 0.1.0 (borrador) -> 1.0.0 (ratificación, sin cambios de
-  contenido respecto del borrador aprobado)
+- Version change: 1.0.0 -> 1.0.1 (PATCH, aclaración): el monorepo pnpm tiene su raíz en `src/`, y
+  los paquetes y apps no llevan un `src/` interno (Principio I y Stack, ADR-0003).
+- Historial: (plantilla sin completar) -> 0.1.0 (borrador) -> 1.0.0 (ratificada el 2026-10-10 al
+  aprobarse el PR #19, sin cambios de contenido) -> 1.0.1
 - Principios agregados: I a VIII
 - Ajuste previo a la ratificación (2026-10-05): Principio V pasa de "exportación diaria" a
   importación del informe de pagos de SysAdmin por Tesorería (ver docs/architecture/overview.md).
@@ -27,7 +28,9 @@ Sync Impact Report
 ### I. Arquitectura hexagonal con límites físicos (NON-NEGOTIABLE)
 
 El núcleo del negocio MUST estar aislado de frameworks, base de datos y servicios externos
-(ADR-0001). La estructura objetivo es un monorepo pnpm con estas capas y dependencias permitidas:
+(ADR-0001). La estructura objetivo es un monorepo pnpm con su raíz en `src/` (el código queda
+separado de la documentación, ADR-0003). Las rutas `apps/*` y `packages/*` son relativas a `src/`, y los
+paquetes y apps MUST NOT tener un `src/` interno. Capas y dependencias permitidas:
 
 - `packages/domain`: entidades, reglas y máquina de estados. MUST NOT declarar dependencias de
   runtime externas.
@@ -125,7 +128,7 @@ anticipa en el diseño y no se construye hasta que exista una segunda (ADR-0002,
   (se agregan solo los componentes que se usen).
 - **Datos:** Supabase (PostgreSQL, Auth, Storage). **Validación:** Zod. **Tests:** Vitest.
 - **Calidad:** ESLint + Prettier + regla de límites entre capas. **Gestor:** pnpm, con versión de
-  Node fijada (`engines` y `.nvmrc`). **Estructura:** monorepo con pnpm workspaces.
+  Node fijada (`engines` y `.nvmrc`). **Estructura:** monorepo con pnpm workspaces en `src/`.
 - **Hosting:** Vercel (aplicación) + Supabase Cloud (datos), para desarrollo y demo. Es una decisión
   del equipo basada en la inferencia de que un despliegue on-premise sería inviable (rechazo del
   agente de sincronización y acceso restringido a los sistemas de la facultad); **no fue consultado
@@ -157,4 +160,4 @@ PATCH por aclaraciones. Toda revisión de PR MUST verificar el cumplimiento de e
 la complejidad adicional MUST justificarse. Spec Kit es una herramienta de apoyo; la constitución es
 un artefacto del repositorio y rige para todo el equipo por igual.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10
+**Version**: 1.0.1 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10

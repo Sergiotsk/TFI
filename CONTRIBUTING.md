@@ -38,6 +38,9 @@ git push -u origin feature/nombre-corto
 
 Si `develop` avanzó mientras trabajabas, actualizá tu rama antes de pedir revisión.
 
+Los comandos de pnpm (`pnpm install`, `pnpm test`, `pnpm dev`) se corren desde `src/`, que es la
+raíz del workspace.
+
 ## Pull Requests
 
 - **Hacia `develop`**, y **chicos**: un PR, un tema. Es más fácil de revisar y de deshacer.
