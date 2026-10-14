@@ -6,9 +6,10 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "dev": "pnpm --filter web dev",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
-    "typescript": "6.0.3"
+    "typescript": "^5.3.3"
   }
 }
