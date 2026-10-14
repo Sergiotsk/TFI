@@ -3,4 +3,7 @@ packages:
   - "packages/*"
 
 # Si la versión de Node no coincide con "engines" (Node 24), pnpm falla en vez de solo avisar.
+allowBuilds:
+  sharp: true
+
 engineStrict: true
