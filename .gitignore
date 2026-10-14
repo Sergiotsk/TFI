@@ -10,4 +10,9 @@
 arqSanti.jpeg
 
 node_modules
-package-lock.json
+package-lock.json*.tsbuildinfo
+.next/
+
+# Secretos: nunca se suben (constitución, Principio VII)
+.env*
+!.env.example
