@@ -1,0 +1,8 @@
+{
+  "name": "tfi-workspace",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm --filter web dev"
+  }
+}
