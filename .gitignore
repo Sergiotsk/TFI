@@ -6,11 +6,9 @@
 !.specify/memory/constitution.md
 .claude/skills/speckit-*/
 
-# Archivos sueltos de trabajo
-arqSanti.jpeg
-
 node_modules
-package-lock.json*.tsbuildinfo
+package-lock.json
+*.tsbuildinfo
 .next/
 
 # Secretos: nunca se suben (constitución, Principio VII)
