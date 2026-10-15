@@ -11,6 +11,26 @@ Convenciones para aportar al repositorio. Se desprenden de la
   [guía de estructura del código](docs/architecture/estructura-codigo.md).
 - Tomá una tarjeta del tablero (GitHub Projects) antes de arrancar, así nadie duplica trabajo.
 
+## Cómo tomar una tarjeta
+
+1. Se toma **solo de `Listo`**, la de más arriba. Nunca directo del Backlog.
+2. Antes de arrancar: asignate y movela a `En curso`.
+3. Una tarjeta pasa de Backlog a `Listo` cuando:
+   - es del incremento actual,
+   - no tiene bloqueos abiertos (*blocked by*),
+   - tiene "Cuándo está hecho",
+   - tiene `Puntos`.
+4. `Prioridad`:
+   - **P0**: camino crítico o fecha de entrega.
+   - **P1**: hace falta para cerrar el incremento.
+   - **P2**: puede esperar.
+   - Dentro de `Listo`, el orden de las tarjetas desempata.
+5. Las dependencias se cargan como relación *blocked by* del issue, no solo en el texto.
+
+**Puntos**: medida relativa de esfuerzo + complejidad + incertidumbre, **no horas**.
+- Escala: 1 · 2 · 3 · 5 · 8.
+- Se estima entre todos; si algo da más de 8, se divide.
+
 ## Ramas
 
 | Rama | Para qué | Quién escribe |
