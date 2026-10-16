@@ -3,9 +3,9 @@ import { repositorioDeUsuarios } from '../../../../composition-root'
 
 export const GET = async (
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) => {
-  const { id } = params
+  const { id } = await params
   const user = await repositorioDeUsuarios.obtenerPorId(id)
 
   if (!user) {

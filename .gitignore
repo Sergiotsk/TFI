@@ -10,6 +10,8 @@ node_modules
 package-lock.json
 *.tsbuildinfo
 .next/
+# Lo genera Next en cada dev/build/typegen (docs: config/typescript)
+next-env.d.ts
 
 # Secretos: nunca se suben (constitución, Principio VII)
 .env*
