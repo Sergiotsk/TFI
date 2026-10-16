@@ -21,11 +21,14 @@ export const POST = async (request: Request) => {
     body.email,
     body.password,
     body.dni,
+    body.cuil,
     new Date(body.birthdate),
     body.sex,
     body.phone,
     body.address,
     body.role,
+    body.timestamp,
+    body.verified,
   )
   await repositorioDeUsuarios.guardar(newUser)
   return NextResponse.json({ success: true, data: newUser }, { status: 201 })
