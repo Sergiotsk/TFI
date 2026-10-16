@@ -6,10 +6,13 @@ export class User {
     readonly email: string,
     readonly password: string,
     readonly dni: string,
+    readonly cuil: string,
     readonly birthdate: Date,
     readonly sex: 'M' | 'F' | 'O',
     readonly phone: string,
     readonly address: string,
     readonly role: 'INTERESADO' | 'SECRETARIO' | 'DIRECTOR' | 'ADMIN',
+    readonly timestamp: Date,
+    readonly verified: boolean,
   ) {}
 }
