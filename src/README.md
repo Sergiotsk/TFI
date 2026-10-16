@@ -1,7 +1,7 @@
 # src — raíz del código
 
-Raíz del **workspace pnpm**. Acá viven `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`
-y `.nvmrc` (y más adelante, la config de ESLint). Todo el código está dentro de `src/`, y la
+Raíz del **workspace pnpm**. Acá viven `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`,
+`.nvmrc` y `eslint.config.mjs`. Todo el código está dentro de `src/`, y la
 documentación queda afuera. Los comandos de pnpm se corren desde acá.
 
 Requisitos: **Node 24** (lo lee fnm del `.nvmrc`; con otra versión, `pnpm install` falla) y **pnpm**
@@ -13,6 +13,10 @@ pnpm install      # instala todo el workspace
 pnpm typecheck    # chequea los tipos de todos los paquetes
 pnpm lint         # ESLint: sin `any` y con los límites entre capas
 ```
+
+En el editor, los errores de lint aparecen con la extensión **ESLint** (`dbaeumer.vscode-eslint`), que el repo
+recomienda al abrirlo. `.vscode/settings.json` le indica que la config está en `src/`: sin eso, abriendo la raíz
+del repo, la extensión no la encuentra.
 
 | Carpeta | Función |
 |---|---|
