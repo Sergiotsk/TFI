@@ -1,4 +1,4 @@
-import { User } from '../../../domain/user/user'
+import { User } from '@tfi/domain'
 import type { RepositorioDeUsuarios } from './puerto'
 
 export class RepositorioDeUsuariosFake implements RepositorioDeUsuarios {

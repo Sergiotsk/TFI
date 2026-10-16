@@ -1,4 +1,4 @@
-import type { Procedure } from '../../../domain/procedure/procedure'
+import type { Procedure } from '@tfi/domain'
 
 export interface RepositorioDeProcedure {
   obtenerTodos(): Promise<Procedure[]>

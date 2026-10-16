@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { repositorioDeUsuarios } from '../../../composition-root'
-import { User } from '../../../../../packages/domain/user/user'
+import { repositorioDeUsuarios } from '@/composition-root'
+import { User } from '@tfi/domain'
 
 export const GET = async (req: NextRequest) => {
   const role = req.nextUrl.searchParams.get('role')

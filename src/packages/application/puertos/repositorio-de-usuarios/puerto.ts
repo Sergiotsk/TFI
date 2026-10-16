@@ -1,4 +1,4 @@
-import type { User } from '../../../domain/user/user'
+import type { User } from '@tfi/domain'
 
 export interface RepositorioDeUsuarios {
   obtenerTodos(): Promise<User[]>
