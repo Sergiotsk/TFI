@@ -9,6 +9,9 @@ Recordatorios para esta carpeta:
 - Route handlers y Server Actions: validan con **Zod** en el borde y llaman a un **caso de uso** de
   `@tfi/application`. Nunca a Supabase directo ni a un repositorio sin pasar por un caso de uso.
 - Componentes: solo **tokens semánticos** de Tailwind (`bg-primary`, `text-foreground`), nunca colores fijos.
+- Los componentes de `components/ui/` son de **shadcn/ui sobre Base UI** (`@base-ui/react`), **no Radix**.
+  Las APIs son distintas (por ejemplo, Base UI usa la prop `render` donde Radix usa `asChild`): verificá en
+  https://base-ui.com antes de escribir código. Agregar componentes con `pnpm dlx shadcn add <nombre>`.
 - Importar los paquetes como `@tfi/domain`, `@tfi/application`, etc., no con rutas relativas.
 
 El bloque de abajo lo escribe `next dev` y lo vuelve a crear si se borra: no editarlo.
