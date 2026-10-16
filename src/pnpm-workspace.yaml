@@ -5,5 +5,7 @@ packages:
 # Si la versión de Node no coincide con "engines" (Node 24), pnpm falla en vez de solo avisar.
 allowBuilds:
   sharp: true
+  # Su postinstall solo descarga el binario si falta; ya viene como dependencia opcional por plataforma.
+  unrs-resolver: false
 
 engineStrict: true
