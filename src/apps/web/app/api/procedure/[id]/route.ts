@@ -3,9 +3,9 @@ import { repositorioDeProcedure } from '../../../../composition-root'
 
 export const GET = async (
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) => {
-  const { id } = params
+  const { id } = await params
   const procedure = await repositorioDeProcedure.obtenerPorId(id)
 
   if (!procedure) {
