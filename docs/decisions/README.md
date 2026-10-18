@@ -18,6 +18,7 @@ qué consecuencias trae.
 | [0001](0001-usar-arquitectura-hexagonal.md) | Usar arquitectura hexagonal | Aceptado |
 | [0002](0002-disenar-para-multi-institucion.md) | Diseñar para multi-institución | Aceptado |
 | [0003](0003-src-como-raiz-del-workspace.md) | `src/` como raíz del workspace, con paquetes planos | Aceptado |
+| [0004](0004-migraciones-por-integracion-github.md) | Migraciones al remoto por la integración de GitHub de Supabase | Aceptado |
 
 ## Plantilla
 
