@@ -112,6 +112,7 @@ Se proponen por PR revisado por el equipo e incluyen:
 ## Seguridad y datos
 
 - **Nunca** subas secretos, tokens ni archivos `.env`. Usá `.env.example` con valores falsos.
-- El esquema de la base se cambia **solo con migraciones** de Supabase CLI en el repo.
+- El esquema de la base se cambia **solo con migraciones** de Supabase CLI en el repo. Cómo levantar la
+  base local y crear migraciones: [`src/supabase/README.md`](src/supabase/README.md).
 - Los datos personales de los aspirantes (DNI, analíticos, fotos) están protegidos por la
   Ley 25.326: no los uses en ejemplos, tests ni capturas.
