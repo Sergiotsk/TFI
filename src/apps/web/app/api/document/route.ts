@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { repositorioDeDocument } from '../../../composition-root'
-import { Document } from '../../../../../packages/domain/document/document'
+import { repositorioDeDocument } from '@/composition-root'
+import { Document } from '@tfi/domain'
 
 export const GET = async (req: NextRequest) => {
   const procedure = req.nextUrl.searchParams.get('procedureId')

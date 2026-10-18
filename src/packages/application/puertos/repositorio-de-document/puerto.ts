@@ -1,4 +1,4 @@
-import type { Document } from '../../../domain/document/document'
+import type { Document } from '@tfi/domain'
 
 export interface RepositorioDeDocument {
   obtenerTodos(): Promise<Document[]>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { repositorioDeDocument } from '../../../../composition-root'
+import { repositorioDeDocument } from '@/composition-root'
 
 export const GET = async (
   request: Request,
