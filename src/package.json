@@ -7,9 +7,16 @@
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint ."
   },
   "devDependencies": {
-    "typescript": "6.0.3"
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.1",
+    "eslint-plugin-import-x": "4.17.1",
+    "globals": "17.13.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2"
   }
 }

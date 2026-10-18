@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { repositorioDeProcedure } from '../../../composition-root'
-import { Procedure } from '../../../../../packages/domain/procedure/procedure'
+import { repositorioDeProcedure } from '@/composition-root'
+import { Procedure } from '@tfi/domain'
 
 export const GET = async (req: NextRequest) => {
   const state = req.nextUrl.searchParams.get('state') as

@@ -1,4 +1,4 @@
-import { Document } from '../../../domain/document/document'
+import { Document } from '@tfi/domain'
 import type { RepositorioDeDocument } from './puerto'
 
 export class RepositorioDeDocumentFake implements RepositorioDeDocument {

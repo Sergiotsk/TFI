@@ -1,4 +1,4 @@
-import { Procedure } from '../../../domain/procedure/procedure'
+import { Procedure } from '@tfi/domain'
 import type { RepositorioDeProcedure } from './puerto'
 
 export class RepositorioDeProcedureFake implements RepositorioDeProcedure {
