@@ -13,8 +13,10 @@ de una unión discriminada, no como excepciones. Las excepciones quedan para los
 interface Reloj { ahora(): Date }
 ```
 
-Fake: `RelojFijo` con `avanzar(ms)`. Sin suite de contrato (no tiene adaptador de infraestructura: el real es
-`new Date()` en la raíz de composición).
+Fake: `RelojFijo` con `avanzar(ms)`. Real: `RelojDeSistema` en `packages/infrastructure/reloj/`.
+
+**Casos de contrato** (corren contra `RelojFijo` y `RelojDeSistema`): `ahora()` devuelve un `Date` válido; dos
+llamadas seguidas no retroceden. Solo para el fake: `avanzar(ms)` mueve `ahora()` exactamente `ms`.
 
 ## RepositorioDePostulaciones (reemplaza a `RepositorioDeProcedure`)
 
@@ -60,7 +62,7 @@ interface RepositorioDePeriodos {
 
 ```ts
 type DecisionDeAcreditacion =
-  | { tipo: 'CONFIRMAR'; postulacionId: string; estadoEsperado: 'PAGO_PENDIENTE' }
+  | { tipo: 'CONFIRMAR'; postulacionId: string; estadoEsperado: 'PAGO_PENDIENTE' | 'VENCIDO' }
   | { tipo: 'REVISION'; postulacionId: string; estadoEsperado: 'PAGO_PENDIENTE' | 'VENCIDO'; motivo: MotivoRevision }
   | { tipo: 'NO_IMPUTAR'; motivo: MotivoNoImputado; postulacionId?: string }
 
@@ -79,7 +81,17 @@ interface RegistroDePagos {
 }
 ```
 
+`estadoEsperado` es el estado **persistido** de la Postulación (el que leyó el repositorio), **no** el efectivo
+calculado con `estadoEn(ahora)`. La RPC compara contra lo que está en la base: si recibiera el estado efectivo, una
+Postulación vencida pero todavía guardada como `PAGO_PENDIENTE` daría `CONFLICTO` en todos los reintentos.
+`CONFIRMAR` con `estadoEsperado: 'VENCIDO'` solo corresponde cuando `pagadoEl <= venceEl` (la regla 6 de
+data-model.md).
+
 **Casos de contrato** (los críticos):
+- **Estado persistido vs. efectivo**: Postulación con `vence_el` pasado pero persistida como `PAGO_PENDIENTE`;
+  `REVISION` con `estadoEsperado: 'PAGO_PENDIENTE'` da `REGISTRADO`, no `CONFLICTO`.
+- **Confirmar desde `VENCIDO`**: Postulación persistida como `VENCIDO` y pago con `pagadoEl <= venceEl`;
+  `CONFIRMAR` con `estadoEsperado: 'VENCIDO'` da `REGISTRADO` y la deja `VACANTE_CONFIRMADA`.
 - **Último cupo en paralelo**: período con 1 cupo libre y dos postulaciones pendientes. Dos
   `registrarAcreditacion(CONFIRMAR)` en `Promise.all`. Exactamente una devuelve `REGISTRADO` y la otra
   `CONFLICTO`, y `contarOcupados` da el total.
@@ -116,6 +128,7 @@ mezcla instituciones.
 | `AcreditarPago` | `TESORERIA` o el sistema (webhook de Pagos360) | Postulaciones, Periodos, Pagos, Reloj |
 | `ImportarInformeDePagos` | `TESORERIA` | Cargas y `AcreditarPago` por fila |
 | `CrearPeriodo` / `ModificarPeriodo` | `SECRETARIA`, `DIRECCION` | Periodos |
+| `ListarPeriodosAbiertos` | cualquier usuario autenticado (de su institución) | Periodos, Reloj |
 | `ConsultarOcupacion` | el personal | Periodos, Reloj |
 | `ListarBandeja(estado)` | `A_DECIDIR`: `DIRECCION`; `NO_IMPUTADO` y `DEVUELTO`: `TESORERIA` y `SECRETARIA` (lectura) | Pagos |
 | `DecidirPagoExcepcional` | `DIRECCION` | Pagos |

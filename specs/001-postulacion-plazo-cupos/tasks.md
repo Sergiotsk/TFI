@@ -34,19 +34,23 @@ corren desde `src/`. Los paquetes son planos (sin un `src/` interno). Cada puert
 
 **Purpose**: limpiar lo que dejó el PR 76, registrar las decisiones de arquitectura y preparar las herramientas.
 
-- [ ] T001 Confirmar con el autor del PR 76 que ninguna de sus migraciones se aplicó al remoto (`pnpm dlx supabase migration list --linked` desde `src/`) y registrar el resultado bajo R1 en specs/001-postulacion-plazo-cupos/research.md
-- [ ] T002 Relevar cuántas filas hay en `profiles`, `procedures` y `documents` del remoto y si son solo datos de prueba. Registrar bajo R8 en specs/001-postulacion-plazo-cupos/research.md si la migración crea el período "Migración de datos de prueba" (no se vacían tablas sin acuerdo del equipo)
+- [ ] T001 Confirmar con el autor del PR 76 que ninguna de sus migraciones se aplicó al remoto. La contraseña de la base no se reparte (ADR-0004), así que lo verifica quien administra el proyecto (dashboard de Supabase → Database → Migrations, o una consulta de solo lectura a `supabase_migrations.schema_migrations`). Registrar el resultado bajo R1 en specs/001-postulacion-plazo-cupos/research.md
+- [ ] T002 Relevar, por el mismo medio que T001, cuántas filas hay en `profiles`, `procedures` y `documents` del remoto y si son solo datos de prueba. Registrar bajo R8 en specs/001-postulacion-plazo-cupos/research.md si la migración crea el período "Migración de datos de prueba" (no se vacían tablas sin acuerdo del equipo)
 - [ ] T003 Borrar la carpeta `supabase/` de la raíz del repo (contiene supabase/migrations/20261020125916_new_schema.sql, que la integración de GitHub nunca aplicaría)
 - [ ] T004 Quitar la línea `/supabase/.temp` de .gitignore (raíz); `src/supabase/.gitignore` ya ignora `.temp`
 - [ ] T005 Borrar src/supabase/migrations/20261020142058_add_instituciones_table.sql (no está mergeada en `develop`, research R1)
 - [ ] T006 [P] Escribir docs/decisions/0005-excepciones-de-vacante-decide-direccion.md: el mecanismo `PAGO_EN_REVISION` y la decisión caso por caso de Dirección; cierra el TODO(EXCEPCIONES_VACANTE) de la constitución (Principio II). Formato igual al de docs/decisions/0004-migraciones-por-integracion-github.md
-- [ ] T007 [P] Escribir docs/decisions/0006-instituciones-en-el-esquema.md: modifica la decisión del ADR-0002 (tabla `instituciones` mínima e `institucion_id` solo en las raíces, sin administración ni multi-tenancy en la UI)
-- [ ] T008 [P] Escribir docs/decisions/0007-renombrar-procedure-a-postulacion.md: lenguaje ubicuo y cambio del puerto `RepositorioDeProcedure` (requiere doble aprobación)
+- [ ] T007 [P] Escribir docs/decisions/0006-instituciones-en-el-esquema.md: modifica la decisión del ADR-0002 (tabla `instituciones` mínima e `institucion_id` solo en las raíces, sin administración ni multi-tenancy en la UI). Incluir una sección de datos personales: `pagos.dni_informado` queda atado al `TODO(RETENCION_DATOS)` de la constitución (Ley 25.326)
+- [ ] T008 [P] Escribir docs/decisions/0007-renombrar-procedure-a-postulacion.md: lenguaje ubicuo y cambio del puerto `RepositorioDeProcedure` (requiere doble aprobación). Incluir el renombre de los roles (`INTERESADO`/`SECRETARIO`/`DIRECTOR`/`ADMIN` → `ASPIRANTE`/`SECRETARIA`/`DIRECCION`/`TESORERIA`): se nombran por función, y las etiquetas de la constitución ("Alumno", "Secretaría TUP", "Director", "Administración/Tesorería") pasan a `apps/web/config/institucion.ts` (Principio VIII)
 - [ ] T009 Agregar los ADR 0005 a 0007 al índice de docs/decisions/README.md
-- [ ] T010 [P] Agregar `PAGO_EN_REVISION` y sus transiciones al diagrama de la sección 4 de docs/architecture/overview.md (según data-model.md)
-- [ ] T011 Agregar `vitest` (versión exacta) a las devDependencies de src/package.json, con los scripts `test` (`vitest run`) y `test:contratos` (`vitest run --project contratos`)
-- [ ] T012 Crear src/vitest.config.ts con dos proyectos: `unidad` (`packages/**/*.test.ts`, excluye `*.contrato.test.ts`) y `contratos` (`packages/infrastructure/**/*.contrato.test.ts`)
-- [ ] T013 [P] Agregar `zod` (misma versión que en la rama `develop-landing`) a src/apps/web/package.json y src/packages/infrastructure/package.json
+- [ ] T010 [P] Agregar `PAGO_EN_REVISION` y sus transiciones, más `VENCIDO → VACANTE_CONFIRMADA` (pagó a tiempo y se informó tarde), al diagrama de la sección 4 de docs/architecture/overview.md (según data-model.md)
+
+> **T011 y T012 salieron de esta feature** (opción A del análisis): la configuración de Vitest (`src/vitest.config.ts`,
+> scripts `test` y `test:contratos`, proyectos `unidad` y `contratos`) y el workflow de CI los aporta la tarjeta
+> **"Config de Vitest y CI"**, que se mergea **antes** de la fase 2 de dominio (T023 en adelante). Los requisitos que
+> esta feature le pide a la tarjeta están en research.md, R4.
+
+- [ ] T013 [P] Agregar `zod` (misma versión que en la rama `develop-landing`, hoy `^4.6.7`, pero fijada exacta como el resto del repo) a src/apps/web/package.json y src/packages/infrastructure/package.json
 - [ ] T014 [P] Agregar `@supabase/supabase-js` a src/packages/infrastructure/package.json, y `@supabase/ssr` más `@supabase/supabase-js` a src/apps/web/package.json (versiones exactas)
 - [ ] T015 [P] Documentar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` y `SUPABASE_TEST_URL` con valores falsos en src/apps/web/.env.example (crearlo si no existe; Principio VII)
 
@@ -66,7 +70,7 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 - [ ] T018 Crear src/supabase/migrations/20261021000300_registro_estricto.sql: el trigger `crear_perfil_al_registrarse` (contracts/rpc.md: rol fijo `ASPIRANTE`, la única institución activa, `RAISE` si falta un dato, sin `COALESCE`), `sincronizar_email_de_perfil` (`AFTER UPDATE OF email ON auth.users`), y elimina el trigger `on_auth_user_created` y la función `handle_new_user`. Tiene que ir **justo después** de T017, porque si no el signup queda roto por el `NOT NULL` de `institucion_id`
 - [ ] T019 Crear src/supabase/migrations/20261021000400_pagos_cargas_y_decisiones.sql: los enums `estado_pago`, `motivo_no_imputado`, `proveedor_pago` y `decision_direccion`; las tablas `cargas_de_informe`, `pagos` (con `UNIQUE (proveedor, referencia_externa)` y los CHECK por estado) y `decisiones_de_direccion` (`UNIQUE (pago_id)`); índices; `ENABLE ROW LEVEL SECURITY`
 - [ ] T020 Crear src/supabase/migrations/20261021000500_helpers_y_politicas_rls.sql: `rol_actual()` e `institucion_actual()` (`SECURITY DEFINER`, `STABLE`, `SET search_path = ''`, `REVOKE ... FROM PUBLIC, anon`, `GRANT` a `authenticated`) y las policies de todas las tablas según la matriz de spec.md (FR-008) y contracts/rpc.md. Sin `INSERT` ni `UPDATE` directo sobre `pagos` y `decisiones_de_direccion`, y con el `UPDATE` de `postulaciones` acotado a `iniciarPago` y a la persistencia de `VENCIDO`
-- [ ] T021 Crear src/supabase/seed.sql: un período abierto de ejemplo (50 cupos, 3 días de plazo, matrícula de 9.400.000 centavos) y una cuenta por rol de personal (`SECRETARIA`, `DIRECCION`, `TESORERIA`) con contraseñas de desarrollo
+- [ ] T021 Crear src/supabase/seed.sql: un período abierto de ejemplo (50 cupos, 3 días de plazo, matrícula de 9.400.000 centavos) y una cuenta por rol de personal (`SECRETARIA`, `DIRECCION`, `TESORERIA`) con contraseñas de desarrollo **obviamente falsas** y un comentario que aclare que el seed solo corre en la base local (nunca en el remoto; Principio VII)
 - [ ] T022 Correr `pnpm dlx supabase db reset` desde `src/` y verificar la sección 1 de specs/001-postulacion-plazo-cupos/quickstart.md (tablas, RLS en todas, `anon` sin `EXECUTE`, sin enums viejos)
 
 ### Dominio (tests primero)
@@ -74,7 +78,7 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 - [ ] T023 [P] Escribir src/packages/domain/pago/monto.test.ts y src/packages/domain/pago/referencia-de-pago.test.ts (centavos enteros, rechazo de negativos y decimales, `cubre`, igualdad de referencia)
 - [ ] T024 [P] Escribir src/packages/domain/postulacion/numero-de-postulacion.test.ts y src/packages/domain/perfil/dni.test.ts (`formatear` con 6 dígitos, validación del DNI)
 - [ ] T025 [P] Escribir src/packages/domain/periodo/periodo-de-ingreso.test.ts (`estaAbierto`, y `calcularVencimiento` con el tope en `cierraEl`)
-- [ ] T026 Escribir src/packages/domain/postulacion/postulacion.test.ts: todas las transiciones válidas e inválidas de la máquina de data-model.md (incluidas `PAGO_EN_REVISION`, `aceptarExcepcion` y `rechazarExcepcion`), `estadoEn(ahora)` perezoso y que `PAGO_EN_REVISION` no vence
+- [ ] T026 Escribir src/packages/domain/postulacion/postulacion.test.ts: todas las transiciones válidas e inválidas de la máquina de data-model.md (incluidas `PAGO_EN_REVISION`, `aceptarExcepcion`, `rechazarExcepcion` y `confirmar` desde `VENCIDO` cuando `pagadoEl <= venceEl`), `estadoEn(ahora)` perezoso y que `PAGO_EN_REVISION` no vence
 - [ ] T027 [P] Implementar src/packages/domain/pago/monto.ts y src/packages/domain/pago/referencia-de-pago.ts (hasta que pase T023)
 - [ ] T028 [P] Implementar src/packages/domain/postulacion/numero-de-postulacion.ts y src/packages/domain/perfil/dni.ts (hasta que pase T024)
 - [ ] T029 [P] Implementar src/packages/domain/periodo/periodo-de-ingreso.ts (hasta que pase T025)
@@ -85,12 +89,15 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 
 ### Application: puertos base (contrato primero)
 
-- [ ] T034 [P] Crear src/packages/application/puertos/reloj/puerto.ts y src/packages/application/puertos/reloj/fake.ts (`RelojFijo` con `avanzar(ms)`)
+- [ ] T034 [P] Crear src/packages/application/puertos/reloj/puerto.ts, contrato.ts (casos de contracts/puertos.md), fake.ts (`RelojFijo` con `avanzar(ms)`) y fake.test.ts, que corre el contrato contra el fake
+- [ ] T034b [P] Crear src/packages/infrastructure/reloj/reloj-de-sistema.ts y src/packages/infrastructure/reloj/reloj-de-sistema.test.ts, que corre el contrato de T034 contra el reloj real
 - [ ] T035 [P] Escribir src/packages/application/puertos/repositorio-de-postulaciones/contrato.ts con la función `probarContratoDeRepositorioDePostulaciones(crear)` y los casos de contracts/puertos.md
 - [ ] T036 [P] Escribir src/packages/application/puertos/repositorio-de-periodos/contrato.ts con los casos de contracts/puertos.md (`contarOcupados` y `contarPendientesVigentes` con vencimiento perezoso)
 - [ ] T037 Crear src/packages/application/puertos/repositorio-de-postulaciones/puerto.ts, fake.ts y fake.test.ts (este último corre el contrato de T035 contra el fake)
 - [ ] T038 Crear src/packages/application/puertos/repositorio-de-periodos/puerto.ts, fake.ts y fake.test.ts (corre el contrato de T036)
 - [ ] T039 Renombrar src/packages/application/puertos/repositorio-de-document/ a repositorio-de-documentos/ y repositorio-de-usuarios/ a repositorio-de-perfiles/ (adaptados a `Documento` y `Perfil`), borrar src/packages/application/puertos/repositorio-de-procedure/ y actualizar src/packages/application/index.ts
+- [ ] T039b [P] Escribir src/packages/application/puertos/repositorio-de-documentos/contrato.ts y fake.test.ts (guardar y obtener; obtener uno inexistente da `null`; listar por postulación). Hoy no tienen contrato: es deuda anterior que esta feature salda porque toca el puerto (Principio III)
+- [ ] T039c [P] Escribir src/packages/application/puertos/repositorio-de-perfiles/contrato.ts y fake.test.ts (obtener por id y por DNI; inexistente da `null`)
 - [ ] T040 Crear src/packages/application/casos-de-uso/actor.ts (`Actor` con `perfilId`, `rol` e `institucionId`, más `exigirRol(actor, ...roles)`) y el error `NoAutorizado` en src/packages/application/casos-de-uso/errores.ts
 
 ### Infrastructure: adaptadores base
@@ -101,16 +108,17 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 - [ ] T044 Implementar src/packages/infrastructure/supabase/repositorio-de-postulaciones.ts (recibe un `SupabaseClient` por constructor; `guardarTransicion` es un `update` condicionado a `.eq('estado', antes.estado)`, y si actualiza 0 filas devuelve `conflicto`)
 - [ ] T045 Implementar src/packages/infrastructure/supabase/repositorio-de-periodos.ts
 - [ ] T046 Crear src/packages/infrastructure/supabase/repositorio-de-postulaciones.contrato.test.ts y src/packages/infrastructure/supabase/repositorio-de-periodos.contrato.test.ts (corren los contratos de T035 y T036 contra los adaptadores, con `describe.skipIf(!process.env.SUPABASE_TEST_URL)`)
-- [ ] T047 Actualizar los exports de src/packages/infrastructure/index.ts
+- [ ] T047 Actualizar los exports de src/packages/infrastructure/index.ts (incluido `RelojDeSistema`)
 
 ### Web: raíz de composición
 
-- [ ] T048 Crear src/apps/web/lib/supabase/servidor.ts (`createServerClient` de `@supabase/ssr` con las cookies de Next, research R3)
-- [ ] T049 Reescribir src/apps/web/composition-root.ts como `crearDependencias()` por request: adaptadores de Supabase con el cliente de la sesión, un reloj de sistema, y los fakes que se mantienen para documentos y perfiles
+- [ ] T047b Crear src/apps/web/config/entorno.ts: schema Zod de `NEXT_PUBLIC_SUPABASE_URL` (URL), `NEXT_PUBLIC_SUPABASE_ANON_KEY` (string no vacío) y `SUPABASE_SERVICE_ROLE_KEY` (opcional, salvo en la ruta del webhook). Falla al arrancar si falta una variable o es inválida (Principio IV). Nadie más en `apps/web` lee `process.env` directamente
+- [ ] T048 Crear src/apps/web/lib/supabase/servidor.ts (`createServerClient` de `@supabase/ssr` con las cookies de Next y las variables de T047b, research R3)
+- [ ] T049 Reescribir src/apps/web/composition-root.ts como `crearDependencias()` por request: adaptadores de Supabase con el cliente de la sesión, `RelojDeSistema` (T034b), y los fakes que se mantienen para documentos y perfiles
 - [ ] T050 [P] Crear src/apps/web/http/respuesta.ts (respuesta uniforme `{ success, data | error }` y mapeo de los errores del dominio a HTTP según contracts/api-http.md)
 - [ ] T051 [P] Crear src/apps/web/http/actor.ts (arma el `Actor` desde la sesión y el perfil; si no hay sesión, 401)
 - [ ] T052 [P] Crear src/apps/web/config/institucion.ts (etiquetas visibles por rol, "Secretaría TUP" y "Director de la TUP", y marca de la institución; Principio VIII)
-- [ ] T053 Borrar src/apps/web/app/api/procedure/ y adaptar src/apps/web/app/api/document/ y src/apps/web/app/api/users/ a los puertos renombrados, sin cambiar su comportamiento
+- [ ] T053 Borrar src/apps/web/app/api/procedure/ y adaptar src/apps/web/app/api/document/ y src/apps/web/app/api/users/ a los puertos renombrados, sin cambiar su comportamiento. Abrir un issue de deuda: esas rutas llaman a los repositorios sin caso de uso ni autorización (Principio VII; hoy no exponen datos reales porque usan fakes), y referenciarlo en un comentario de cada route.ts
 
 **Checkpoint**: la base se reconstruye con `db reset`, `pnpm test` pasa (dominio y contratos contra los fakes) y los
 contratos de Postulaciones y Períodos pasan contra Supabase local.
@@ -129,8 +137,8 @@ base); al acreditar su pago queda `VACANTE_CONFIRMADA` y la ocupación da 1; si 
 
 > Se escriben PRIMERO y tienen que FALLAR antes de implementar.
 
-- [ ] T054 [P] [US1] Escribir src/packages/domain/postulacion/evaluar-pago.test.ts: las 8 reglas de la tabla de data-model.md, en orden (incluido el caso "tardío y sin cupo" → `FUERA_DE_PLAZO`)
-- [ ] T055 [P] [US1] Escribir src/packages/application/puertos/registro-de-pagos/contrato.ts: idempotencia, duplicado en paralelo, **último cupo en paralelo** (`Promise.all`: exactamente un `REGISTRADO` y un `CONFLICTO`), precondición de estado, `REVISION` y `NO_IMPUTAR` sin efectos sobre la Postulación
+- [ ] T054 [P] [US1] Escribir src/packages/domain/postulacion/evaluar-pago.test.ts: las 8 reglas de la tabla de data-model.md, en orden (incluidos "tardío y sin cupo" → `FUERA_DE_PLAZO`, y "pagó a tiempo pero se informó después del vencimiento" → `CONFIRMAR` con `estadoEsperado` igual al estado **persistido**)
+- [ ] T055 [P] [US1] Escribir src/packages/application/puertos/registro-de-pagos/contrato.ts: idempotencia, duplicado en paralelo, **último cupo en paralelo** (`Promise.all`: exactamente un `REGISTRADO` y un `CONFLICTO`), precondición de estado, **estado persistido vs. efectivo** y **confirmar desde `VENCIDO`** (los dos casos de contracts/puertos.md), y `REVISION` y `NO_IMPUTAR` sin efectos sobre la Postulación
 - [ ] T056 [P] [US1] Escribir src/packages/application/puertos/registro-de-cargas/contrato.ts (`cerrar` persiste el resumen, `listar` ordena por fecha y no mezcla instituciones)
 - [ ] T057 [P] [US1] Escribir src/packages/application/casos-de-uso/acreditar-pago.test.ts: `CONFIRMAR`; `DUPLICADO`; `CONFLICTO` → reintento → `REVISION(SIN_CUPO)`; 3 conflictos → error; un rol distinto de `TESORERIA` → `NoAutorizado`; imputación por número con DNI que no coincide; DNI ambiguo
 - [ ] T058 [P] [US1] Escribir src/packages/application/casos-de-uso/importar-informe-de-pagos.test.ts (resumen por categoría; reimportar da todo `duplicados`, SC-002)
@@ -223,12 +231,14 @@ M y N − K; bajar el total por debajo de K falla.
 
 - [ ] T092 [P] [US3] Escribir src/packages/application/casos-de-uso/crear-periodo.test.ts y src/packages/application/casos-de-uso/modificar-periodo.test.ts (roles; `CuposPorDebajoDeConfirmadas`)
 - [ ] T093 [P] [US3] Escribir src/packages/application/casos-de-uso/consultar-ocupacion.test.ts (ocupados, pendientes vigentes sin las vencidas, libres, y exceso mostrado como "52 / 50")
+- [ ] T093b [P] [US3] Escribir src/packages/application/casos-de-uso/listar-periodos-abiertos.test.ts (solo los de la institución del actor y abiertos según el reloj; sin actor → `NoAutorizado`)
 
 ### Implementation for User Story 3
 
 - [ ] T094 [US3] Implementar src/packages/application/casos-de-uso/crear-periodo.ts y src/packages/application/casos-de-uso/modificar-periodo.ts (hasta que pase T092)
 - [ ] T095 [US3] Implementar src/packages/application/casos-de-uso/consultar-ocupacion.ts (hasta que pase T093)
-- [ ] T096 [US3] Crear src/apps/web/http/esquemas/periodos.ts, src/apps/web/app/api/periodos/route.ts (GET y POST), src/apps/web/app/api/periodos/[id]/route.ts (PATCH) y src/apps/web/app/api/periodos/[id]/ocupacion/route.ts
+- [ ] T095b [US3] Implementar src/packages/application/casos-de-uso/listar-periodos-abiertos.ts (hasta que pase T093b)
+- [ ] T096 [US3] Crear src/apps/web/http/esquemas/periodos.ts, src/apps/web/app/api/periodos/route.ts (GET con `ListarPeriodosAbiertos` y POST), src/apps/web/app/api/periodos/[id]/route.ts (PATCH) y src/apps/web/app/api/periodos/[id]/ocupacion/route.ts
 - [ ] T097 [US3] Crear la gestión de períodos en src/apps/web/app/personal/periodos/page.tsx (alta y edición, más la ocupación por período)
 
 **Checkpoint**: los períodos se gestionan desde la app y ya no dependen del seed.
@@ -260,8 +270,8 @@ un `signUp` sin DNI falla.
 
 - [ ] T101 [P] Actualizar src/supabase/README.md (las migraciones nuevas, cómo correr `pnpm test:contratos` contra la base local, y el seed con las cuentas de personal)
 - [ ] T102 [P] Actualizar src/packages/domain/postulacion/README.md, src/packages/domain/pago/README.md y src/packages/infrastructure/supabase/README.md con el modelo final
-- [ ] T103 Correr las puertas de calidad de la CI desde `src/`: `pnpm lint`, `pnpm typecheck` y `pnpm test` (Principio IV: sin `any`; la regla de límites entre capas)
-- [ ] T104 Recorrer specs/001-postulacion-plazo-cupos/quickstart.md completo (secciones 1 a 5) y adjuntar la salida de la sección 3 (contratos contra Supabase local) al PR del adaptador
+- [ ] T103 Verificar que las puertas de calidad de la CI (las de la tarjeta "Config de Vitest y CI") pasan en el PR: `pnpm lint`, `pnpm typecheck` y `pnpm test` (Principio IV: sin `any`; la regla de límites entre capas)
+- [ ] T104 Recorrer specs/001-postulacion-plazo-cupos/quickstart.md completo (secciones 1 a 5), medir que importar un informe de unas 200 filas tarda menos de 30 s (meta de plan.md) y adjuntar la salida de la sección 3 (contratos contra Supabase local) al PR del adaptador
 - [ ] T105 Coordinar con el autor del PR 76 su cierre en favor de los PRs de esta feature (comentario en el PR que enlace a specs/001-postulacion-plazo-cupos/spec.md)
 
 ---
@@ -272,7 +282,9 @@ un `signUp` sin DNI falla.
 
 - **Setup (fase 1)**: T001 y T002 bloquean T017 (el backfill de períodos). Las tareas de ADR (T006 a T010) son
   independientes del código.
-- **Foundational (fase 2)**: depende de T003 a T005 y T011 a T014. Bloquea todas las historias.
+- **Foundational (fase 2)**: depende de T003 a T005 y T013 a T015. Las tareas de base de datos (T016 a T022) no
+  necesitan Vitest. **Desde T023 (dominio) en adelante, depende de la tarjeta "Config de Vitest y CI" mergeada.**
+  Bloquea todas las historias.
 - **US1 (fase 3)**: depende de la fase 2. Es el MVP.
 - **US2 (fase 4)**: depende de la fase 2. No depende de US1 para probarse (los tests usan fakes sembrados), pero el
   recorrido de punta a punta las combina.
@@ -293,8 +305,8 @@ un `signUp` sin DNI falla.
 ### Parallel Opportunities
 
 - Fase 1: T006, T007, T008 y T010 (ADRs y docs); T013, T014 y T015 (dependencias).
-- Fase 2: los tests del dominio T023 a T025 entre sí, y las implementaciones T027 a T029, T031 y T032; los
-  contratos T035 y T036; T050 a T052.
+- Fase 2: los tests del dominio T023 a T025 entre sí, y las implementaciones T027 a T029, T031 y T032; T034 y
+  T034b; los contratos T035, T036, T039b y T039c; T050 a T052.
 - Una vez terminada la fase 2: **US1, US3 y US4 se pueden hacer en paralelo** entre distintos integrantes. US2
   también, en paralelo con US1. US5 espera a US1.
 
@@ -333,8 +345,9 @@ T063 registro-de-cargas (puerto + fake)
 |---|---|---|
 | A. ADRs y docs | T006 a T010 | **doble** (cambian la máquina de estados y un puerto) |
 | B. Base | T001 a T005, T016 a T022 | uno |
-| C. Herramientas + dominio base | T011 a T015, T023 a T033 | **doble** (domain) |
-| D. Puertos base + adaptadores + web base | T034 a T053 | **doble** (puertos) |
+| — | **Tarjeta "Config de Vitest y CI"** (fuera de esta feature) | según la tarjeta |
+| C. Dependencias + dominio base | T013 a T015, T023 a T033 | **doble** (domain) |
+| D. Puertos base + adaptadores + web base | T034 a T053 (incluye T034b, T039b, T039c y T047b) | **doble** (puertos) |
 | E. US1 | T054 a T073 | **doble** (puerto nuevo) |
 | F. US2 | T074 a T082 | uno |
 | G. US5 | T083 a T091 | **doble** (cambia un puerto) |
@@ -342,7 +355,8 @@ T063 registro-de-cargas (puerto + fake)
 | I. US4 | T098 a T100 | uno |
 | J. Cierre | T101 a T105 | uno |
 
-El PR B se puede mergear antes que el C: el esquema nuevo no rompe nada porque la app todavía usa fakes.
+El PR B se puede mergear antes que el C: el esquema nuevo no rompe nada porque la app todavía usa fakes. Entre el
+B y el C va la tarjeta de Vitest y CI, así que desde el primer test del dominio la CI ya bloquea.
 
 ---
 

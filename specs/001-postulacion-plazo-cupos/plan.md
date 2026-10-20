@@ -20,22 +20,23 @@ en español con RLS, y concurrencia optimista mediante una RPC que **garantiza**
 
 **Primary Dependencies**: Next.js 16.4.1 y React 19.3.1 (`apps/web`). A agregar: `@supabase/supabase-js` (en
 `infrastructure`), `@supabase/ssr` (en `web`), `zod` (en `web` e `infrastructure`; ya existe en la rama
-`develop-landing`, conviene alinear la versión) y `vitest` (devDependency). Las versiones exactas se fijan al
+`develop-landing`, conviene alinear la versión). `vitest`, su configuración y el workflow de CI **los aporta la
+tarjeta "Config de Vitest y CI"**, que es una dependencia previa del incremento 2. Las versiones exactas se fijan al
 instalar (research R3).
 
 **Storage**: Supabase, PostgreSQL 17 (`src/supabase/config.toml`). Local con `supabase start`; remoto de
 desarrollo vía la integración de GitHub desde `develop` (ADR-0004).
 
 **Testing**: Vitest. Tests de unidad del dominio y los casos de uso con fakes (sin red ni base), y suites de
-contrato (`contrato.ts`, patrón ya previsto en `eslint.config.mjs`) contra el fake (CI) y contra Supabase local
-(requisito del PR del adaptador).
+contrato (`contrato.ts`, patrón ya previsto en `eslint.config.mjs`) contra el fake (en la CI que agrega la tarjeta
+de Vitest y CI) y contra Supabase local (requisito del PR del adaptador).
 
 **Target Platform**: Vercel (app) + Supabase Cloud (datos).
 
 **Project Type**: aplicación web, monorepo pnpm con capas hexagonales en `src/`.
 
 **Performance Goals**: no son críticos. Entre 100 y 160 inscripciones por ciclo y un informe diario. Importar un
-informe de unas 200 filas en menos de 30 s.
+informe de unas 200 filas en menos de 30 s (se mide en T104).
 
 **Constraints**: concurrencia correcta sobre el último cupo (cero sobreventas no autorizadas); idempotencia total
 de las acreditaciones; sin `pg_cron`; sin `service_role` fuera del webhook; migraciones mergeadas inmutables.
@@ -51,13 +52,14 @@ puertos más `Reloj`.
 |---|---|---|
 | **I. Hexagonal con límites físicos** | Reglas, máquina de estados y `evaluarPago` en `packages/domain`. Puertos y casos de uso en `application`. Adaptador de Supabase y tipos generados en `infrastructure`. `apps/web` es la raíz de composición. Las RPC **verifican** precondiciones y no deciden (contracts/rpc.md). La regla de límites ya existe en `eslint.config.mjs`. | ✅ |
 | **II. Pago acreditado = vacante; máquina explícita** | Máquina de estados en el dominio con transiciones que lanzan `TransicionInvalida`. Las excepciones (fuera de plazo, sin cupo) **no** rompen la regla: no se acreditan solas, las decide Dirección. Lenguaje ubicuo: `Procedure` pasa a `Postulacion`. | ✅ con ADR (Complexity Tracking) |
-| **III. Fakes y contratos** | Cada puerto tiene `fake.ts` y `contrato.ts`; el contrato corre contra el fake y contra Supabase local; el caso del último cupo en paralelo está incluido. | ✅ (en CI corre solo contra el fake, research R4) |
-| **IV. TS estricto y Zod en los bordes** | Zod en los route handlers, el formulario de registro y la lectura de las respuestas de las RPC en el adaptador. Ninguno en `domain`. Sin `any`. | ✅ |
+| **III. Fakes y contratos** | **Cada** puerto, incluidos `Reloj` y los renombrados `RepositorioDeDocumentos` y `RepositorioDePerfiles`, tiene `fake.ts` y `contrato.ts`; el contrato corre contra el fake y contra Supabase local; el caso del último cupo en paralelo está incluido. | ✅ |
+| **IV. TS estricto y Zod en los bordes** | Zod en los route handlers, el formulario de registro, las **variables de entorno** (`apps/web/config/entorno.ts`) y la lectura de las respuestas de las RPC en el adaptador. Ninguno en `domain`. Sin `any`. | ✅ |
 | **V. Integración solo por archivo; Pagos360 detrás de un puerto** | `ImportarInformeDePagos` recibe filas ya validadas; el parser del archivo y el webhook quedan como adaptadores futuros (research R9). Sin acceso a SysAdmin ni a SysAcad. | ✅ |
 | **VI. MVP sin overengineering** | Sin scheduler, contador ni lista de espera. Instituciones: tabla mínima, sin administración. | ⚠️ instituciones va con ADR (Complexity Tracking) |
 | **VII. Seguridad** | Autorización en los casos de uso y RLS como segunda barrera (el JWT del usuario en el adaptador). Trigger de registro sin rol desde la metadata. `REVOKE` en todas las `SECURITY DEFINER`. Esquema solo por migraciones. | ✅ |
 | **VIII. Identidad institucional** | Roles por función (`SECRETARIA`, `DIRECCION`); las etiquetas "Secretaría TUP" y "Director de la TUP" van en un único punto de configuración de `apps/web`. | ✅ |
 | **Flujo: cambios en domain y puertos** | Cambia la máquina de estados y el puerto `RepositorioDeProcedure`: **doble aprobación + ADR**. | ⚠️ requiere 3 ADR (abajo) |
+| **Flujo: puertas de calidad en CI** | Hoy el repo **no tiene CI** en ninguna rama. Las puertas (`tsc`, ESLint con la regla de límites, Vitest) las agrega la tarjeta "Config de Vitest y CI", que se mergea **antes** del incremento 2. Hasta entonces, el incremento 1 (solo SQL) se valida a mano (T022). | ⚠️ depende de la tarjeta |
 
 **Gate**: PASA, con las justificaciones de Complexity Tracking y los ADR como entregables de esta feature.
 
@@ -105,10 +107,12 @@ src/
 │   │   ├── casos-de-uso/       un archivo por caso de uso + *.test.ts
 │   │   └── index.ts
 │   └── infrastructure/
+│       ├── reloj/              reloj-de-sistema.ts (+ su test contra el contrato de Reloj)
 │       └── supabase/           cliente (tipos), un adaptador por puerto, mapeadores, *.contrato.test.ts
 ├── apps/web/
 │   ├── composition-root.ts     arma los adaptadores por request, con el cliente de la sesión
 │   ├── config/institucion.ts   etiquetas de roles y marca (Principio VIII)
+│   ├── config/entorno.ts       variables de entorno validadas con Zod (Principio IV)
 │   ├── http/                   schemas Zod + mapeo de errores a HTTP
 │   └── app/api/                postulaciones/, periodos/, pagos/ (se elimina procedure/)
 └── supabase/
@@ -143,8 +147,9 @@ Todas nuevas, incrementales sobre `init_schema` + `enable_rls`. Cada una lleva s
 | # | PR | Contenido | Depende de |
 |---|---|---|---|
 | 0 | ADRs | ADR-0005 (excepciones de vacante: Dirección decide), ADR-0006 (instituciones, modifica la decisión del ADR-0002), ADR-0007 (renombre Procedure → Postulación). Actualizar `overview.md` con `PAGO_EN_REVISION` | — |
-| 1 | Base | Las 6 migraciones + seed + borrar las del PR 76. Validación: quickstart §1 y §4 | 0 |
-| 2 | Dominio | Vitest en el workspace; entidades, value objects, máquina de estados, `evaluarPago`, con tests | 0 |
+| 1 | Base | Las migraciones de la fundación + seed + borrar las del PR 76. Validación: quickstart §1 y §4 | 0 |
+| — | **Tarjeta "Config de Vitest y CI"** (fuera de esta feature) | Vitest en el workspace (scripts `test` y `test:contratos`, proyectos `unidad` y `contratos`) y el workflow con lint, typecheck y test | — |
+| 2 | Dominio | Entidades, value objects, máquina de estados, `evaluarPago`, con tests | 0 y la tarjeta |
 | 3 | Application | Puertos, fakes, `contrato.ts`, casos de uso con tests; se borra `RepositorioDeProcedure` | 2 |
 | 4 | Adaptador | `infrastructure/supabase` + los contratos contra la base local (quickstart §3) | 1, 3 |
 | 5 | Web | `@supabase/ssr`, raíz de composición por request, route handlers con Zod, `config/institucion.ts`; se borra `api/procedure` | 4 |

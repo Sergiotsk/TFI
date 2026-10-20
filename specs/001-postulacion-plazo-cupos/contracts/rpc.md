@@ -27,9 +27,10 @@ Reglas comunes a todas las `SECURITY DEFINER`:
    `{"resultado": "DUPLICADO", "pago_id": ...}` y no hace nada más.
 2. Si `decision` es `CONFIRMAR` o `REVISION`: `SELECT ... FOR UPDATE` sobre el período de la Postulación, y después
    sobre la Postulación.
-3. Precondiciones: el estado de la Postulación es `estado_esperado`. Si `CONFIRMAR`, `ocupados < total_cupos`.
+3. Precondiciones: el estado **persistido** de la Postulación es igual a `estado_esperado` (no se calcula el
+   vencimiento perezoso acá: eso es del dominio). Si `CONFIRMAR`, `ocupados < total_cupos`.
    Si alguna falla, `RAISE` interno con rollback, y devuelve `{"resultado": "CONFLICTO"}`.
-4. Aplica: `CONFIRMAR` → Postulación `VACANTE_CONFIRMADA` y pago `ACREDITADO`; `REVISION` → Postulación
+4. Aplica: `CONFIRMAR` (desde `PAGO_PENDIENTE` o `VENCIDO`) → Postulación `VACANTE_CONFIRMADA` y pago `ACREDITADO`; `REVISION` → Postulación
    `PAGO_EN_REVISION` con el motivo y pago `A_DECIDIR`; `NO_IMPUTAR` → pago `NO_IMPUTADO` con el motivo.
 5. Devuelve `{"resultado": "REGISTRADO", "pago_id": ...}`.
 

@@ -32,6 +32,8 @@ Verificaciones rápidas en el SQL editor de Studio (rol `postgres`):
 
 ## 2. Tests (sin red ni base)
 
+> Los scripts `test` y `test:contratos` los agrega la tarjeta "Config de Vitest y CI" (research R4).
+
 ```bash
 pnpm test                        # Vitest: dominio + casos de uso + contratos contra los fakes
 ```

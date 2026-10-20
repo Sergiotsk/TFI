@@ -188,9 +188,10 @@ confirmada y la ocupación supera el total.
   fecha de nacimiento, sexo) se validan en el borde antes del registro. Si falta alguno, el registro falla: nunca
   se completan con valores inventados (vacíos o la fecha de hoy).
 - **FR-009b**: Si el usuario cambia su email en la autenticación, el email del perfil MUST quedar sincronizado.
-- **FR-010**: Perfiles, Postulaciones y períodos MUST pertenecer a una institución (se mantiene la tabla de
-  instituciones del PR 76), justificado con un ADR que modifique la decisión del ADR-0002.
-- **FR-011**: No se MUST poder entrar en `PAGO_PENDIENTE` en un período cerrado o sin cupos libres.
+- **FR-010**: Perfiles, Postulaciones y períodos MUST pertenecer a una institución, directamente o a través de su
+  período (se mantiene la tabla de instituciones del PR 76), justificado con un ADR que modifique la decisión del
+  ADR-0002.
+- **FR-011**: El sistema MUST NOT permitir entrar en `PAGO_PENDIENTE` en un período cerrado o sin cupos libres.
 - **FR-012**: Un pago fuera de plazo o sin cupo MUST NOT acreditarse automáticamente: la Postulación pasa a
   `PAGO_EN_REVISION`, el pago queda `A_DECIDIR` con su motivo (`FUERA_DE_PLAZO` o `SIN_CUPO`) y el caso aparece en
   el panel de Dirección. Solo el rol `DIRECCION` MUST poder aceptarlo o rechazarlo, y cada decisión MUST registrar

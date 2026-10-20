@@ -57,6 +57,7 @@ stateDiagram-v2
     [*] --> PREINSCRIPTO: crear
     PREINSCRIPTO --> PAGO_PENDIENTE: iniciarPago (período abierto y con cupos libres)
     PAGO_PENDIENTE --> VACANTE_CONFIRMADA: confirmar (pago en plazo, con cupo)
+    VENCIDO --> VACANTE_CONFIRMADA: confirmar (pagadoEl <= venceEl: pagó a tiempo, se informó tarde)
     PAGO_PENDIENTE --> VENCIDO: estadoEn(ahora) con ahora > venceEl (perezoso)
     PAGO_PENDIENTE --> PAGO_EN_REVISION: pasarARevision(SIN_CUPO | FUERA_DE_PLAZO)
     VENCIDO --> PAGO_EN_REVISION: pasarARevision(FUERA_DE_PLAZO)
@@ -84,11 +85,19 @@ evalúan en este orden:
 | 3 | `monto < periodo.montoMatricula` | `NO_IMPUTAR(MONTO_INSUFICIENTE)` | `NO_IMPUTADO` |
 | 4 | La Postulación ya está en `VACANTE_CONFIRMADA` o posterior, o en `PAGO_EN_REVISION` | `NO_IMPUTAR(YA_TIENE_PAGO)` | `NO_IMPUTADO` (pago doble, para que Tesorería lo devuelva) |
 | 5 | La Postulación está en `PREINSCRIPTO` (nunca inició el pago) | `NO_IMPUTAR(SIN_PAGO_INICIADO)` | `NO_IMPUTADO` |
-| 6 | `pagadoEl > venceEl` (o el estado efectivo es `VENCIDO`) | `REVISION(FUERA_DE_PLAZO)` | `A_DECIDIR` |
+| 6 | `pagadoEl > venceEl` | `REVISION(FUERA_DE_PLAZO)` | `A_DECIDIR` |
 | 7 | `ocupados >= totalCupos` | `REVISION(SIN_CUPO)` | `A_DECIDIR` |
 | 8 | Si no se cumple ninguna de las anteriores | `CONFIRMAR` | `ACREDITADO` |
 
 El orden de 6 antes que 7 cubre el caso borde "tardío **y** sin cupo" (se registra `FUERA_DE_PLAZO`).
+
+El estado **efectivo** (`estadoEn(ahora)`) no participa de la regla 6: lo único que cuenta es `pagadoEl` contra
+`venceEl`. Una Postulación que hoy se ve `VENCIDO`, pero cuyo pago tiene fecha dentro del plazo, se **confirma**
+(supuesto de la spec: cuenta la fecha de pago, no la de carga). Por eso existe la transición
+`VENCIDO → VACANTE_CONFIRMADA`.
+
+La decisión que se le pasa al puerto lleva el estado **persistido** de la Postulación (el que leyó el repositorio),
+no el efectivo (ver contracts/puertos.md, `estadoEsperado`).
 
 Antes de evaluar, la idempotencia: si `ReferenciaDePago` ya existe, el resultado es `DUPLICADO` y no se escribe
 nada (SC-002).
@@ -156,7 +165,8 @@ RESTRICT`, `estado estado_postulacion NOT NULL DEFAULT 'PREINSCRIPTO'`, `vence_e
 `monto_centavos bigint NOT NULL CHECK (> 0)`, `pagado_el timestamptz NOT NULL`,
 `registrado_el timestamptz NOT NULL DEFAULT now()`, `estado estado_pago NOT NULL`, `motivo_revision?`,
 `motivo_no_imputado?`, `postulacion_id uuid? → postulaciones RESTRICT`, `carga_id uuid? → cargas_de_informe`,
-`dni_informado?`, `numero_informado?`, timestamps.
+`dni_informado?`, `numero_informado?`, timestamps. `dni_informado` es un dato personal (Ley 25.326): su plazo de
+conservación queda atado al `TODO(RETENCION_DATOS)` de la constitución y se registra en el ADR-0006.
 - `UNIQUE (proveedor, referencia_externa)`: la idempotencia (FR-006).
 - `CHECK`: `ACREDITADO`, `A_DECIDIR` y `DEVUELTO` requieren `postulacion_id`; `A_DECIDIR` requiere
   `motivo_revision`; `NO_IMPUTADO` requiere `motivo_no_imputado`.

@@ -14,7 +14,7 @@ actuales, con el error tipado.
 | `GET /api/postulaciones/mias` | `ConsultarPostulacion` | `ASPIRANTE` | — |
 | `GET /api/postulaciones/:id` | `ConsultarPostulacion` | la propia o el personal | `NoAutorizado` → 403 |
 | `POST /api/postulaciones/:id/iniciar-pago` | `IniciarPago` | `ASPIRANTE` | `TransicionInvalida` → 409, `SinCuposParaIniciar` → 409 |
-| `GET /api/periodos` | listar abiertos | todos | — |
+| `GET /api/periodos` | `ListarPeriodosAbiertos` | cualquier usuario autenticado | — |
 | `POST /api/periodos` / `PATCH /api/periodos/:id` | `CrearPeriodo` / `ModificarPeriodo` | `SECRETARIA`, `DIRECCION` | `CuposPorDebajoDeConfirmadas` → 409 |
 | `GET /api/periodos/:id/ocupacion` | `ConsultarOcupacion` | el personal | — |
 | `POST /api/pagos/acreditaciones` `{ pagos: PagoInformado[] }` | `ImportarInformeDePagos` | `TESORERIA` | — (el resumen informa por fila) |

@@ -37,7 +37,9 @@ GitHub aplica solo lo que entra a `develop`, así que ninguna llegó al remoto. 
 objetos inútiles y una migración (`new_schema`) que falla al aplicarse.
 
 **Verificación previa a implementar**: confirmar con el autor del PR 76 que nadie aplicó esas migraciones con
-`db push` al remoto (`supabase migration list` contra el remoto).
+`db push` al remoto. Como la contraseña de la base no se reparte (ADR-0004), lo verifica quien administra el
+proyecto en el dashboard de Supabase (Database → Migrations), o con una consulta de solo lectura a
+`supabase_migrations.schema_migrations`.
 
 ## R2. Concurrencia por el último cupo
 
@@ -93,8 +95,14 @@ datos únicos es mucho más rápido que resetear la base, y permite correr tests
 **Alternatives considered**: `db reset` antes de cada archivo (lento, entre 10 y 20 s); pgTAP para las RPC (es otro
 lenguaje de tests y la regla del Principio III es la suite de contrato del puerto, no tests del SQL aislado).
 
-**Riesgo**: la CI hoy no levanta Supabase. Para el MVP, la suite contra Supabase corre local y es requisito del PR
-del adaptador (el reviewer la corre o se adjunta la salida). Habilitar Supabase en CI queda como mejora.
+**CI**: hoy el repo **no tiene CI** en ninguna rama (verificado en `develop`, `main` y `develop-landing`). La
+configuración de Vitest y el workflow (lint, typecheck, test) los aporta la tarjeta **"Config de Vitest y CI"**, que
+se mergea antes del incremento de dominio. Esta feature le pide a esa tarjeta: el script `test` (proyecto
+`unidad`: `packages/**/*.test.ts` sin los `*.contrato.test.ts`) y el script `test:contratos` (proyecto
+`contratos`: `packages/infrastructure/**/*.contrato.test.ts`).
+
+**Riesgo**: aun con CI, la CI no levanta Supabase. La suite contra Supabase corre local y es requisito del PR del
+adaptador (el reviewer la corre o se adjunta la salida). Habilitar Supabase en CI queda como mejora.
 
 ## R5. Vencimiento perezoso y consultas
 
