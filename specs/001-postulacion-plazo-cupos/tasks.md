@@ -97,7 +97,7 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 - [ ] T038 Crear src/packages/application/puertos/repositorio-de-periodos/puerto.ts, fake.ts y fake.test.ts (corre el contrato de T036)
 - [ ] T039 Renombrar src/packages/application/puertos/repositorio-de-document/ a repositorio-de-documentos/ y repositorio-de-usuarios/ a repositorio-de-perfiles/ (adaptados a `Documento` y `Perfil`), borrar src/packages/application/puertos/repositorio-de-procedure/ y actualizar src/packages/application/index.ts
 - [ ] T039b [P] Escribir src/packages/application/puertos/repositorio-de-documentos/contrato.ts y fake.test.ts (guardar y obtener; obtener uno inexistente da `null`; listar por postulación). Hoy no tienen contrato: es deuda anterior que esta feature salda porque toca el puerto (Principio III)
-- [ ] T039c [P] Escribir src/packages/application/puertos/repositorio-de-perfiles/contrato.ts y fake.test.ts (obtener por id y por DNI; inexistente da `null`)
+- [ ] T039c [P] Escribir src/packages/application/puertos/repositorio-de-perfiles/contrato.ts y fake.test.ts, con los métodos que existen hoy en el puerto (`obtenerTodos`, `obtenerPorId`, `obtenerPorRol`, `guardar`; inexistente da `null`). La búsqueda por DNI no va acá: es `RepositorioDePostulaciones.buscarPendientesPorDni`
 - [ ] T040 Crear src/packages/application/casos-de-uso/actor.ts (`Actor` con `perfilId`, `rol` e `institucionId`, más `exigirRol(actor, ...roles)`) y el error `NoAutorizado` en src/packages/application/casos-de-uso/errores.ts
 
 ### Infrastructure: adaptadores base
@@ -107,16 +107,17 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 - [ ] T043 [P] Crear src/packages/infrastructure/supabase/mapeadores/postulacion.ts y src/packages/infrastructure/supabase/mapeadores/periodo.ts (fila a entidad, validando cada fila con Zod)
 - [ ] T044 Implementar src/packages/infrastructure/supabase/repositorio-de-postulaciones.ts (recibe un `SupabaseClient` por constructor; `guardarTransicion` es un `update` condicionado a `.eq('estado', antes.estado)`, y si actualiza 0 filas devuelve `conflicto`)
 - [ ] T045 Implementar src/packages/infrastructure/supabase/repositorio-de-periodos.ts
-- [ ] T046 Crear src/packages/infrastructure/supabase/repositorio-de-postulaciones.contrato.test.ts y src/packages/infrastructure/supabase/repositorio-de-periodos.contrato.test.ts (corren los contratos de T035 y T036 contra los adaptadores, con `describe.skipIf(!process.env.SUPABASE_TEST_URL)`)
+- [ ] T045b Implementar src/packages/infrastructure/supabase/repositorio-de-perfiles.ts con al menos `obtenerPorId` y `obtenerPorRol` (lectura; el alta la hace el trigger de T018). Lo usa T051 para armar el `Actor`: la autorización de los casos de uso **no** puede correr contra un fake (Principio VII, primera barrera)
+- [ ] T046 Crear src/packages/infrastructure/supabase/repositorio-de-postulaciones.contrato.test.ts, src/packages/infrastructure/supabase/repositorio-de-periodos.contrato.test.ts y src/packages/infrastructure/supabase/repositorio-de-perfiles.contrato.test.ts (corren los contratos de T035, T036 y T039c contra los adaptadores, con `describe.skipIf(!process.env.SUPABASE_TEST_URL)`)
 - [ ] T047 Actualizar los exports de src/packages/infrastructure/index.ts (incluido `RelojDeSistema`)
 
 ### Web: raíz de composición
 
 - [ ] T047b Crear src/apps/web/config/entorno.ts: schema Zod de `NEXT_PUBLIC_SUPABASE_URL` (URL), `NEXT_PUBLIC_SUPABASE_ANON_KEY` (string no vacío) y `SUPABASE_SERVICE_ROLE_KEY` (opcional, salvo en la ruta del webhook). Falla al arrancar si falta una variable o es inválida (Principio IV). Nadie más en `apps/web` lee `process.env` directamente
 - [ ] T048 Crear src/apps/web/lib/supabase/servidor.ts (`createServerClient` de `@supabase/ssr` con las cookies de Next y las variables de T047b, research R3)
-- [ ] T049 Reescribir src/apps/web/composition-root.ts como `crearDependencias()` por request: adaptadores de Supabase con el cliente de la sesión, `RelojDeSistema` (T034b), y los fakes que se mantienen para documentos y perfiles
+- [ ] T049 Reescribir src/apps/web/composition-root.ts como `crearDependencias()` por request: adaptadores de Supabase con el cliente de la sesión, `RelojDeSistema` (T034b), el adaptador de perfiles (T045b) y el fake que se mantiene solo para documentos
 - [ ] T050 [P] Crear src/apps/web/http/respuesta.ts (respuesta uniforme `{ success, data | error }` y mapeo de los errores del dominio a HTTP según contracts/api-http.md)
-- [ ] T051 [P] Crear src/apps/web/http/actor.ts (arma el `Actor` desde la sesión y el perfil; si no hay sesión, 401)
+- [ ] T051 [P] Crear src/apps/web/http/actor.ts (arma el `Actor` desde la sesión y el perfil **real**, con el adaptador de T045b; si no hay sesión, 401; si no hay perfil, 403)
 - [ ] T052 [P] Crear src/apps/web/config/institucion.ts (etiquetas visibles por rol, "Secretaría TUP" y "Director de la TUP", y marca de la institución; Principio VIII)
 - [ ] T053 Borrar src/apps/web/app/api/procedure/ y adaptar src/apps/web/app/api/document/ y src/apps/web/app/api/users/ a los puertos renombrados, sin cambiar su comportamiento. Abrir un issue de deuda: esas rutas llaman a los repositorios sin caso de uso ni autorización (Principio VII; hoy no exponen datos reales porque usan fakes), y referenciarlo en un comentario de cada route.ts
 

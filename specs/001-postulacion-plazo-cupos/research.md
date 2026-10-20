@@ -107,7 +107,9 @@ adaptador (el reviewer la corre o se adjunta la salida). Habilitar Supabase en C
 ## R5. Vencimiento perezoso y consultas
 
 **Decision**: la Postulación expone `estadoEn(ahora)`, que devuelve `VENCIDO` si el estado persistido es
-`PAGO_PENDIENTE` y `ahora > vence_el`. Los casos de uso siempre usan `estadoEn(reloj.ahora())`. El estado
+`PAGO_PENDIENTE` y `ahora > vence_el`. Los casos de uso usan `estadoEn(reloj.ahora())` para consultar y para
+transicionar, **salvo** la evaluación de un pago, que se decide por `pagadoEl` contra `vence_el` (regla 6 de
+data-model.md) y le pasa al puerto el estado **persistido**. El estado
 `VENCIDO` se **persiste** solo cuando un caso de uso toca esa Postulación (por ejemplo, un reintento o un pago).
 Las consultas de ocupación no se ven afectadas, porque solo cuentan `VACANTE_CONFIRMADA` y posteriores.
 

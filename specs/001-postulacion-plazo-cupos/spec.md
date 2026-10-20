@@ -30,8 +30,12 @@ se verifica que la Postulación queda confirmada y que los cupos ocupados pasan 
 2. **Given** un pago ya acreditado, **When** el mismo pago se informa otra vez (mismo proveedor y misma referencia
    externa, por ejemplo en un informe recargado), **Then** no se acredita de nuevo, no se ocupa otro cupo y la
    operación se informa como ya procesada, no como error.
-3. **Given** una Postulación en `PREINSCRIPTO`, `VENCIDO` o `VACANTE_CONFIRMADA`, **When** se intenta acreditarle un
-   pago, **Then** la transición se rechaza por inválida (ver Edge Cases sobre el pago tardío).
+3. **Given** una Postulación en `PREINSCRIPTO` o `VACANTE_CONFIRMADA`, **When** llega un pago para ella, **Then**
+   el pago no confirma ninguna vacante: queda `NO_IMPUTADO` con su motivo (nunca inició el pago, o ya tenía un
+   pago) para que Tesorería lo revise.
+4. **Given** una Postulación que se ve como `VENCIDO`, **When** llega un pago con fecha **dentro** del plazo
+   (pagó a tiempo y se informó tarde), **Then** pasa a `VACANTE_CONFIRMADA` si hay cupo. Si la fecha de pago es
+   posterior al vencimiento, va a revisión de Dirección (User Story 5).
 
 ---
 
@@ -165,6 +169,8 @@ confirmada y la ocupación supera el total.
 
 - **FR-001**: El ciclo de vida de la Postulación MUST seguir la máquina de estados del overview, ampliada con
   `PAGO_EN_REVISION` (`PREINSCRIPTO → PAGO_PENDIENTE → VACANTE_CONFIRMADA | VENCIDO`;
+  `VENCIDO → VACANTE_CONFIRMADA` cuando la fecha de pago está dentro del plazo;
+  `VENCIDO → PAGO_PENDIENTE` como reintento;
   `PAGO_PENDIENTE | VENCIDO → PAGO_EN_REVISION → VACANTE_CONFIRMADA | VENCIDO`;
   `VACANTE_CONFIRMADA → ESPERANDO_DOCUMENTACION`), y rechazar las transiciones inválidas. Hay que actualizar el
   diagrama de `docs/architecture/overview.md`.
@@ -173,7 +179,8 @@ confirmada y la ocupación supera el total.
 - **FR-003**: Al pasar a `PAGO_PENDIENTE`, la Postulación MUST registrar una fecha de vencimiento propia, calculada
   con un plazo configurable.
 - **FR-004**: Una Postulación en `PAGO_PENDIENTE` cuyo vencimiento ya pasó MUST tratarse como `VENCIDO` en toda
-  consulta y decisión (vencimiento perezoso), y persistirse como tal cuando un caso de uso la modifique.
+  consulta y decisión (vencimiento perezoso), y persistirse como tal cuando un caso de uso la modifique. **Excepción**:
+  la evaluación de un pago se decide por la fecha de pago, no por el estado del momento en que se informa.
 - **FR-005**: Los cupos ocupados de un período MUST derivarse de las Postulaciones en `VACANTE_CONFIRMADA` (o
   posterior) y MUST NOT superar el total, salvo por una aceptación explícita de Dirección (FR-012).
 - **FR-006**: Acreditar el mismo pago (mismo proveedor y misma referencia externa) más de una vez MUST ser

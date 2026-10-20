@@ -82,7 +82,8 @@ Con un período de 2 cupos y un plazo de 3 días, y tres aspirantes (A, B y C):
 5. Se vuelve a importar el mismo informe. El resumen de la carga da todo `duplicados` y no cambia nada (SC-002).
 6. Dirección acepta el caso de C. C queda `VACANTE_CONFIRMADA`, la ocupación da 3 / 2 y queda registrada la
    decisión (SC-007).
-7. Con el reloj después del vencimiento, un aspirante E pendiente se consulta como `VENCIDO`. Si después llega su
+7. Con el reloj después del vencimiento, un aspirante E pendiente se consulta como `VENCIDO`. Si después llega un
+   pago suyo **con fecha posterior al vencimiento** (si la fecha estuviera dentro del plazo, se confirmaría), su
    pago, queda `PAGO_EN_REVISION` con `FUERA_DE_PLAZO`. Dirección lo rechaza: E vuelve a `VENCIDO` y el pago
    queda `DEVUELTO`, visible para Tesorería.
 8. Un pago con un número de Postulación existente pero un DNI que no coincide queda `NO_IMPUTADO`
