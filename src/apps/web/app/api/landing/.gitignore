@@ -1,3 +1,0 @@
-includes/config.local.php
-storage/*
-!storage/.gitkeep
