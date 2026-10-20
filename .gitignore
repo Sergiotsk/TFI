@@ -16,3 +16,5 @@ next-env.d.ts
 # Secretos: nunca se suben (constitución, Principio VII)
 .env*
 !.env.example
+
+/supabase/.temp
