@@ -3,6 +3,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { 
   ClipboardCheck, 
   Mail, 
@@ -74,20 +77,34 @@ export default function InscripcionPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-background text-foreground">
+    <div className="relative min-h-screen flex flex-col justify-between text-foreground">
+      {/* Capa de Fondo Fija (Cubre toda la pantalla detrás del contenido) */}
+      <div className="fixed inset-0 -z-10 pointer-events-none select-none">
+        <Image
+          src="/fondo-utn.jpg"
+          alt="Fachada UTN Haedo"
+          fill
+          priority
+          className="object-cover object-center opacity-90"
+        />
+        {/* Overlay tenue para mantener la nitidez y los colores de la foto */}
+        <div className="absolute inset-0 bg-background/15" />
+      </div>
+
       <HeaderInstitucional />
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground">
-            <ClipboardCheck className="h-4 w-4" /> PASO PREVIO · IDENTIFICACIÓN
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+        <div className="flex items-center justify-between mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent text-accent-foreground text-xs font-bold rounded-full shadow-xs">
+            <ClipboardCheck className="w-4 h-4" /> PASO PREVIO · IDENTIFICACIÓN
           </div>
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground bg-background/80 px-2 py-0.5 rounded-md border border-border">
             Requisito administrativo obligatorio
           </span>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-md sm:p-10">
+        {/* Tarjeta del Formulario */}
+        <div className="bg-card/95 backdrop-blur-md rounded-2xl border border-border p-6 sm:p-10 shadow-xl">
           <div className="mb-6 border-b border-border pb-6">
             <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
               Carga de datos
@@ -99,76 +116,73 @@ export default function InscripcionPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Nombre y Apellido */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="nombre" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+                <label htmlFor="nombre" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                   <span>Nombre/s *</span>
                   <span className="text-[10px] font-normal text-muted-foreground">Como figura en tu DNI</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   id="nombre"
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleChange}
                   placeholder="Ej: Lucas Martín"
-                  className={`w-full rounded-xl border px-4 py-3 text-sm text-foreground transition outline-none placeholder:text-muted-foreground ${
-                    errores.nombre ? 'border-destructive bg-destructive/10 focus:ring-2 focus:ring-destructive' : 'border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary'
-                  }`}
+                  className={errores.nombre ? 'border-destructive bg-destructive/10' : ''}
                 />
-                {errores.nombre && <p className="mt-1 text-xs text-destructive">{errores.nombre}</p>}
+                {errores.nombre && <p className="text-destructive text-xs mt-1">{errores.nombre}</p>}
               </div>
 
               <div>
-                <label htmlFor="apellido" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+                <label htmlFor="apellido" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                   <span>Apellido/s *</span>
                   <span className="text-[10px] font-normal text-muted-foreground">Completos</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   id="apellido"
                   name="apellido"
                   value={formData.apellido}
                   onChange={handleChange}
                   placeholder="Ej: Rossi"
-                  className={`w-full rounded-xl border px-4 py-3 text-sm text-foreground transition outline-none placeholder:text-muted-foreground ${
-                    errores.apellido ? 'border-destructive bg-destructive/10 focus:ring-2 focus:ring-destructive' : 'border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary'
-                  }`}
+                  className={errores.apellido ? 'border-destructive bg-destructive/10' : ''}
                 />
-                {errores.apellido && <p className="mt-1 text-xs text-destructive">{errores.apellido}</p>}
+                {errores.apellido && <p className="text-destructive text-xs mt-1">{errores.apellido}</p>}
               </div>
             </div>
 
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+              <label htmlFor="email" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                 <span>Correo electrónico *</span>
                 <span className="text-[10px] font-normal text-muted-foreground">Aquí recibirás comprobantes y notificaciones</span>
               </label>
               <div className="relative">
-                <input
+                <Input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="correo@ejemplo.com"
-                  className={`w-full rounded-xl border py-3 pr-4 pl-10 text-sm text-foreground transition outline-none placeholder:text-muted-foreground ${
-                    errores.email ? 'border-destructive bg-destructive/10 focus:ring-2 focus:ring-destructive' : 'border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary'
-                  }`}
+                  className={`pl-10 ${errores.email ? 'border-destructive bg-destructive/10' : ''}`}
                 />
-                <Mail className="absolute top-3.5 left-3.5 h-4 w-4 text-muted-foreground" />
+                <Mail className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
-              {errores.email && <p className="mt-1 text-xs text-destructive">{errores.email}</p>}
+              {errores.email && <p className="text-destructive text-xs mt-1">{errores.email}</p>}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* DNI y Género */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="dni" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+                <label htmlFor="dni" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                   <span>DNI *</span>
                   <span className="text-[10px] font-normal text-muted-foreground">Sin puntos ni espacios</span>
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     type="text"
                     id="dni"
                     name="dni"
@@ -176,17 +190,15 @@ export default function InscripcionPage() {
                     onChange={handleChange}
                     placeholder="Ej: 43829114"
                     maxLength={8}
-                    className={`w-full rounded-xl border py-3 pr-4 pl-10 text-sm text-foreground transition outline-none placeholder:text-muted-foreground ${
-                      errores.dni ? 'border-destructive bg-destructive/10 focus:ring-2 focus:ring-destructive' : 'border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary'
-                    }`}
+                    className={`pl-10 ${errores.dni ? 'border-destructive bg-destructive/10' : ''}`}
                   />
-                  <IdCard className="absolute top-3.5 left-3.5 h-4 w-4 text-muted-foreground" />
+                  <IdCard className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
-                {errores.dni && <p className="mt-1 text-xs text-destructive">{errores.dni}</p>}
+                {errores.dni && <p className="text-destructive text-xs mt-1">{errores.dni}</p>}
               </div>
 
               <div>
-                <label htmlFor="genero" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+                <label htmlFor="genero" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                   <span>Género / Sexo Registral *</span>
                 </label>
                 <select
@@ -194,8 +206,8 @@ export default function InscripcionPage() {
                   name="genero"
                   value={formData.genero}
                   onChange={handleChange}
-                  className={`w-full rounded-xl border px-4 py-3 text-sm text-foreground transition outline-none ${
-                    errores.genero ? 'border-destructive bg-destructive/10 focus:ring-2 focus:ring-destructive' : 'border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary'
+                  className={`h-9 w-full rounded-md border px-3 py-1 text-sm text-foreground shadow-xs transition outline-none ${
+                    errores.genero ? 'border-destructive bg-destructive/10' : 'border-input bg-card'
                   }`}
                 >
                   <option value="" disabled>Seleccionar</option>
@@ -203,69 +215,68 @@ export default function InscripcionPage() {
                   <option value="Femenino">Femenino</option>
                   <option value="No binario / Otro">No binario / Otro</option>
                 </select>
-                {errores.genero && <p className="mt-1 text-xs text-destructive">{errores.genero}</p>}
+                {errores.genero && <p className="text-destructive text-xs mt-1">{errores.genero}</p>}
               </div>
             </div>
 
+            {/* Teléfono */}
             <div>
-              <label htmlFor="telefono" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+              <label htmlFor="telefono" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                 <span>Teléfono celular *</span>
                 <span className="text-[10px] font-normal text-muted-foreground">Con código de área, sin 0 ni 15</span>
               </label>
-              <div className={`flex overflow-hidden rounded-xl border shadow-xs transition focus-within:ring-2 focus-within:ring-primary ${
-                errores.telefono ? 'border-destructive' : 'border-input'
-              }`}>
-                <span className="inline-flex select-none items-center border-r border-input bg-muted px-4 text-sm font-bold text-foreground">
+              <div className="flex">
+                <span className="inline-flex items-center px-3 text-sm font-bold border border-r-0 border-input rounded-l-md bg-muted text-foreground">
                   +54
                 </span>
-                <input
+                <Input
                   type="tel"
                   id="telefono"
                   name="telefono"
                   value={formData.telefono}
                   onChange={handleChange}
                   placeholder="11 6543-9821"
-                  className="w-full bg-card px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  className={`rounded-l-none ${errores.telefono ? 'border-destructive bg-destructive/10' : ''}`}
                 />
               </div>
-              <span className="mt-1 flex items-center text-[11px] text-muted-foreground">
-                <PhoneCall className="mr-1 h-3 w-3 text-emerald-600" /> Se enviarán recordatorios de vencimiento de vacante y avisos académicos.
+              <span className="text-[11px] text-muted-foreground mt-1 flex items-center">
+                <PhoneCall className="w-3 h-3 text-emerald-600 mr-1" /> Se enviarán recordatorios de vencimiento de vacante y avisos académicos.
               </span>
-              {errores.telefono && <p className="mt-1 text-xs text-destructive">{errores.telefono}</p>}
+              {errores.telefono && <p className="text-destructive text-xs mt-1">{errores.telefono}</p>}
             </div>
 
+            {/* Dirección */}
             <div>
-              <label htmlFor="direccion" className="mb-1.5 flex items-center justify-between text-xs font-bold text-foreground">
+              <label htmlFor="direccion" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                 <span>Dirección *</span>
                 <span className="text-[10px] font-normal text-muted-foreground">Calle, altura, piso/dpto y localidad</span>
               </label>
               <div className="relative">
-                <input
+                <Input
                   type="text"
                   id="direccion"
                   name="direccion"
                   value={formData.direccion}
                   onChange={handleChange}
                   placeholder="Ej: Av. Rivadavia 16240, Haedo"
-                  className={`w-full rounded-xl border py-3 pr-4 pl-10 text-sm text-foreground transition outline-none placeholder:text-muted-foreground ${
-                    errores.direccion ? 'border-destructive bg-destructive/10 focus:ring-2 focus:ring-destructive' : 'border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary'
-                  }`}
+                  className={`pl-10 ${errores.direccion ? 'border-destructive bg-destructive/10' : ''}`}
                 />
-                <MapPin className="absolute top-3.5 left-3.5 h-4 w-4 text-muted-foreground" />
+                <MapPin className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
-              {errores.direccion && <p className="mt-1 text-xs text-destructive">{errores.direccion}</p>}
+              {errores.direccion && <p className="text-destructive text-xs mt-1">{errores.direccion}</p>}
             </div>
 
-            <div className="space-y-3 border-t border-border pt-4">
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/40 p-3.5 transition hover:bg-muted/70">
+            {/* Checkboxes de Términos */}
+            <div className="pt-4 border-t border-border space-y-3">
+              <label className="flex items-start gap-3 p-3.5 bg-muted/40 hover:bg-muted/70 rounded-xl border border-border cursor-pointer transition">
                 <input
                   type="checkbox"
                   name="aceptaTerminosFacturacion"
                   checked={formData.aceptaTerminosFacturacion}
                   onChange={handleChange}
-                  className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                  className="mt-1 h-4 w-4 text-primary rounded border-input focus:ring-primary"
                 />
-                <span className="text-xs leading-relaxed text-foreground">
+                <span className="text-xs text-foreground leading-relaxed">
                   Declaro bajo juramento que los datos ingresados son fidedignos y autorizo a la{' '}
                   <strong>Universidad Tecnológica Nacional - Facultad Regional Haedo</strong> a emitir la
                   factura legal y generar mi legajo de postulante para la{' '}
@@ -273,46 +284,48 @@ export default function InscripcionPage() {
                 </span>
               </label>
               {errores.aceptaTerminosFacturacion && (
-                <p className="text-xs text-destructive">{errores.aceptaTerminosFacturacion}</p>
+                <p className="text-destructive text-xs">{errores.aceptaTerminosFacturacion}</p>
               )}
 
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/40 p-3.5 transition hover:bg-muted/70">
+              <label className="flex items-start gap-3 p-3.5 bg-muted/40 hover:bg-muted/70 rounded-xl border border-border cursor-pointer transition">
                 <input
                   type="checkbox"
                   name="aceptaReglamento"
                   checked={formData.aceptaReglamento}
                   onChange={handleChange}
-                  className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                  className="mt-1 h-4 w-4 text-primary rounded border-input focus:ring-primary"
                 />
-                <span className="text-xs leading-relaxed text-foreground">
+                <span className="text-xs text-foreground leading-relaxed">
                   Entiendo que al presionar <strong>Siguiente</strong> pasaré a la lectura de los requisitos
                   académicos, condiciones de la seña de reserva de vacante y métodos de pago.
                 </span>
               </label>
               {errores.aceptaReglamento && (
-                <p className="text-xs text-destructive">{errores.aceptaReglamento}</p>
+                <p className="text-destructive text-xs">{errores.aceptaReglamento}</p>
               )}
             </div>
 
-            <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-4 sm:flex-row">
+            {/* Botón Shadcn */}
+            <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Lock className="h-4 w-4 text-muted-foreground" /> Tus datos fiscales están protegidos (Ley 25.326).
+                <Lock className="w-4 h-4 text-muted-foreground" /> Tus datos fiscales están protegidos (Ley 25.326).
               </div>
-              <button
+              <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full min-w-[220px] cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-sm font-bold text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-70 sm:w-auto"
+                className="w-full sm:w-auto min-w-[220px]"
               >
                 <span>{isSubmitting ? 'Iniciando...' : 'Siguiente'}</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </form>
         </div>
 
-        <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-xl border border-accent bg-accent/30 p-4 text-xs text-accent-foreground sm:flex-row">
+        {/* Banner de Facturación */}
+        <div className="mt-6 p-4 rounded-xl border border-accent bg-card/90 backdrop-blur-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-accent-foreground shadow-xs">
           <div className="flex items-center gap-2.5">
-            <Info className="h-5 w-5 text-primary" />
+            <Info className="w-5 h-5 text-primary" />
             <span>
               <strong>Facturación Oficial:</strong> UTN Facultad Regional Haedo · CUIT 30-54667232-4 · IVA Exento.
             </span>

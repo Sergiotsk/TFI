@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Settings, ShieldCheck, User } from 'lucide-react'
+import Image from 'next/image'
+import { ShieldCheck, User } from 'lucide-react'
 import { Stepper } from './stepper'
 
 interface HeaderProps {
@@ -12,18 +13,15 @@ export function HeaderInstitucional({ pasoActual, dniPostulante }: HeaderProps) 
     <header className="sticky top-0 z-50 h-20 border-b border-border bg-card shadow-xs">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center space-x-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
-              <Settings className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="text-xl font-black tracking-tight text-foreground">
-                UTN<span className="text-secondary">.FRH</span>
-              </span>
-              <span className="block text-xs font-bold tracking-widest text-primary">
-                HAEDO · TUP
-              </span>
-            </div>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/UTNLogo.svg"
+              alt="Logo UTN Facultad Regional Haedo"
+              width={140}
+              height={32}
+              className="h-7 w-auto object-contain"
+              priority
+            />
           </div>
           <div className="mx-2 hidden h-6 w-px bg-border md:block" />
           <div className="hidden text-xs text-muted-foreground md:block">

@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CreditCard, QrCode, Building2, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react'
+import { CreditCard, QrCode, Building2, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface FormularioPagoProps {
   idPostulacion: string
@@ -104,17 +106,15 @@ export function FormularioPago({ idPostulacion }: FormularioPagoProps) {
           )}
 
           {metodo === 'tarjeta' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <input
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
                 type="text"
                 placeholder="Número de tarjeta"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background"
                 required
               />
-              <input
+              <Input
                 type="text"
                 placeholder="Nombre como figura en la tarjeta"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background"
                 required
               />
             </div>
@@ -123,20 +123,20 @@ export function FormularioPago({ idPostulacion }: FormularioPagoProps) {
       </div>
 
       {/* Botón de Confirmación */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="h-4 w-4 text-emerald-600" />
           <span>Transacción cifrada y protegida por UTN</span>
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={procesando}
-          className="inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-sm text-primary-foreground bg-primary hover:bg-primary/90 transition shadow-xs cursor-pointer disabled:opacity-60"
+          className="w-full sm:w-auto"
         >
-          {procesando ? 'Procesando pago...' : 'Confirmar y Pagar $100.000'}
+          <span>{procesando ? 'Procesando pago...' : 'Confirmar y Pagar $100.000'}</span>
           <ArrowRight className="ml-2 h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </form>
   )

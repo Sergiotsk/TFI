@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
+import { Button } from '@/components/ui/button'
 import { 
   CheckCircle2, 
   Clock, 
@@ -85,22 +86,22 @@ export default function EstadoFinalPage({ params }: PageProps) {
 
           {/* Acciones */}
           <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => window.print()}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-input text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
+              className="w-full sm:w-auto"
             >
-              <Download className="w-4 h-4 text-muted-foreground" />
-              Descargar Constancia en PDF
-            </button>
+              <Download className="w-4 h-4" />
+              <span>Descargar Constancia en PDF</span>
+            </Button>
 
-            <Link
-              href="/"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-xs text-primary-foreground bg-primary hover:bg-primary/90 transition shadow-xs"
-            >
-              <Home className="w-4 h-4" />
-              Volver al Portal Principal
-            </Link>
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/">
+                <Home className="w-4 h-4" />
+                <span>Volver al Portal Principal</span>
+              </Link>
+            </Button>
           </div>
         </div>
 

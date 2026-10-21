@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileCheck, AlertCircle, ArrowRight, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface UploadDocumentosProps {
   idPostulacion: string
@@ -93,14 +94,16 @@ export function UploadDocumentos({ idPostulacion }: UploadDocumentosProps) {
                 <span className="font-medium text-foreground truncate max-w-xs sm:max-w-md">
                   {doc.archivo.name} ({(doc.archivo.size / 1024 / 1024).toFixed(2)} MB)
                 </span>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => handleFileChange(doc.id, null)}
-                  className="text-rose-600 hover:text-rose-800 p-1 cursor-pointer"
+                  className="h-8 w-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
                   title="Eliminar archivo"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             ) : (
               <label className="border-2 border-dashed border-border hover:border-primary/60 rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer bg-background hover:bg-accent/20 transition">
@@ -131,14 +134,14 @@ export function UploadDocumentos({ idPostulacion }: UploadDocumentosProps) {
           {documentos.filter((d) => d.archivo !== null).length} de 3 documentos cargados
         </span>
 
-        <button
+        <Button
           type="submit"
           disabled={!todosCargados || enviando}
-          className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-sm text-primary-foreground bg-primary hover:bg-primary/90 transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto"
         >
-          {enviando ? 'Subiendo documentación...' : 'Confirmar y Finalizar Trámite'}
+          <span>{enviando ? 'Subiendo documentación...' : 'Confirmar y Finalizar Trámite'}</span>
           <ArrowRight className="ml-2 h-4 w-4" />
-        </button>
+        </Button>
       </div>
     </form>
   )
