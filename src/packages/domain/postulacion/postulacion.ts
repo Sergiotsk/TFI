@@ -78,12 +78,13 @@ export class Postulacion {
     return this.con('VACANTE_CONFIRMADA')
   }
 
-  /** PAGO_PENDIENTE → PAGO_EN_REVISION (SIN_CUPO | FUERA_DE_PLAZO); VENCIDO → PAGO_EN_REVISION (FUERA_DE_PLAZO). */
+  /**
+   * PAGO_PENDIENTE | VENCIDO → PAGO_EN_REVISION con el motivo (SIN_CUPO | FUERA_DE_PLAZO).
+   * Desde VENCIDO el diagrama de data-model.md solo dibuja FUERA_DE_PLAZO, pero la regla 7 de `evaluarPago`
+   * puede dar SIN_CUPO para un pago en plazo informado tarde; se admite para que ese pago no se pierda.
+   */
   pasarARevision(motivo: MotivoDeRevision): Postulacion {
     this.exigirEstado(['PAGO_PENDIENTE', 'VENCIDO'], 'pasar a revisión')
-    if (this.estado === 'VENCIDO' && motivo !== 'FUERA_DE_PLAZO') {
-      throw new TransicionInvalida('Desde VENCIDO solo se puede pasar a revisión por FUERA_DE_PLAZO.')
-    }
     return this.con('PAGO_EN_REVISION', this.venceEl, motivo)
   }
 

@@ -236,8 +236,10 @@ describe('Postulacion', () => {
       expect(p.motivoRevision).toBe('FUERA_DE_PLAZO')
     })
 
-    test('VENCIDO con SIN_CUPO no es una transición válida', () => {
-      expect(() => vencida().pasarARevision('SIN_CUPO')).toThrow(TransicionInvalida)
+    test('VENCIDO con SIN_CUPO también pasa a revisión (pagó en plazo, se informó tarde y ya no hay cupo)', () => {
+      // El diagrama de data-model.md solo dibuja FUERA_DE_PLAZO desde VENCIDO, pero la regla 7 de evaluarPago
+      // puede producir REVISION(SIN_CUPO) con estadoEsperado VENCIDO. Se admite para no perder ese pago.
+      expect(vencida().pasarARevision('SIN_CUPO').motivoRevision).toBe('SIN_CUPO')
     })
 
     test('desde PREINSCRIPTO, PAGO_EN_REVISION o vacantes no es válida', () => {
