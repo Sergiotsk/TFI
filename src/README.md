@@ -12,6 +12,8 @@ cd src
 pnpm install      # instala todo el workspace
 pnpm typecheck    # chequea los tipos de todos los paquetes
 pnpm lint         # ESLint: sin `any` y con los límites entre capas
+pnpm test         # Vitest, proyecto `unidad`: dominio, casos de uso, fakes y web (sin red ni base)
+pnpm test:contratos  # Vitest, proyecto `contratos`: suites de contrato contra Supabase local
 ```
 
 En el editor, los errores de lint aparecen con la extensión **ESLint** (`dbaeumer.vscode-eslint`), que el repo

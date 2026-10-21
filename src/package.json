@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "pnpm --filter web dev",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run --project unidad",
+    "test:contratos": "vitest run --project contratos --passWithNoTests"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
@@ -17,6 +19,7 @@
     "eslint-plugin-import-x": "4.17.1",
     "globals": "17.13.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.71.2"
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5"
   }
 }
