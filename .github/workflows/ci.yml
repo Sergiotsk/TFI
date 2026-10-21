@@ -1,0 +1,46 @@
+# CI (T14): las puertas de calidad de CONTRIBUTING en cada PR.
+# - typecheck: tsc estricto en todos los paquetes.
+# - lint: ESLint, que incluye la regla de límites entre capas (Principio I) y prohíbe `any` (Principio IV).
+# - test: Vitest, proyecto `unidad` (sin red ni base).
+# El ruleset de `develop` exige que el job "Calidad" pase para poder mergear.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+# Un push nuevo al mismo PR cancela la corrida anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: Calidad
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v5
+
+      # Toma la versión exacta de `packageManager` en src/package.json.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: src/package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: src/.nvmrc
+          cache: pnpm
+          cache-dependency-path: src/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
