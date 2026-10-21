@@ -149,8 +149,10 @@ quedar un usuario de Auth sin perfil).
 ## R8. Conversión de los enums y de los datos existentes
 
 **Decision**: crear los enums nuevos, convertir las columnas con `ALTER COLUMN ... TYPE ... USING (CASE ...)` y
-eliminar los viejos. Mapeo de estados: `INICIADO → PREINSCRIPTO`, `EN PROCESO → PAGO_PENDIENTE`,
-`APROBADO → VACANTE_CONFIRMADA`, `RECHAZADO → VENCIDO`. Roles: `INTERESADO → ASPIRANTE`,
+eliminar los viejos. Mapeo de estados: `INICIADO → PREINSCRIPTO`, `EN PROCESO → PREINSCRIPTO`,
+`APROBADO → VACANTE_CONFIRMADA`, `RECHAZADO → VENCIDO`. `EN PROCESO` no va a `PAGO_PENDIENTE` porque una
+Postulación pendiente necesita `vence_el` (CHECK de data-model.md), y estas filas no tienen un plazo real que
+inventarles. Roles: `INTERESADO → ASPIRANTE`,
 `SECRETARIO → SECRETARIA`, `DIRECTOR → DIRECCION`, `ADMIN → TESORERIA`.
 
 **Pendiente de verificar antes de implementar**: `postulaciones.periodo_id` es `NOT NULL`, y las filas existentes
