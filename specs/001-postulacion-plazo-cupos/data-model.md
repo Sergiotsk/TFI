@@ -60,7 +60,7 @@ stateDiagram-v2
     VENCIDO --> VACANTE_CONFIRMADA: confirmar (pagadoEl <= venceEl: pagó a tiempo, se informó tarde)
     PAGO_PENDIENTE --> VENCIDO: estadoEn(ahora) con ahora > venceEl (perezoso)
     PAGO_PENDIENTE --> PAGO_EN_REVISION: pasarARevision(SIN_CUPO | FUERA_DE_PLAZO)
-    VENCIDO --> PAGO_EN_REVISION: pasarARevision(FUERA_DE_PLAZO)
+    VENCIDO --> PAGO_EN_REVISION: pasarARevision(FUERA_DE_PLAZO | SIN_CUPO)
     VENCIDO --> PAGO_PENDIENTE: iniciarPago (reintento, plazo nuevo)
     PAGO_EN_REVISION --> VACANTE_CONFIRMADA: aceptarExcepcion (DIRECCION)
     PAGO_EN_REVISION --> VENCIDO: rechazarExcepcion (DIRECCION)
@@ -75,8 +75,10 @@ Para la ocupación cuentan `VACANTE_CONFIRMADA` **y todos los posteriores**.
 
 ### Evaluación de un pago informado (regla del dominio)
 
-`evaluarPago(pagoInformado, candidata?, periodo, ocupados)` devuelve **una** de estas decisiones. Las reglas se
-evalúan en este orden:
+`evaluarPago(pagoInformado, imputacion, periodo, ocupados)` devuelve **una** de estas decisiones. `imputacion` es
+`{ via: 'NUMERO' | 'DNI', candidatas }`: por dónde buscó el caso de uso y **todas** las Postulaciones que encontró,
+cada una con el DNI de su aspirante (la Postulación no lo guarda). Hacen falta las dos cosas: la lista, para la regla
+1 ("más de una"), y la vía con el DNI, para la regla 2. Las reglas se evalúan en este orden:
 
 | # | Condición | Decisión | Pago queda |
 |---|---|---|---|
@@ -90,6 +92,10 @@ evalúan en este orden:
 | 8 | Si no se cumple ninguna de las anteriores | `CONFIRMAR` | `ACREDITADO` |
 
 El orden de 6 antes que 7 cubre el caso borde "tardío **y** sin cupo" (se registra `FUERA_DE_PLAZO`).
+
+La regla 7 también alcanza a una Postulación persistida en `VENCIDO` que pagó dentro del plazo y se informó tarde:
+la regla 6 no corta, y si ya no hay cupo queda `REVISION(SIN_CUPO)`. Por eso `VENCIDO → PAGO_EN_REVISION` admite
+los dos motivos (es lo que ya aceptan `contracts/puertos.md` y `contracts/rpc.md`).
 
 El estado **efectivo** (`estadoEn(ahora)`) no participa de la regla 6: lo único que cuenta es `pagadoEl` contra
 `venceEl`. Una Postulación que hoy se ve `VENCIDO`, pero cuyo pago tiene fecha dentro del plazo, se **confirma**
