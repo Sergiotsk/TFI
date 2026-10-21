@@ -80,8 +80,8 @@ export class Postulacion {
 
   /**
    * PAGO_PENDIENTE | VENCIDO → PAGO_EN_REVISION con el motivo (SIN_CUPO | FUERA_DE_PLAZO).
-   * Desde VENCIDO el diagrama de data-model.md solo dibuja FUERA_DE_PLAZO, pero la regla 7 de `evaluarPago`
-   * puede dar SIN_CUPO para un pago en plazo informado tarde; se admite para que ese pago no se pierda.
+   * Desde VENCIDO también se admite SIN_CUPO: la regla 7 de `evaluarPago` lo da para un pago en plazo informado
+   * tarde (data-model.md).
    */
   pasarARevision(motivo: MotivoDeRevision): Postulacion {
     this.exigirEstado(['PAGO_PENDIENTE', 'VENCIDO'], 'pasar a revisión')
