@@ -41,6 +41,24 @@ objetos inútiles y una migración (`new_schema`) que falla al aplicarse.
 proyecto en el dashboard de Supabase (Database → Migrations), o con una consulta de solo lectura a
 `supabase_migrations.schema_migrations`.
 
+**Resultado (T001, 2026-10-21)**: consulta de solo lectura por MCP al proyecto `rwnmmsjrhwmjfyqauqww`. El remoto
+está **vacío**: no existe `supabase_migrations.schema_migrations`, no hay tablas ni enums en `public`, no hay
+branches de Supabase y `auth.users` tiene 0 filas. Ninguna migración del PR 76 llegó al remoto, pero **tampoco**
+las de `develop` (`init_schema` y `enable_rls`). Eso contradice lo que supone el ADR-0004 (que la integración de
+GitHub ya aplica lo que entra a `develop`): falta confirmar con el equipo si la integración está conectada y a qué
+rama apunta. El único objeto propio del proyecto es la función `public.rls_auto_enable()` con el event trigger
+`ensure_rls`, que crea Supabase al habilitar "RLS automático" y activa RLS en cada tabla nueva de `public`; es
+compatible con nuestras migraciones, que ya activan RLS en todas las tablas.
+
+**Diferencia con la base local**: los privilegios por defecto del remoto (rol `postgres`, esquema `public`) **no
+exponen** lo nuevo. Las tablas les dan a `anon`, `authenticated` y `service_role` solo `TRUNCATE`, `REFERENCES`,
+`TRIGGER` y `MAINTAIN`; las secuencias y las funciones son solo de `postgres` (sin `EXECUTE` ni para `PUBLIC`). En
+local, en cambio, todo queda expuesto, así que una migración que se apoye en esos valores por defecto pasa en local
+y rompe en el remoto. Toda migración tiene que declarar sus `GRANT`, incluido `GRANT EXECUTE ... TO service_role`
+en las RPC que use el webhook. Se validó reproduciendo en local esos privilegios por defecto y `ensure_rls` con una
+migración temporal (no commiteada): la cadena completa se aplica limpia y pasan 23 pruebas de privilegios, más el
+registro hecho como `supabase_auth_admin` (el rol de Auth).
+
 ## R2. Concurrencia por el último cupo
 
 **Decision**: concurrencia optimista. El caso de uso lee, el dominio decide y el adaptador persiste la decisión
@@ -159,6 +177,11 @@ inventarles. Roles: `INTERESADO → ASPIRANTE`,
 del remoto (datos de prueba) no tienen período. Si el remoto tiene solo datos de prueba, la migración crea un
 período "Migración de datos de prueba" para asignárselo. Vaciar tablas en el remoto **no** se hace sin acuerdo del
 equipo.
+
+**Resultado (T002, 2026-10-21)**: el remoto no tiene tablas ni usuarios (ver R1), así que no hay filas que
+convertir ni roles autoasignados que corregir. Al aplicar la cadena completa sobre la base vacía, el bloque
+defensivo **no** crea el período "Migración de datos de prueba" y el mapeo de enums opera sobre tablas vacías. El
+riesgo de un `ADMIN` autoasignado convertido en `TESORERIA` no existe en este remoto.
 
 **Rationale**: Postgres no permite eliminar valores de un enum (`ALTER TYPE ... DROP VALUE` no existe).
 
