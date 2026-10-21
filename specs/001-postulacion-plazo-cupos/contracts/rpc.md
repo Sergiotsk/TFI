@@ -59,6 +59,7 @@ Eso lo hace el dominio antes de llamar.
 | `crear_perfil_al_registrarse` | `auth.users AFTER INSERT` | Rol `ASPIRANTE`, la única institución activa, y los datos obligatorios desde la metadata (`nombre`, `apellido`, `dni`, `cuil`, `fecha_nacimiento`, `sexo`). Si falta uno, si no se puede convertir o si la institución no es única: `RAISE` (falla el `signUp`). Nunca lee `role` de la metadata. |
 | `sincronizar_email_de_perfil` | `auth.users AFTER UPDATE OF email` | `perfiles.email = NEW.email` |
 | `actualizar_actualizado_el` | todas las tablas con `actualizado_el`, `BEFORE UPDATE` | `NEW.actualizado_el = now()` |
+| `proteger_transiciones_de_postulacion` | `postulaciones BEFORE UPDATE` | Solo para escrituras directas del rol `authenticated` (las RPC corren como otro usuario y no pasan por acá). Permite únicamente `PREINSCRIPTO`/`VENCIDO` → `PAGO_PENDIENTE`, con `vence_el` en el futuro y no mayor a `min(ahora + dias_plazo_pago, cierra_el)` (5 minutos de tolerancia de reloj), y `PAGO_PENDIENTE` → `VENCIDO` si `vence_el` ya pasó y no cambia. Cualquier otra transición: `RAISE`. Existe porque RLS solo ve la fila nueva, no la anterior: sin el guardián, un aspirante podría estirarse el plazo o confirmarse una vacante. **Garantiza**: la decisión sigue en `IniciarPago` y en el vencimiento perezoso |
 
 ## Lo que se elimina
 
