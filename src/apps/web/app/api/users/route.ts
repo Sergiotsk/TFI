@@ -1,35 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { repositorioDeUsuarios } from '@/composition-root'
-import { User } from '@tfi/domain'
+import { repositorioDePerfiles } from '@/composition-root'
 
 export const GET = async (req: NextRequest) => {
-  const role = req.nextUrl.searchParams.get('role')
+  const rol = req.nextUrl.searchParams.get('rol')
 
-  const users = role
-    ? await repositorioDeUsuarios.obtenerPorRol(role)
-    : await repositorioDeUsuarios.obtenerTodos()
+  const perfiles = rol
+    ? await repositorioDePerfiles.obtenerPorRol(rol)
+    : await repositorioDePerfiles.obtenerTodos()
 
-  return NextResponse.json({ success: true, data: users })
+  return NextResponse.json({ success: true, data: perfiles })
 }
 
-export const POST = async (request: Request) => {
-  const body = await request.json()
-  const newUser = new User(
-    String(Date.now()),
-    body.name,
-    body.lastname,
-    body.email,
-    body.password,
-    body.dni,
-    body.cuil,
-    new Date(body.birthdate),
-    body.sex,
-    body.phone,
-    body.address,
-    body.role,
-    body.timestamp,
-    body.verified,
-  )
-  await repositorioDeUsuarios.guardar(newUser)
-  return NextResponse.json({ success: true, data: newUser }, { status: 201 })
-}
+// No hay POST: el perfil lo crea el trigger crear_perfil_al_registrarse, en la
+// misma transacción que el usuario de Supabase Auth. La app no inserta en
+// public.perfiles (ADR-0004 y migración 20261021000300).
