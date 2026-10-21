@@ -1,22 +1,31 @@
 import { describe, expect, it } from 'vitest'
 import type { ServicioDeAutenticacion, DatosDeRegistro } from './puerto'
 
-const DATOS_DE_REGISTRO_VALIDOS: DatosDeRegistro = {
-  email: 'aspirante.test@example.com',
-  contrasena: 'contrasenaSegura123',
-  nombre: 'Ana',
-  apellido: 'García',
-  dni: '30123456',
-  cuil: '27301234569',
-  fechaDeNacimiento: '2000-05-15',
-  sexo: 'F',
-  telefono: '1122334455',
-  direccion: 'Calle Falsa 123',
+const CONTRASENA = 'contrasenaSegura123'
+
+function datosDe(email: string): DatosDeRegistro {
+  return {
+    email,
+    contrasena: CONTRASENA,
+    nombre: 'Ana',
+    apellido: 'García',
+    dni: '30123456',
+    cuil: '27301234569',
+    fechaDeNacimiento: '2000-05-15',
+    sexo: 'F',
+    telefono: '1122334455',
+    direccion: 'Calle Falsa 123',
+  }
 }
 
 export function probarContratoServicioDeAutenticacion(
   crearServicio: () => Promise<ServicioDeAutenticacion> | ServicioDeAutenticacion,
+  opciones: { emailDePrueba?: () => string } = {},
 ) {
+  // Cada test usa un email distinto: contra una base real el mismo usuario no
+  // se puede registrar dos veces.
+  const emailDePrueba = opciones.emailDePrueba ?? (() => 'aspirante.test@example.com')
+
   describe('contrato: ServicioDeAutenticacion', () => {
     it('usuarioAutenticado() devuelve null cuando no hay sesión', async () => {
       const servicio = await crearServicio()
@@ -26,7 +35,7 @@ export function probarContratoServicioDeAutenticacion(
 
     it('registrarAspirante() registra y deja una sesión activa', async () => {
       const servicio = await crearServicio()
-      const resultado = await servicio.registrarAspirante(DATOS_DE_REGISTRO_VALIDOS)
+      const resultado = await servicio.registrarAspirante(datosDe(emailDePrueba()))
       expect(resultado.resultado).toBe('REGISTRADO')
       if (resultado.resultado === 'REGISTRADO') {
         expect(resultado.usuarioId).toBeTruthy()
@@ -44,9 +53,10 @@ export function probarContratoServicioDeAutenticacion(
 
     it('iniciarSesion() devuelve INICIADA con credenciales correctas', async () => {
       const servicio = await crearServicio()
-      await servicio.registrarAspirante(DATOS_DE_REGISTRO_VALIDOS)
+      const email = emailDePrueba()
+      await servicio.registrarAspirante(datosDe(email))
       await servicio.cerrarSesion()
-      const resultado = await servicio.iniciarSesion(DATOS_DE_REGISTRO_VALIDOS.email, DATOS_DE_REGISTRO_VALIDOS.contrasena)
+      const resultado = await servicio.iniciarSesion(email, CONTRASENA)
       expect(resultado.resultado).toBe('INICIADA')
       if (resultado.resultado === 'INICIADA') {
         expect(resultado.usuarioId).toBeTruthy()
@@ -55,10 +65,9 @@ export function probarContratoServicioDeAutenticacion(
 
     it('cerrarSesion() limpia la sesión', async () => {
       const servicio = await crearServicio()
-      await servicio.registrarAspirante(DATOS_DE_REGISTRO_VALIDOS)
+      await servicio.registrarAspirante(datosDe(emailDePrueba()))
       await servicio.cerrarSesion()
       expect(await servicio.usuarioAutenticado()).toBeNull()
     })
   })
 }
-

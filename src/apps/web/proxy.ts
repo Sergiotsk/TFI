@@ -1,6 +1,10 @@
-
 import { NextResponse, type NextRequest } from 'next/server'
-import { crearClienteSupabase } from '@tfi/infrastructure/supabase/servidor'
+import {
+  crearClienteSupabase,
+  type AlmacenDeCookies,
+} from '@tfi/infrastructure/supabase/servidor'
+import { leerEntorno } from '@/config/entorno'
+import { redireccionValida } from '@/lib/redireccion'
 
 const RUTAS_PROTEGIDAS_POR_PREFIJO = ['/panel']
 
@@ -8,61 +12,55 @@ function esRutaProtegida(pathname: string): boolean {
   return RUTAS_PROTEGIDAS_POR_PREFIJO.some((prefijo) => pathname.startsWith(prefijo))
 }
 
-function redireccionValida(destino: string): boolean {
-  if (!destino.startsWith('/')) return false
-  if (destino.startsWith('//')) return false
-  return true
-}
-
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({
+  const entorno = leerEntorno()
+
+  // Las cookies que Supabase escribe (refresh del token) se acumulan aca y se
+  // aplican al final, sobre la respuesta.
+  const cookiesActualizadas: { name: string; value: string; options: object }[] = []
+
+  const almacen: AlmacenDeCookies = {
+    getAll: () => request.cookies.getAll(),
+    setAll: (nuevas) => {
+      cookiesActualizadas.push(...nuevas)
+    },
+  }
+
+  const supabase = crearClienteSupabase(
+    entorno.NEXT_PUBLIC_SUPABASE_URL,
+    entorno.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    almacen,
+  )
+
+  // Una sola llamada: la misma sesion sirve para refrescar el token y para
+  // decidir si la ruta esta protegida.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const pathname = request.nextUrl.pathname
+
+  if (esRutaProtegida(pathname) && !user) {
+    const loginUrl = new URL('/login', request.url)
+    const redirect = request.nextUrl.pathname + request.nextUrl.search
+    if (redireccionValida(redirect)) {
+      loginUrl.searchParams.set('redirect', redirect)
+    }
+    return NextResponse.redirect(loginUrl)
+  }
+
+  for (const { name, value } of cookiesActualizadas) {
+    request.cookies.set(name, value)
+  }
+
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
-  const cookieStore = {
-    getAll() {
-      return request.cookies.getAll()
-    },
-    set(name: string, value: string, options?: { path?: string; domain?: string; maxAge?: number; expires?: Date; httpOnly?: boolean; secure?: boolean; sameSite?: 'lax' | 'strict' | 'none' }) {
-      request.cookies.set({ name, value, ...(options ?? {}) })
-      response = NextResponse.next({
-        request: {
-          headers: request.headers,
-        },
-      })
-      response.cookies.set({ name, value, ...(options ?? {}) })
-    },
-    delete(name: string, options?: { path?: string; domain?: string }) {
-      request.cookies.delete(name)
-      response = NextResponse.next({
-        request: {
-          headers: request.headers,
-        },
-      })
-      response.cookies.delete({ name, ...(options ?? {}) })
-    },
-  }
-
-  const supabase = crearClienteSupabase(cookieStore)
-  await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
-
-  if (esRutaProtegida(pathname)) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      const loginUrl = new URL('/login', request.url)
-      const redirect = request.nextUrl.pathname + request.nextUrl.search
-      if (redireccionValida(redirect)) {
-        loginUrl.searchParams.set('redirect', redirect)
-      }
-      return NextResponse.redirect(loginUrl)
-    }
+  for (const { name, value, options } of cookiesActualizadas) {
+    response.cookies.set({ name, value, ...options })
   }
 
   return response

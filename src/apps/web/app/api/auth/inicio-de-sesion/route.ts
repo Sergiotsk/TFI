@@ -1,6 +1,7 @@
 import { crearCliente } from '@/lib/supabase/servidor'
 import { crearDependencias } from '@/composition-root'
 import { esquemaInicioDeSesion } from '@/http/esquemas/inicio-de-sesion'
+import { detallesDeZod } from '@/http/esquemas/errores'
 import { jsonError, jsonOk } from '@/http/respuesta'
 
 export async function POST(request: Request) {
@@ -9,7 +10,12 @@ export async function POST(request: Request) {
     const parsed = esquemaInicioDeSesion.safeParse(body)
 
     if (!parsed.success) {
-      return jsonError('DATOS_INVALIDOS', 'Los datos ingresados no son válidos', 400)
+      return jsonError(
+        'DATOS_INVALIDOS',
+        'Los datos ingresados no son válidos',
+        400,
+        detallesDeZod(parsed.error),
+      )
     }
 
     const supabase = await crearCliente()
