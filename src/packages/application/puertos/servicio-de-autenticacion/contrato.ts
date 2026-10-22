@@ -3,14 +3,26 @@ import type { ServicioDeAutenticacion, DatosDeRegistro } from './puerto'
 
 const CONTRASENA = 'contrasenaSegura123'
 
+// El DNI y el CUIL son UNIQUE en public.perfiles: si dos registros de la suite
+// usan el mismo, el segundo choca contra el trigger y no se crea el usuario.
+// Cada registro necesita entonces su propia identidad.
+let contadorDeIdentidad = 0
+
+function digitosUnicos(): string {
+  contadorDeIdentidad += 1
+  return `${Date.now().toString().slice(-6)}${contadorDeIdentidad.toString().padStart(2, '0')}`
+}
+
 function datosDe(email: string): DatosDeRegistro {
+  const digitos = digitosUnicos()
+
   return {
     email,
     contrasena: CONTRASENA,
     nombre: 'Ana',
     apellido: 'García',
-    dni: '30123456',
-    cuil: '27301234569',
+    dni: digitos,
+    cuil: `20${digitos}5`,
     fechaDeNacimiento: '2000-05-15',
     sexo: 'F',
     telefono: '1122334455',

@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { describe } from 'vitest'
-import { probarContratoServicioDeAutenticacion } from '@tfi/application'
+import { probarContratoServicioDeAutenticacion } from '@tfi/application/contratos'
 import { ServicioDeAutenticacionSupabase } from './servicio-de-autenticacion'
 import {
   clavePublicaDePrueba,

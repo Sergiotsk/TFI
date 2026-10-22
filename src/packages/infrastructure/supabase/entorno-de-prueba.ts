@@ -16,6 +16,14 @@ export function hayEntornoDePrueba(): boolean {
   )
 }
 
+/**
+ * Los tests que leen public.perfiles directo (los del trigger) necesitan ademas
+ * la clave de servicio: el rol anon no tiene SELECT sobre esa tabla.
+ */
+export function hayEntornoDePruebaConServicio(): boolean {
+  return hayEntornoDePrueba() && Boolean(process.env.SUPABASE_TEST_SERVICE_ROLE_KEY)
+}
+
 export function urlDePrueba(): string {
   return exigir('SUPABASE_TEST_URL')
 }

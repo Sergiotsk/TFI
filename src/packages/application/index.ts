@@ -7,7 +7,6 @@ export type { RepositorioDeDocument } from './puertos/repositorio-de-document/pu
 export { RepositorioDeDocumentFake } from './puertos/repositorio-de-document/fake'
 export type { ServicioDeAutenticacion, DatosDeRegistro, ResultadoDeRegistro, ResultadoDeInicioDeSesion } from './puertos/servicio-de-autenticacion/puerto'
 export { ServicioDeAutenticacionFake } from './puertos/servicio-de-autenticacion/fake'
-export { probarContratoServicioDeAutenticacion } from './puertos/servicio-de-autenticacion/contrato'
 export { RegistrarAspiranteUseCase } from './casos-de-uso/autenticacion/registrar-aspirante'
 export { IniciarSesionUseCase } from './casos-de-uso/autenticacion/iniciar-sesion'
 export { CerrarSesionUseCase } from './casos-de-uso/autenticacion/cerrar-sesion'

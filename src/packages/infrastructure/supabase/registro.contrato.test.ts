@@ -4,7 +4,7 @@ import {
   claveDeServicioDePrueba,
   clavePublicaDePrueba,
   emailDePrueba,
-  hayEntornoDePrueba,
+  hayEntornoDePruebaConServicio,
   urlDePrueba,
 } from './entorno-de-prueba'
 
@@ -26,7 +26,7 @@ const METADATA_COMPLETA = {
 // Requieren SUPABASE_TEST_URL, SUPABASE_TEST_PUBLISHABLE_KEY y
 // SUPABASE_TEST_SERVICE_ROLE_KEY. Ademas el proyecto de prueba necesita la
 // migracion 20261021000300 aplicada y exactamente una institucion activa.
-describe.skipIf(!hayEntornoDePrueba())('contrato: registro con Supabase', () => {
+describe.skipIf(!hayEntornoDePruebaConServicio())('contrato: registro con Supabase', () => {
   it('el rol de la metadata se ignora y queda ASPIRANTE', async () => {
     const anon = clientePublico()
     const admin = clienteDeServicio()
