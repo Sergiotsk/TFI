@@ -86,7 +86,7 @@ cada una con el DNI de su aspirante (la Postulación no lo guarda). Hacen falta 
 | 2 | Vino por número y el DNI informado no coincide | `NO_IMPUTAR(DNI_NO_COINCIDE)` | `NO_IMPUTADO` |
 | 3 | `monto < periodo.montoMatricula` | `NO_IMPUTAR(MONTO_INSUFICIENTE)` | `NO_IMPUTADO` |
 | 4 | La Postulación ya está en `VACANTE_CONFIRMADA` o posterior, o en `PAGO_EN_REVISION` | `NO_IMPUTAR(YA_TIENE_PAGO)` | `NO_IMPUTADO` (pago doble, para que Tesorería lo devuelva) |
-| 5 | La Postulación está en `PREINSCRIPTO` (nunca inició el pago) | `NO_IMPUTAR(SIN_PAGO_INICIADO)` | `NO_IMPUTADO` |
+| 5 | La Postulación está en `PREINSCRIPTO` (nunca inició el pago), o en `VENCIDO` sin `venceEl` (migrada de `RECHAZADO`, research R8) | `NO_IMPUTAR(SIN_PAGO_INICIADO)` | `NO_IMPUTADO` |
 | 6 | `pagadoEl > venceEl` | `REVISION(FUERA_DE_PLAZO)` | `A_DECIDIR` |
 | 7 | `ocupados >= totalCupos` | `REVISION(SIN_CUPO)` | `A_DECIDIR` |
 | 8 | Si no se cumple ninguna de las anteriores | `CONFIRMAR` | `ACREDITADO` |

@@ -178,6 +178,16 @@ describe('evaluarPago', () => {
         postulacionId: 'p-1',
       })
     })
+
+    test('VENCIDO sin venceEl (migrado de RECHAZADO, research R8): NO_IMPUTAR SIN_PAGO_INICIADO', () => {
+      const legacy = new Postulacion('p-1', new NumeroDePostulacion(1), 'asp-1', 'per-1', 'VENCIDO')
+      const imputacion = { via: 'DNI' as const, candidatas: [{ postulacion: legacy, dniDelAspirante: DNI }] }
+      expect(evaluarPago(pago(), imputacion, periodo(), 0)).toEqual({
+        tipo: 'NO_IMPUTAR',
+        motivo: 'SIN_PAGO_INICIADO',
+        postulacionId: 'p-1',
+      })
+    })
   })
 
   describe('regla 6: fuera de plazo', () => {

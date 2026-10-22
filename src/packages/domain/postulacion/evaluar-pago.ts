@@ -70,14 +70,14 @@ export function evaluarPago(
     return { tipo: 'NO_IMPUTAR', motivo: 'YA_TIENE_PAGO', postulacionId }
   }
 
-  // 5. Nunca inició el pago.
-  const estado = postulacion.estado
-  if (estado !== 'PAGO_PENDIENTE' && estado !== 'VENCIDO') {
+  // 5. Nunca inició el pago. Un VENCIDO sin venceEl (migrado de RECHAZADO, research R8) tampoco tuvo plazo.
+  const { estado, venceEl } = postulacion
+  if ((estado !== 'PAGO_PENDIENTE' && estado !== 'VENCIDO') || venceEl === undefined) {
     return { tipo: 'NO_IMPUTAR', motivo: 'SIN_PAGO_INICIADO', postulacionId }
   }
 
   // 6. Pagó después del vencimiento (va antes que el cupo: "tardío y sin cupo" se registra FUERA_DE_PLAZO).
-  if (postulacion.venceEl !== undefined && pago.pagadoEl.getTime() > postulacion.venceEl.getTime()) {
+  if (pago.pagadoEl.getTime() > venceEl.getTime()) {
     return { tipo: 'REVISION', postulacionId, estadoEsperado: estado, motivo: 'FUERA_DE_PLAZO' }
   }
 
