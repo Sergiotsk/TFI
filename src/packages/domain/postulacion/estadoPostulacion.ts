@@ -1,4 +1,4 @@
-export type Estado =
+export type EstadoPostulacion =
   | 'PREINSCRIPTO'
   | 'PAGO_PENDIENTE'
   | 'PAGO_EN_REVISION'

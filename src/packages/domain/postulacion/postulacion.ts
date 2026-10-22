@@ -1,11 +1,11 @@
-import type { Estado } from './estado'
+import type { EstadoPostulacion } from './estadoPostulacion'
 import type { MotivoRevision } from './motivoRevision'
 
-export class Postulaciones {
+export class Postulacion {
   constructor(
     readonly id: string,
     readonly aspiranteId: string,
-    readonly estado: Estado,
+    readonly estado: EstadoPostulacion,
     readonly creadoEl: Date,
     readonly actualizadoEl: Date,
     readonly periodoId: string,
