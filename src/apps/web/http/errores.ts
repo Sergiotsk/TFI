@@ -1,9 +1,10 @@
 import type { NextResponse } from 'next/server'
-import { ConflictoDeEstado, NoAutorizado, NoEncontrado } from '@tfi/application'
+import { ConflictoDeEstado, DatosDuplicados, NoAutorizado, NoEncontrado } from '@tfi/application'
 import {
   CuposPorDebajoDeConfirmadas,
   PeriodoCerrado,
   PostulacionDuplicada,
+  SinCuposParaConfirmar,
   SinCuposParaIniciar,
   TransicionInvalida,
 } from '@tfi/domain'
@@ -20,6 +21,7 @@ export function respuestaDeErrorDePostulacion(error: unknown): NextResponse {
   if (error instanceof NoEncontrado) return jsonError('NO_ENCONTRADO', error.message, 404)
   if (error instanceof PeriodoCerrado) return jsonError('PERIODO_CERRADO', error.message, 409)
   if (error instanceof SinCuposParaIniciar) return jsonError('SIN_CUPOS', error.message, 409)
+  if (error instanceof SinCuposParaConfirmar) return jsonError('SIN_CUPOS', error.message, 409)
   if (error instanceof TransicionInvalida) {
     return jsonError('TRANSICION_INVALIDA', error.message, 409)
   }
@@ -31,6 +33,9 @@ export function respuestaDeErrorDePostulacion(error: unknown): NextResponse {
   }
   if (error instanceof ConflictoDeEstado) {
     return jsonError('CONFLICTO_DE_ESTADO', error.message, 409)
+  }
+  if (error instanceof DatosDuplicados) {
+    return jsonError('DATOS_DUPLICADOS', error.message, 409)
   }
 
   throw error

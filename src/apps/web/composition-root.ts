@@ -5,6 +5,7 @@ import {
   RepositorioDePerfilesSupabase,
   RepositorioDePostulacionesSupabase,
   RepositorioDePeriodosSupabase,
+  AccionesDelPersonalSupabase,
   RelojDeSistema,
   GeneradorDeIdsCrypto,
 } from '@tfi/infrastructure'
@@ -21,6 +22,9 @@ import {
   ListarPeriodosAbiertosUseCase,
   ListarPostulacionesUseCase,
   ModificarPeriodoUseCase,
+  AcreditarPagoManualUseCase,
+  ProrrogarPlazoDePagoUseCase,
+  ActualizarPerfilUseCase,
 } from '@tfi/application'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
@@ -31,6 +35,7 @@ export function crearDependencias(supabase: SupabaseClient) {
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
   const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
   const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
+  const accionesDelPersonal = new AccionesDelPersonalSupabase(supabase, repoPostulaciones)
   const reloj = new RelojDeSistema()
   const generadorDeIds = new GeneradorDeIdsCrypto()
   // Los documentos todavía no tienen adaptador: public.documentos se lee con
@@ -45,6 +50,7 @@ export function crearDependencias(supabase: SupabaseClient) {
     repoPeriodos,
     reloj,
     repoDocumentos,
+    accionesDelPersonal,
     registrarAspirante: new RegistrarAspiranteUseCase(auth),
     iniciarSesion: new IniciarSesionUseCase(auth),
     cerrarSesion: new CerrarSesionUseCase(auth),
@@ -57,6 +63,18 @@ export function crearDependencias(supabase: SupabaseClient) {
     crearPeriodo: new CrearPeriodoUseCase(repoPeriodos, generadorDeIds),
     modificarPeriodo: new ModificarPeriodoUseCase(repoPeriodos),
     listarPeriodosAbiertos: new ListarPeriodosAbiertosUseCase(repoPeriodos, reloj),
+    acreditarPagoManual: new AcreditarPagoManualUseCase(
+      repoPostulaciones,
+      accionesDelPersonal,
+      reloj,
+    ),
+    prorrogarPlazoDePago: new ProrrogarPlazoDePagoUseCase(
+      repoPostulaciones,
+      repoPeriodos,
+      accionesDelPersonal,
+      reloj,
+    ),
+    actualizarPerfil: new ActualizarPerfilUseCase(repoPerfiles),
   }
 }
 

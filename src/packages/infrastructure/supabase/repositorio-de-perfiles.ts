@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { Perfil } from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
+import { DatosDuplicados } from '@tfi/application'
 import type { RepositorioDePerfiles } from '@tfi/application'
 
 interface FilaPerfil {
@@ -62,9 +63,32 @@ export class RepositorioDePerfilesSupabase implements RepositorioDePerfiles {
     return (data as FilaPerfil[]).map(mapearPerfil)
   }
 
-  async guardar(): Promise<void> {
-    // El alta la hace el trigger crear_perfil_al_registrarse. Las escrituras
-    // directas quedan restringidas por RLS y por GRANT (migración 20261021000500).
-    throw new Error('guardar() no está permitido desde el adaptador: el perfil lo crea el trigger')
+  async guardar(perfil: Perfil): Promise<void> {
+    // El alta la hace el trigger crear_perfil_al_registrarse. Acá solo se
+    // actualizan los datos personales: RLS y los GRANT por columna impiden
+    // tocar rol, email, institución o verificado.
+    const { data, error } = await this.supabase
+      .from('perfiles')
+      .update({
+        nombre: perfil.nombre,
+        apellido: perfil.apellido,
+        dni: perfil.dni,
+        cuil: perfil.cuil,
+        fecha_nacimiento: perfil.fechaNacimiento.toISOString().slice(0, 10),
+        sexo: perfil.sexo,
+        telefono: perfil.telefono,
+        direccion: perfil.direccion,
+      })
+      .eq('id', perfil.id)
+      .select('id')
+
+    if (error) {
+      if (error.code === '23505') throw new DatosDuplicados()
+      throw new Error(`No se pudo actualizar el perfil: ${error.message}`)
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('No se pudo actualizar el perfil: la escritura no afectó ninguna fila')
+    }
   }
 }
