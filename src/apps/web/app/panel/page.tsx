@@ -2,18 +2,11 @@ import { redirect } from 'next/navigation'
 import { crearCliente } from '@/lib/supabase/servidor'
 import { crearDependencias } from '@/composition-root'
 import { BotonCerrarSesion } from '@/components/auth/boton-cerrar-sesion'
-import type { Rol } from '@tfi/domain'
+import { ETIQUETAS_DE_ROL, INSTITUCION } from '@/config/institucion'
 
 export const metadata = {
   title: 'Panel',
   description: 'Panel del aspirante y del personal de la facultad.',
-}
-
-const ROLES: Record<Rol, string> = {
-  ASPIRANTE: 'Aspirante',
-  SECRETARIA: 'Secretaría',
-  DIRECCION: 'Dirección',
-  TESORERIA: 'Tesorería',
 }
 
 export default async function PaginaPanel() {
@@ -49,7 +42,7 @@ export default async function PaginaPanel() {
       <div className="w-full max-w-lg">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            UTN FRH
+            {INSTITUCION.nombre}
           </p>
           <h1 className="mt-3 text-xl font-semibold tracking-tight text-foreground">
             {perfil ? `Hola, ${perfil.nombre} ${perfil.apellido}` : 'Panel'}
@@ -59,7 +52,7 @@ export default async function PaginaPanel() {
           </p>
 
           <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-            <Dato etiqueta="Rol" valor={ROLES[actor.rol]} />
+            <Dato etiqueta="Rol" valor={ETIQUETAS_DE_ROL[actor.rol]} />
             {perfil ? <Dato etiqueta="DNI" valor={perfil.dni} /> : null}
             {perfil ? <Dato etiqueta="CUIL" valor={perfil.cuil} /> : null}
             {perfil ? (

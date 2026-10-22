@@ -15,8 +15,16 @@ La autenticación la resuelve Supabase Auth, no un endpoint propio.
   lógica de aplicación, no dos implementaciones.
 - `api/perfiles/**`: lectura de perfiles. Exige sesión y, para listar, un rol del personal
   (secretaría, dirección, tesorería). Un aspirante solo puede leer el suyo.
-- `api/procedure/**` y `api/document/**`: todavía usan los fakes del composition root. Es deuda
-  conocida (T053): no exponen datos reales, pero no tienen autorización.
+- `api/document/**`: lectura de los documentos de las postulaciones. Exige sesión y un rol del
+  personal. La tabla `public.documentos` todavía no tiene adaptador, así que el repositorio es el
+  fake de `@tfi/application`: es deuda conocida y se cierra con la feature de documentación.
 
 Cada route handler es un **adaptador de entrada**: valida con Zod, arma el caso de uso desde la raíz
 de composición (`@/composition-root`) y devuelve la respuesta con `jsonOk` / `jsonError`.
+
+## Rutas que se fueron
+
+- `api/procedure/**`: eliminadas. Modelaban un trámite de aprobación con cuatro estados
+  (`INICIADO`, `EN PROCESO`, `APROBADO`, `RECHAZADO`) que no existen en el negocio: el ciclo de vida
+  real es el de la Postulación (`docs/architecture/overview.md`). La API de postulaciones llega con
+  la feature 001, en `/api/postulaciones` (tarea T081 del spec).

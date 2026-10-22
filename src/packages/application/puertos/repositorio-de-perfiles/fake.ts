@@ -1,4 +1,5 @@
 import { Perfil } from '@tfi/domain'
+import type { Rol } from '@tfi/domain'
 import type { RepositorioDePerfiles } from './puerto'
 
 export class RepositorioDePerfilesFake implements RepositorioDePerfiles {
@@ -91,7 +92,7 @@ export class RepositorioDePerfilesFake implements RepositorioDePerfiles {
     }
   }
 
-  async obtenerPorRol(rol: string): Promise<Perfil[] | null> {
+  async obtenerPorRol(rol: Rol): Promise<Perfil[] | null> {
     return this.perfiles.filter((u) => u.rol === rol)
   }
 
