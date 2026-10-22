@@ -55,6 +55,39 @@ const NUEVO_PERIODO_INICIAL: NuevoPeriodo = {
   montoArs: '94000',
 }
 
+interface PerfilEnEdicion {
+  nombre: string
+  apellido: string
+  dni: string
+  cuil: string
+  fechaNacimiento: string
+  sexo: '' | 'M' | 'F' | 'O'
+  telefono: string
+  direccion: string
+}
+
+const PERFIL_INICIAL: PerfilEnEdicion = {
+  nombre: '',
+  apellido: '',
+  dni: '',
+  cuil: '',
+  fechaNacimiento: '',
+  sexo: '',
+  telefono: '',
+  direccion: '',
+}
+
+interface PerfilDeApi {
+  nombre: string
+  apellido: string
+  dni: string
+  cuil: string
+  fechaNacimiento: string
+  sexo: 'M' | 'F' | 'O'
+  telefono: string | null
+  direccion: string | null
+}
+
 export function PanelDePruebas() {
   const [sesion, setSesion] = useState<Sesion | null>(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
@@ -64,6 +97,7 @@ export function PanelDePruebas() {
 
   const [rolFiltro, setRolFiltro] = useState('')
   const [perfilId, setPerfilId] = useState('')
+  const [perfilEnEdicion, setPerfilEnEdicion] = useState<PerfilEnEdicion>(PERFIL_INICIAL)
 
   const [periodoId, setPeriodoId] = useState('')
   const [periodos, setPeriodos] = useState<Periodo[]>([])
@@ -71,6 +105,7 @@ export function PanelDePruebas() {
   const [periodoEnEdicion, setPeriodoEnEdicion] = useState<PeriodoEnEdicion | null>(null)
 
   const [postulacionId, setPostulacionId] = useState('')
+  const [diasDeProrroga, setDiasDeProrroga] = useState('3')
   const [documentoId, setDocumentoId] = useState('')
   const [filtroAspiranteId, setFiltroAspiranteId] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
@@ -262,6 +297,71 @@ export function PanelDePruebas() {
     return consulta === '' ? '/api/postulaciones' : `/api/postulaciones?${consulta}`
   }
 
+  function editarPerfil<K extends keyof PerfilEnEdicion>(
+    campo: K,
+    valor: PerfilEnEdicion[K],
+  ) {
+    setPerfilEnEdicion((actual) => ({ ...actual, [campo]: valor }))
+  }
+
+  function cambiarSexo(valor: string) {
+    if (valor === '' || valor === 'M' || valor === 'F' || valor === 'O') {
+      editarPerfil('sexo', valor)
+    }
+  }
+
+  function cuerpoDePerfil(): Record<string, unknown> | null {
+    const cuerpo: Record<string, unknown> = {}
+
+    if (perfilEnEdicion.nombre.trim() !== '') cuerpo.nombre = perfilEnEdicion.nombre.trim()
+    if (perfilEnEdicion.apellido.trim() !== '') cuerpo.apellido = perfilEnEdicion.apellido.trim()
+    if (perfilEnEdicion.dni.trim() !== '') cuerpo.dni = perfilEnEdicion.dni.trim()
+    if (perfilEnEdicion.cuil.trim() !== '') cuerpo.cuil = perfilEnEdicion.cuil.trim()
+    if (perfilEnEdicion.fechaNacimiento !== '') {
+      cuerpo.fechaNacimiento = perfilEnEdicion.fechaNacimiento
+    }
+    if (perfilEnEdicion.sexo !== '') cuerpo.sexo = perfilEnEdicion.sexo
+    if (perfilEnEdicion.telefono.trim() !== '') cuerpo.telefono = perfilEnEdicion.telefono.trim()
+    if (perfilEnEdicion.direccion.trim() !== '') {
+      cuerpo.direccion = perfilEnEdicion.direccion.trim()
+    }
+
+    return Object.keys(cuerpo).length === 0 ? null : cuerpo
+  }
+
+  async function cargarPerfilParaEditar() {
+    setOcupado(true)
+    try {
+      const respuesta = await fetch(`/api/perfiles/${perfilId.trim()}`, { cache: 'no-store' })
+      const cuerpo: unknown = await interpretarJson(await respuesta.text())
+
+      if (!respuesta.ok) {
+        setMensaje(mensajeDeError(cuerpo) ?? 'No se pudo cargar el perfil')
+        return
+      }
+
+      const datos = datosDe(cuerpo)
+      if (!esPerfil(datos)) {
+        setMensaje('La respuesta del perfil no tiene el formato esperado')
+        return
+      }
+
+      setPerfilEnEdicion({
+        nombre: datos.nombre,
+        apellido: datos.apellido,
+        dni: datos.dni,
+        cuil: datos.cuil,
+        fechaNacimiento: datos.fechaNacimiento.slice(0, 10),
+        sexo: datos.sexo,
+        telefono: datos.telefono ?? '',
+        direccion: datos.direccion ?? '',
+      })
+      setMensaje(null)
+    } finally {
+      setOcupado(false)
+    }
+  }
+
   const sinSesion = sesion === null
   const deshabilitado = sinSesion || ocupado
   const puedeGestionarPeriodos = sesion?.rol === 'DIRECCION'
@@ -407,6 +507,10 @@ export function PanelDePruebas() {
                 <FilaPermiso endpoint="GET /api/auth/yo" quien="Autenticado" />
                 <FilaPermiso endpoint="GET /api/perfiles" quien={rolesDe(ROLES_DEL_PERSONAL)} />
                 <FilaPermiso endpoint="GET /api/perfiles/:id" quien="El propio o personal" />
+                <FilaPermiso
+                  endpoint="PATCH /api/perfiles/:id"
+                  quien={rolesDe(ROLES_DEL_PERSONAL)}
+                />
                 <FilaPermiso endpoint="GET /api/periodos" quien="Autenticado" />
                 <FilaPermiso endpoint="POST /api/periodos" quien="Director" />
                 <FilaPermiso endpoint="PATCH /api/periodos/:id" quien="Director" />
@@ -417,6 +521,14 @@ export function PanelDePruebas() {
                 <FilaPermiso
                   endpoint="POST /api/postulaciones/:id/iniciar-pago"
                   quien="Aspirante dueño"
+                />
+                <FilaPermiso
+                  endpoint="POST /api/postulaciones/:id/acreditar-pago"
+                  quien={rolesDe(ROLES_DEL_PERSONAL)}
+                />
+                <FilaPermiso
+                  endpoint="POST /api/postulaciones/:id/prorrogar-plazo"
+                  quien={rolesDe(ROLES_DEL_PERSONAL)}
                 />
                 <FilaPermiso endpoint="GET /api/document" quien={rolesDe(ROLES_DEL_PERSONAL)} />
                 <FilaPermiso endpoint="GET /api/document/:id" quien={rolesDe(ROLES_DEL_PERSONAL)} />
@@ -430,8 +542,10 @@ export function PanelDePruebas() {
           descripcion={
             <>
               <code>GET /api/perfiles</code> lista (solo personal, con filtro opcional por rol);{' '}
-              <code>GET /api/perfiles/:id</code> devuelve uno (el propio o personal). No hay alta,
-              edición ni baja: el perfil lo crea el trigger de registro.
+              <code>GET /api/perfiles/:id</code> devuelve uno (el propio o personal).{' '}
+              <code>PATCH /api/perfiles/:id</code> lo puede hacer el personal para corregir datos
+              personales: no cambia rol, email ni institución. No hay alta ni baja: el perfil lo crea
+              el trigger de registro.
             </>
           }
         >
@@ -500,6 +614,136 @@ export function PanelDePruebas() {
                 </Button>
               ) : null}
             </div>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Editar perfil (solo personal)</p>
+            <p className="text-sm text-muted-foreground">
+              Corrige los datos personales del perfil elegido arriba. No cambia rol, email,
+              institución ni verificación.
+            </p>
+            <Button
+              className="mt-2"
+              variant="outline"
+              disabled={deshabilitado || perfilId.trim() === ''}
+              onClick={() => void cargarPerfilParaEditar()}
+            >
+              Cargar datos
+            </Button>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="perfil-nombre" className={CLASE_ETIQUETA}>
+                  Nombre
+                </label>
+                <input
+                  id="perfil-nombre"
+                  value={perfilEnEdicion.nombre}
+                  onChange={(evento) => editarPerfil('nombre', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="perfil-apellido" className={CLASE_ETIQUETA}>
+                  Apellido
+                </label>
+                <input
+                  id="perfil-apellido"
+                  value={perfilEnEdicion.apellido}
+                  onChange={(evento) => editarPerfil('apellido', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="perfil-dni" className={CLASE_ETIQUETA}>
+                  DNI
+                </label>
+                <input
+                  id="perfil-dni"
+                  inputMode="numeric"
+                  value={perfilEnEdicion.dni}
+                  onChange={(evento) => editarPerfil('dni', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="perfil-cuil" className={CLASE_ETIQUETA}>
+                  CUIL
+                </label>
+                <input
+                  id="perfil-cuil"
+                  inputMode="numeric"
+                  value={perfilEnEdicion.cuil}
+                  onChange={(evento) => editarPerfil('cuil', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="perfil-nacimiento" className={CLASE_ETIQUETA}>
+                  Fecha de nacimiento
+                </label>
+                <input
+                  id="perfil-nacimiento"
+                  type="date"
+                  value={perfilEnEdicion.fechaNacimiento}
+                  onChange={(evento) => editarPerfil('fechaNacimiento', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="perfil-sexo" className={CLASE_ETIQUETA}>
+                  Sexo
+                </label>
+                <select
+                  id="perfil-sexo"
+                  value={perfilEnEdicion.sexo}
+                  onChange={(evento) => cambiarSexo(evento.target.value)}
+                  className={CLASE_CAMPO}
+                >
+                  <option value="">Sin cambios</option>
+                  <option value="M">M</option>
+                  <option value="F">F</option>
+                  <option value="O">O</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="perfil-telefono" className={CLASE_ETIQUETA}>
+                  Teléfono
+                </label>
+                <input
+                  id="perfil-telefono"
+                  value={perfilEnEdicion.telefono}
+                  onChange={(evento) => editarPerfil('telefono', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="perfil-direccion" className={CLASE_ETIQUETA}>
+                  Dirección
+                </label>
+                <input
+                  id="perfil-direccion"
+                  value={perfilEnEdicion.direccion}
+                  onChange={(evento) => editarPerfil('direccion', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+            </div>
+
+            <Button
+              className="mt-3"
+              disabled={deshabilitado || perfilId.trim() === ''}
+              onClick={() => {
+                const cuerpo = cuerpoDePerfil()
+                if (!cuerpo) {
+                  setMensaje('Completá al menos un campo para actualizar el perfil')
+                  return
+                }
+                void llamar('PATCH', `/api/perfiles/${perfilId.trim()}`, cuerpo)
+              }}
+            >
+              PATCH /api/perfiles/:id
+            </Button>
           </div>
         </Tarjeta>
 
@@ -643,7 +887,8 @@ export function PanelDePruebas() {
               Crear, listar las propias e iniciar el pago son de <strong>Aspirante</strong>. El
               personal (Secretaría, Dirección y Tesorería) puede listar todas y filtrar por perfil,
               período o estado; ver una por id lo puede hacer el dueño o cualquier rol del personal.
-              No hay PATCH ni DELETE: el estado lo mueve la máquina de estados.
+              Las acciones manuales del personal son explícitas: acreditar un pago o prorrogar el
+              plazo. No hay PATCH ni DELETE de estados: el estado lo mueve la máquina de estados.
             </>
           }
         >
@@ -761,6 +1006,57 @@ export function PanelDePruebas() {
                 }
               >
                 POST /:id/iniciar-pago
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Acciones manuales del personal</p>
+            <p className="text-sm text-muted-foreground">
+              Secretaría, Tesorería y Dirección. Acreditar confirma la vacante y controla el cupo;
+              prorrogar extiende el plazo o reactiva una VENCIDO (nunca pasa el cierre del período).
+            </p>
+            <Button
+              className="mt-2"
+              disabled={deshabilitado || postulacionId.trim() === ''}
+              onClick={() =>
+                void llamar(
+                  'POST',
+                  `/api/postulaciones/${postulacionId.trim()}/acreditar-pago`,
+                )
+              }
+            >
+              POST /:id/acreditar-pago
+            </Button>
+
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <div className="w-32">
+                <label htmlFor="dias-prorroga" className={CLASE_ETIQUETA}>
+                  Días
+                </label>
+                <input
+                  id="dias-prorroga"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={diasDeProrroga}
+                  onChange={(evento) => setDiasDeProrroga(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <Button
+                disabled={
+                  deshabilitado || postulacionId.trim() === '' || diasDeProrroga.trim() === ''
+                }
+                onClick={() =>
+                  void llamar(
+                    'POST',
+                    `/api/postulaciones/${postulacionId.trim()}/prorrogar-plazo`,
+                    { dias: Number(diasDeProrroga) },
+                  )
+                }
+              >
+                POST /:id/prorrogar-plazo
               </Button>
             </div>
           </div>
@@ -913,10 +1209,22 @@ where email = 'tu@email.com';`}</pre>
                 <code>GET /api/postulaciones</code> devuelve todas y podés filtrar por{' '}
                 <code>aspiranteId</code>, período o estado (el id del perfil sale del apartado de
                 Perfiles). <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200.
-                Crear e iniciar pago responden 403. En Perfiles podés listar y filtrar por rol; en
-                Documentos, leer (datos de prueba). Con <code>SECRETARIA</code> o{' '}
-                <code>TESORERIA</code> los períodos son de solo lectura; con <code>DIRECCION</code>{' '}
-                podés crearlos y modificarlos.
+                Crear e iniciar pago responden 403. En Perfiles podés listar, filtrar por rol y
+                corregir datos personales con <code>PATCH</code>; en Documentos, leer (datos de
+                prueba). Con <code>SECRETARIA</code> o <code>TESORERIA</code> los períodos son de
+                solo lectura; con <code>DIRECCION</code> podés crearlos y modificarlos.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-medium text-foreground">5. Ayudar a un postulante</p>
+              <p className="mt-1">
+                Con cualquier rol del personal, en Postulaciones tenés dos acciones sobre el id
+                elegido: <code>acreditar-pago</code> confirma la vacante de una{' '}
+                <code>PAGO_PENDIENTE</code> o <code>VENCIDO</code> (si no hay cupo responde 409) y{' '}
+                <code>prorrogar-plazo</code> extiende el vencimiento o reactiva una{' '}
+                <code>VENCIDO</code> con los días que indiques. No se puede editar el estado
+                libremente: la máquina de estados y el control de cupos lo impiden.
               </p>
             </div>
           </div>
@@ -1083,6 +1391,20 @@ function esPeriodo(valor: unknown): valor is Periodo {
     typeof valor.cierraEl === 'string' &&
     typeof valor.diasPlazoPago === 'number' &&
     typeof valor.montoMatriculaCentavos === 'number'
+  )
+}
+
+function esPerfil(valor: unknown): valor is PerfilDeApi {
+  return (
+    esObjeto(valor) &&
+    typeof valor.nombre === 'string' &&
+    typeof valor.apellido === 'string' &&
+    typeof valor.dni === 'string' &&
+    typeof valor.cuil === 'string' &&
+    typeof valor.fechaNacimiento === 'string' &&
+    (valor.sexo === 'M' || valor.sexo === 'F' || valor.sexo === 'O') &&
+    (valor.telefono === null || typeof valor.telefono === 'string') &&
+    (valor.direccion === null || typeof valor.direccion === 'string')
   )
 }
 
