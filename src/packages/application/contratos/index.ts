@@ -5,3 +5,5 @@
 // Un adaptador real importa desde acá: import { probarContrato... } from
 // '@tfi/application/contratos'.
 export { probarContratoServicioDeAutenticacion } from '../puertos/servicio-de-autenticacion/contrato'
+export { probarContratoRepositorioDePerfiles } from '../puertos/repositorio-de-perfiles/contrato'
+export { probarContratoRepositorioDeDocumentos } from '../puertos/repositorio-de-documentos/contrato'
