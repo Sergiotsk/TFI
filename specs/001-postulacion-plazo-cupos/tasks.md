@@ -81,14 +81,14 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 
 ### Dominio (tests primero)
 
-- [ ] T023 [P] Escribir src/packages/domain/pago/monto.test.ts y src/packages/domain/pago/referencia-de-pago.test.ts (centavos enteros, rechazo de negativos y decimales, `cubre`, igualdad de referencia)
-- [ ] T024 [P] Escribir src/packages/domain/postulacion/numero-de-postulacion.test.ts y src/packages/domain/perfil/dni.test.ts (`formatear` con 6 dígitos, validación del DNI)
-- [ ] T025 [P] Escribir src/packages/domain/periodo/periodo-de-ingreso.test.ts (`estaAbierto`, y `calcularVencimiento` con el tope en `cierraEl`)
-- [ ] T026 Escribir src/packages/domain/postulacion/postulacion.test.ts: todas las transiciones válidas e inválidas de la máquina de data-model.md (incluidas `PAGO_EN_REVISION`, `aceptarExcepcion`, `rechazarExcepcion` y `confirmar` desde `VENCIDO` cuando `pagadoEl <= venceEl`), `estadoEn(ahora)` perezoso y que `PAGO_EN_REVISION` no vence
-- [ ] T027 [P] Implementar src/packages/domain/pago/monto.ts y src/packages/domain/pago/referencia-de-pago.ts (hasta que pase T023)
-- [ ] T028 [P] Implementar src/packages/domain/postulacion/numero-de-postulacion.ts y src/packages/domain/perfil/dni.ts (hasta que pase T024)
-- [ ] T029 [P] Implementar src/packages/domain/periodo/periodo-de-ingreso.ts (hasta que pase T025)
-- [ ] T030 Implementar src/packages/domain/postulacion/estados.ts, src/packages/domain/postulacion/errores.ts (`TransicionInvalida`, `PeriodoCerrado`, `SinCuposParaIniciar`, `CuposPorDebajoDeConfirmadas`) y src/packages/domain/postulacion/postulacion.ts (inmutable; hasta que pase T026)
+- [x] T023 [P] Escribir src/packages/domain/pago/monto.test.ts y src/packages/domain/pago/referencia-de-pago.test.ts (centavos enteros, rechazo de negativos y decimales, `cubre`, igualdad de referencia)
+- [x] T024 [P] Escribir src/packages/domain/postulacion/numero-de-postulacion.test.ts y src/packages/domain/perfil/dni.test.ts (`formatear` con 6 dígitos, validación del DNI)
+- [x] T025 [P] Escribir src/packages/domain/periodo/periodo-de-ingreso.test.ts (`estaAbierto`, y `calcularVencimiento` con el tope en `cierraEl`)
+- [x] T026 Escribir src/packages/domain/postulacion/postulacion.test.ts: todas las transiciones válidas e inválidas de la máquina de data-model.md (incluidas `PAGO_EN_REVISION`, `aceptarExcepcion`, `rechazarExcepcion` y `confirmar` desde `VENCIDO` cuando `pagadoEl <= venceEl`), `estadoEn(ahora)` perezoso y que `PAGO_EN_REVISION` no vence
+- [x] T027 [P] Implementar src/packages/domain/pago/monto.ts y src/packages/domain/pago/referencia-de-pago.ts (hasta que pase T023)
+- [x] T028 [P] Implementar src/packages/domain/postulacion/numero-de-postulacion.ts y src/packages/domain/perfil/dni.ts (hasta que pase T024)
+- [x] T029 [P] Implementar src/packages/domain/periodo/periodo-de-ingreso.ts (hasta que pase T025)
+- [x] T030 Implementar src/packages/domain/postulacion/estados.ts, src/packages/domain/postulacion/errores.ts (`TransicionInvalida`, `PeriodoCerrado`, `SinCuposParaIniciar`, `CuposPorDebajoDeConfirmadas`) y src/packages/domain/postulacion/postulacion.ts (inmutable; hasta que pase T026)
 - [x] T031 [P] Reemplazar src/packages/domain/user/user.ts por src/packages/domain/perfil/perfil.ts (sin `password`, con `rol` = `ASPIRANTE` | `SECRETARIA` | `DIRECCION` | `TESORERIA` e `institucionId`)
 - [x] T032 [P] Mover src/packages/domain/document/document.ts a src/packages/domain/documento/documento.ts, con nombres en español (`postulacionId`, `ruta`, `vigencia`, `estado`)
 - [x] T033 Actualizar los exports de src/packages/domain/index.ts y borrar src/packages/domain/procedure/
@@ -149,7 +149,7 @@ base); al acreditar su pago queda `VACANTE_CONFIRMADA` y la ocupación da 1; si 
 
 > Se escriben PRIMERO y tienen que FALLAR antes de implementar.
 
-- [ ] T054 [P] [US1] Escribir src/packages/domain/postulacion/evaluar-pago.test.ts: las 8 reglas de la tabla de data-model.md, en orden (incluidos "tardío y sin cupo" → `FUERA_DE_PLAZO`, y "pagó a tiempo pero se informó después del vencimiento" → `CONFIRMAR` con `estadoEsperado` igual al estado **persistido**)
+- [x] T054 [P] [US1] Escribir src/packages/domain/postulacion/evaluar-pago.test.ts: las 8 reglas de la tabla de data-model.md, en orden (incluidos "tardío y sin cupo" → `FUERA_DE_PLAZO`, y "pagó a tiempo pero se informó después del vencimiento" → `CONFIRMAR` con `estadoEsperado` igual al estado **persistido**)
 - [ ] T055 [P] [US1] Escribir src/packages/application/puertos/registro-de-pagos/contrato.ts: idempotencia, duplicado en paralelo, **último cupo en paralelo** (`Promise.all`: exactamente un `REGISTRADO` y un `CONFLICTO`), precondición de estado, **estado persistido vs. efectivo** y **confirmar desde `VENCIDO`** (los dos casos de contracts/puertos.md), y `REVISION` y `NO_IMPUTAR` sin efectos sobre la Postulación
 - [ ] T056 [P] [US1] Escribir src/packages/application/puertos/registro-de-cargas/contrato.ts (`cerrar` persiste el resumen, `listar` ordena por fecha y no mezcla instituciones)
 - [ ] T057 [P] [US1] Escribir src/packages/application/casos-de-uso/acreditar-pago.test.ts: `CONFIRMAR`; `DUPLICADO`; `CONFLICTO` → reintento → `REVISION(SIN_CUPO)`; 3 conflictos → error; un rol distinto de `TESORERIA` → `NoAutorizado`; imputación por número con DNI que no coincide; DNI ambiguo
@@ -158,8 +158,8 @@ base); al acreditar su pago queda `VACANTE_CONFIRMADA` y la ocupación da 1; si 
 
 ### Implementation for User Story 1
 
-- [ ] T060 [P] [US1] Implementar src/packages/domain/pago/pago.ts (estados y motivos) y src/packages/domain/pago/carga-de-informe.ts, y exportarlos en src/packages/domain/index.ts
-- [ ] T061 [US1] Implementar src/packages/domain/postulacion/evaluar-pago.ts (hasta que pase T054)
+- [x] T060 [P] [US1] Implementar src/packages/domain/pago/pago.ts (estados y motivos) y src/packages/domain/pago/carga-de-informe.ts, y exportarlos en src/packages/domain/index.ts
+- [x] T061 [US1] Implementar src/packages/domain/postulacion/evaluar-pago.ts (hasta que pase T054)
 - [ ] T062 [P] [US1] Crear src/packages/application/puertos/registro-de-pagos/puerto.ts, fake.ts y fake.test.ts. El fake verifica las precondiciones y escribe **sin ningún `await` en el medio**, así es atómico dentro del event loop
 - [ ] T063 [P] [US1] Crear src/packages/application/puertos/registro-de-cargas/puerto.ts, fake.ts y fake.test.ts
 - [ ] T064 [US1] Implementar src/packages/application/casos-de-uso/acreditar-pago.ts (imputación por número y luego por DNI, `evaluarPago` y hasta 3 reintentos; hasta que pase T057)
@@ -219,7 +219,7 @@ lo acepta, la ocupación supera el total y queda la decisión registrada; una se
 
 ### Implementation for User Story 5
 
-- [ ] T085 [P] [US5] Implementar src/packages/domain/pago/decision-de-direccion.ts y exportarlo en src/packages/domain/index.ts
+- [x] T085 [P] [US5] Implementar src/packages/domain/pago/decision-de-direccion.ts y exportarlo en src/packages/domain/index.ts
 - [ ] T086 [US5] Implementar `registrarDecision` en src/packages/application/puertos/registro-de-pagos/fake.ts (hasta que pase el contrato de T084 contra el fake)
 - [ ] T087 [US5] Implementar src/packages/application/casos-de-uso/decidir-pago-excepcional.ts (hasta que pase T083)
 - [ ] T088 [US5] Crear src/supabase/migrations/20261021000700_rpc_decidir_pago_excepcional.sql según contracts/rpc.md (`FOR UPDATE` sobre el pago y la Postulación, exige `rol_actual() = 'DIRECCION'`, inserta en `decisiones_de_direccion`, sin comparar contra el total al aceptar), con `REVOKE` y `GRANT`
