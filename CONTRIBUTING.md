@@ -61,7 +61,7 @@ git push -u origin feature/nombre-corto
 Si `develop` avanzó mientras trabajabas, actualizá tu rama antes de pedir revisión.
 
 Los comandos de pnpm (`pnpm install`, `pnpm test`, `pnpm dev`) se corren desde `src/`, que es la
-raíz del workspace.
+raíz del workspace. La lista completa está en [`src/README.md`](src/README.md).
 
 ## Pull Requests
 
