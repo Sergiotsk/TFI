@@ -13,10 +13,11 @@ export interface DatosDeNuevoPeriodo {
 }
 
 /**
- * US3: SECRETARIA o DIRECCION dan de alta un período de ingreso.
+ * US3: DIRECCION da de alta un período de ingreso.
  *
- * El total de cupos es solo un techo: la ocupación se deriva de las
- * Postulaciones. La institución es la del actor, no la que venga en el body.
+ * Solo el Director: ni Secretaría ni Tesorería pueden crear períodos. El total
+ * de cupos es solo un techo: la ocupación se deriva de las Postulaciones. La
+ * institución es la del actor, no la que venga en el body.
  */
 export class CrearPeriodoUseCase {
   constructor(
@@ -25,7 +26,7 @@ export class CrearPeriodoUseCase {
   ) {}
 
   async ejecutar(actor: Actor, datos: DatosDeNuevoPeriodo): Promise<PeriodoDeIngreso> {
-    exigirRol(actor, 'SECRETARIA', 'DIRECCION')
+    exigirRol(actor, 'DIRECCION')
 
     const periodo = new PeriodoDeIngreso(
       this.generadorDeIds.nuevo(),

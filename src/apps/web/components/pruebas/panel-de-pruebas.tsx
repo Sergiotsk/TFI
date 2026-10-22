@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import Link from 'next/link'
-import { ROLES_DEL_PERSONAL } from '@tfi/domain'
+import { ESTADOS_DE_POSTULACION, ROLES_DEL_PERSONAL } from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
 import { Button } from '@/components/ui/button'
 import { CLASE_CAMPO, CLASE_ETIQUETA } from '@/components/auth/clases'
@@ -73,6 +73,9 @@ export function PanelDePruebas() {
 
   const [postulacionId, setPostulacionId] = useState('')
   const [documentoId, setDocumentoId] = useState('')
+  const [filtroAspiranteId, setFiltroAspiranteId] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('')
+  const [soloPeriodoElegido, setSoloPeriodoElegido] = useState(false)
 
   const [historial, setHistorial] = useState<Llamada[]>([])
   const [ocupado, setOcupado] = useState(false)
@@ -245,9 +248,25 @@ export function PanelDePruebas() {
     })
   }
 
+  function urlDeListado(): string {
+    const parametros = new URLSearchParams()
+    if (filtroAspiranteId.trim() !== '') {
+      parametros.set('aspiranteId', filtroAspiranteId.trim())
+    }
+    if (filtroEstado !== '') parametros.set('estado', filtroEstado)
+    if (soloPeriodoElegido && periodoId.trim() !== '') {
+      parametros.set('periodoId', periodoId.trim())
+    }
+
+    const consulta = parametros.toString()
+
+    return consulta === '' ? '/api/postulaciones' : `/api/postulaciones?${consulta}`
+  }
+
   const sinSesion = sesion === null
   const deshabilitado = sinSesion || ocupado
-  const puedeCrearPeriodos = sesion !== null && DIRECTIVOS.includes(sesion.rol)
+  const puedeCrearPeriodos = sesion?.rol === 'DIRECCION'
+  const puedeEditarPeriodos = sesion !== null && DIRECTIVOS.includes(sesion.rol)
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background px-4 py-10">
@@ -295,7 +314,7 @@ export function PanelDePruebas() {
               <p className="text-sm text-muted-foreground">
                 {sesion.rol === 'ASPIRANTE'
                   ? 'Como aspirante podés crear tu Postulación, ver las tuyas e iniciar el pago. Perfiles y documentos te responden 403.'
-                  : 'Como personal podés ver cualquier Postulación y los perfiles/documentos. Crear Postulación e iniciar pago responden 403.'}
+                  : 'Como personal podés ver cualquier Postulación, listar todas y filtrarlas por perfil, período o estado. Crear Postulación e iniciar pago responden 403.'}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -391,8 +410,9 @@ export function PanelDePruebas() {
                 <FilaPermiso endpoint="GET /api/perfiles" quien={rolesDe(ROLES_DEL_PERSONAL)} />
                 <FilaPermiso endpoint="GET /api/perfiles/:id" quien="El propio o personal" />
                 <FilaPermiso endpoint="GET /api/periodos" quien="Autenticado" />
-                <FilaPermiso endpoint="POST /api/periodos" quien={rolesDe(DIRECTIVOS)} />
+                <FilaPermiso endpoint="POST /api/periodos" quien="Director" />
                 <FilaPermiso endpoint="PATCH /api/periodos/:id" quien={rolesDe(DIRECTIVOS)} />
+                <FilaPermiso endpoint="GET /api/postulaciones" quien={rolesDe(ROLES_DEL_PERSONAL)} />
                 <FilaPermiso endpoint="POST /api/postulaciones" quien="Aspirante" />
                 <FilaPermiso endpoint="GET /api/postulaciones/mias" quien="Aspirante" />
                 <FilaPermiso endpoint="GET /api/postulaciones/:id" quien="El propio o personal" />
@@ -490,8 +510,8 @@ export function PanelDePruebas() {
           descripcion={
             <>
               <code>GET</code> lo ve cualquier usuario autenticado (solo los abiertos);{' '}
-              <code>POST</code> y <code>PATCH</code> son de Secretaría o Dirección. No hay DELETE:
-              el período se cierra cambiando la fecha.
+              <code>POST</code> es solo del Director y <code>PATCH</code> es de Secretaría o
+              Dirección. No hay DELETE: el período se cierra cambiando la fecha.
             </>
           }
         >
@@ -523,7 +543,7 @@ export function PanelDePruebas() {
               No hay períodos abiertos.{' '}
               {puedeCrearPeriodos
                 ? 'Creá uno acá abajo.'
-                : 'Pedile a Secretaría que cree uno para poder postularte.'}
+                : 'Pedile al Director que cree uno para poder postularte.'}
             </p>
           ) : (
             <ul className="mt-4 space-y-2">
@@ -552,7 +572,7 @@ export function PanelDePruebas() {
                     >
                       {periodoId === periodo.id ? 'Elegido' : 'Usar'}
                     </Button>
-                    {puedeCrearPeriodos ? (
+                    {puedeEditarPeriodos ? (
                       <Button variant="ghost" size="sm" onClick={() => empezarEdicion(periodo)}>
                         Editar
                       </Button>
@@ -566,7 +586,7 @@ export function PanelDePruebas() {
           {puedeCrearPeriodos ? (
             <form onSubmit={crearPeriodo} className="mt-5 space-y-3 border-t border-border pt-5">
               <p className="text-sm font-medium text-foreground">
-                Crear período ({rolesDe(DIRECTIVOS)})
+                Crear período (solo Director)
               </p>
 
               <CamposDePeriodo
@@ -585,7 +605,7 @@ export function PanelDePruebas() {
             </form>
           ) : null}
 
-          {puedeCrearPeriodos && periodoEnEdicion ? (
+          {puedeEditarPeriodos && periodoEnEdicion ? (
             <form
               onSubmit={modificarPeriodo}
               className="mt-5 space-y-3 border-t border-border pt-5"
@@ -622,9 +642,10 @@ export function PanelDePruebas() {
           titulo="Postulaciones"
           descripcion={
             <>
-              Crear, listar las propias e iniciar el pago son de <strong>Aspirante</strong>. Ver una
-              por id lo puede hacer el dueño o cualquier rol del personal. No hay PATCH ni DELETE: el
-              estado lo mueve la máquina de estados.
+              Crear, listar las propias e iniciar el pago son de <strong>Aspirante</strong>. El
+              personal (Secretaría, Dirección y Tesorería) puede listar todas y filtrar por perfil,
+              período o estado; ver una por id lo puede hacer el dueño o cualquier rol del personal.
+              No hay PATCH ni DELETE: el estado lo mueve la máquina de estados.
             </>
           }
         >
@@ -635,6 +656,62 @@ export function PanelDePruebas() {
               onClick={() => void llamar('GET', '/api/postulaciones/mias')}
             >
               GET /api/postulaciones/mias
+            </Button>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Listar todas (solo personal)</p>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="filtro-aspirante" className={CLASE_ETIQUETA}>
+                  Perfil del aspirante (opcional)
+                </label>
+                <input
+                  id="filtro-aspirante"
+                  placeholder="aspiranteId (UUID)"
+                  value={filtroAspiranteId}
+                  onChange={(evento) => setFiltroAspiranteId(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="filtro-estado" className={CLASE_ETIQUETA}>
+                  Estado (opcional)
+                </label>
+                <select
+                  id="filtro-estado"
+                  value={filtroEstado}
+                  onChange={(evento) => setFiltroEstado(evento.target.value)}
+                  className={CLASE_CAMPO}
+                >
+                  <option value="">Todos</option>
+                  {ESTADOS_DE_POSTULACION.map((estado) => (
+                    <option key={estado} value={estado}>
+                      {estado}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <label className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={soloPeriodoElegido}
+                onChange={(evento) => setSoloPeriodoElegido(evento.target.checked)}
+                className="size-4 accent-primary"
+              />
+              Solo el período elegido
+            </label>
+
+            <Button
+              className="mt-3"
+              variant="outline"
+              disabled={deshabilitado}
+              onClick={() => void llamar('GET', urlDeListado())}
+            >
+              GET /api/postulaciones
             </Button>
           </div>
 
@@ -801,22 +878,23 @@ export function PanelDePruebas() {
 
           <div className="mt-3 space-y-4 text-sm text-muted-foreground">
             <div>
-              <p className="font-medium text-foreground">1. Una cuenta de Secretaría</p>
+              <p className="font-medium text-foreground">1. Una cuenta de Director</p>
               <p className="mt-1">
                 El registro siempre crea <code>ASPIRANTE</code>. Para poder dar de alta períodos,
-                promové una cuenta desde el SQL Editor de Supabase y volvé a entrar:
+                promové una cuenta a <code>DIRECCION</code> desde el SQL Editor de Supabase y volvé a
+                entrar:
               </p>
               <pre className="mt-2 overflow-auto rounded-md bg-muted p-3 text-xs text-foreground">{`update public.perfiles
-set rol = 'SECRETARIA'
+set rol = 'DIRECCION'
 where email = 'tu@email.com';`}</pre>
             </div>
 
             <div>
               <p className="font-medium text-foreground">2. Creá el período</p>
               <p className="mt-1">
-                Con la cuenta <code>SECRETARIA</code> (o <code>DIRECCION</code>) aparece el alta en
-                el apartado de Períodos. Al crearlo queda abierto y lo ve cualquier usuario de la
-                institución.
+                Con la cuenta <code>DIRECCION</code> aparece el alta en el apartado de Períodos; es
+                el único rol que puede crear. Al crearlo queda abierto y lo ve cualquier usuario de
+                la institución.
               </p>
             </div>
 
@@ -834,8 +912,10 @@ where email = 'tu@email.com';`}</pre>
               <p className="font-medium text-foreground">4. Como admin</p>
               <p className="mt-1">
                 Con <code>SECRETARIA</code>, <code>DIRECCION</code> o <code>TESORERIA</code>,{' '}
-                <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200. Crear e
-                iniciar pago responden 403. En Perfiles podés listar y filtrar por rol; en
+                <code>GET /api/postulaciones</code> devuelve todas y podés filtrar por{' '}
+                <code>aspiranteId</code>, período o estado (el id del perfil sale del apartado de
+                Perfiles). <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200.
+                Crear e iniciar pago responden 403. En Perfiles podés listar y filtrar por rol; en
                 Documentos, leer (datos de prueba).
               </p>
             </div>

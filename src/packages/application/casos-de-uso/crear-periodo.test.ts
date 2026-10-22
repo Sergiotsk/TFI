@@ -8,9 +8,9 @@ import { NoAutorizado } from './errores'
 
 const CIERRE = new Date('2027-03-01T00:00:00.000Z')
 
-const secretaria: Actor = {
-  perfilId: 'perfil-secretaria',
-  rol: 'SECRETARIA',
+const director: Actor = {
+  perfilId: 'perfil-director',
+  rol: 'DIRECCION',
   institucionId: 'institucion-1',
 }
 
@@ -36,7 +36,7 @@ describe('CrearPeriodo', () => {
   it('crea el período en la institución del actor', async () => {
     const { caso, periodos } = armarMundo()
 
-    const creado = await caso.ejecutar(secretaria, DATOS)
+    const creado = await caso.ejecutar(director, DATOS)
 
     expect(creado.id).toBe('periodo-1')
     expect(creado.institucionId).toBe('institucion-1')
@@ -46,20 +46,11 @@ describe('CrearPeriodo', () => {
     expect(await periodos.obtenerPorId(creado.id)).not.toBeNull()
   })
 
-  it('también lo puede crear DIRECCION', async () => {
+  it('solo lo puede crear DIRECCION', async () => {
     const { caso } = armarMundo()
 
-    await expect(caso.ejecutar({ ...secretaria, rol: 'DIRECCION' }, DATOS)).resolves.toBeDefined()
-  })
-
-  it('no lo pueden crear ASPIRANTE ni TESORERIA', async () => {
-    const { caso } = armarMundo()
-
-    await expect(caso.ejecutar({ ...secretaria, rol: 'ASPIRANTE' }, DATOS)).rejects.toThrow(
-      NoAutorizado,
-    )
-    await expect(caso.ejecutar({ ...secretaria, rol: 'TESORERIA' }, DATOS)).rejects.toThrow(
-      NoAutorizado,
-    )
+    for (const rol of ['ASPIRANTE', 'SECRETARIA', 'TESORERIA'] as const) {
+      await expect(caso.ejecutar({ ...director, rol }, DATOS)).rejects.toThrow(NoAutorizado)
+    }
   })
 })

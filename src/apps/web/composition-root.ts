@@ -19,6 +19,7 @@ import {
   ConsultarPostulacionUseCase,
   CrearPeriodoUseCase,
   ListarPeriodosAbiertosUseCase,
+  ListarPostulacionesUseCase,
   ModificarPeriodoUseCase,
 } from '@tfi/application'
 
@@ -52,6 +53,7 @@ export function crearDependencias(supabase: SupabaseClient) {
     crearPostulacion: new CrearPostulacionUseCase(repoPostulaciones, repoPeriodos, reloj),
     iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),
     consultarPostulacion: new ConsultarPostulacionUseCase(repoPostulaciones, reloj),
+    listarPostulaciones: new ListarPostulacionesUseCase(repoPostulaciones, reloj),
     crearPeriodo: new CrearPeriodoUseCase(repoPeriodos, generadorDeIds),
     modificarPeriodo: new ModificarPeriodoUseCase(repoPeriodos),
     listarPeriodosAbiertos: new ListarPeriodosAbiertosUseCase(repoPeriodos, reloj),

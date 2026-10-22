@@ -33,8 +33,9 @@ export async function GET() {
 /**
  * `POST /api/periodos` → `CrearPeriodo` (US3).
  *
- * Solo `SECRETARIA` y `DIRECCION` (FR-008). La institución y el id los decide
- * el caso de uso; el body solo trae los datos del período.
+ * Solo `DIRECCION` (el Director) puede crear períodos; el alta no está abierta a
+ * Secretaría ni a Tesorería. La institución y el id los decide el caso de uso;
+ * el body solo trae los datos del período.
  */
 export async function POST(request: Request) {
   const cuerpo: unknown = await request.json().catch(() => null)
