@@ -126,6 +126,21 @@ describe('Postulacion: transiciones válidas', () => {
     expect(actualizada.estado).toBe('VENCIDO')
     expect(actualizada.motivoRevision).toBeNull()
   })
+
+  it('vencer() persiste el VENCIDO cuando el plazo ya pasó', () => {
+    const vencida = crear('PAGO_PENDIENTE').vencer(VENCIDA)
+
+    expect(vencida.estado).toBe('VENCIDO')
+    expect(vencida.venceEl).toEqual(VENCE_EL)
+  })
+
+  it('vencer() no deja vencer una Postulación que todavía está en plazo', () => {
+    expect(() => crear('PAGO_PENDIENTE').vencer(DENTRO_DEL_PLAZO)).toThrow(TransicionInvalida)
+  })
+
+  it('vencer() no deja vencer una Postulación que no está pendiente de pago', () => {
+    expect(() => crear('PAGO_EN_REVISION').vencer(VENCIDA)).toThrow(TransicionInvalida)
+  })
 })
 
 const TRANSICIONES_INVALIDAS: ReadonlyArray<{

@@ -66,6 +66,19 @@ export class Postulacion {
     return this.con({ estado: 'PAGO_EN_REVISION', motivoRevision: motivo })
   }
 
+  /**
+   * Persiste el vencimiento perezoso: solo si el plazo ya pasó. Lo usa
+   * `IniciarPago` antes de un reintento, porque el trigger guardián no acepta
+   * `PAGO_PENDIENTE -> PAGO_PENDIENTE`.
+   */
+  vencer(ahora: Date): Postulacion {
+    if (this.estado !== 'PAGO_PENDIENTE' || this.estadoEn(ahora) !== 'VENCIDO') {
+      throw new TransicionInvalida(this.estado, 'VENCIDO')
+    }
+
+    return this.con({ estado: 'VENCIDO' })
+  }
+
   /** Dirección acepta la excepción: la vacante se confirma aunque el período esté lleno. */
   aceptarExcepcion(ahora: Date): Postulacion {
     this.exigirTransicion('VACANTE_CONFIRMADA', ahora, ['PAGO_EN_REVISION'])
