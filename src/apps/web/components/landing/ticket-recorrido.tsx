@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useMovimientoReducido } from './use-movimiento-reducido'
 
 const PASOS = [
   { titulo: 'Preinscripción', detalle: 'Se cargan los datos mínimos y se aceptan las condiciones.' },
@@ -14,24 +15,14 @@ const PASOS = [
   { titulo: 'Documentación', detalle: 'Recién ahora se suben los documentos requeridos.' },
 ]
 
-function suscribirseAMovimientoReducido(alCambiar: () => void) {
-  const consulta = window.matchMedia('(prefers-reduced-motion: reduce)')
-  consulta.addEventListener('change', alCambiar)
-  return () => consulta.removeEventListener('change', alCambiar)
-}
-
-function movimientoReducidoEnElNavegador() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
-/** Recorrido de una Postulación (tarjeta tipo comprobante): los pasos se encienden en orden. */
+/**
+ * Recorrido de una Postulación (tarjeta tipo comprobante).
+ * Los pasos se encienden en orden: la línea se va llenando hacia el siguiente, el marcador
+ * "salta" al activarse, una barra de avance acompaña todo el recorrido y, al llegar a la
+ * vacante confirmada, el sello emite un pulso.
+ */
 export function TicketRecorrido() {
-  // En el servidor asumimos movimiento reducido (todo visible); después el navegador decide.
-  const sinMovimiento = useSyncExternalStore(
-    suscribirseAMovimientoReducido,
-    movimientoReducidoEnElNavegador,
-    () => true,
-  )
+  const sinMovimiento = useMovimientoReducido()
   const [alcanzado, setAlcanzado] = useState(0)
   // Cada "ciclo" vuelve a programar los temporizadores del recorrido.
   const [ciclo, setCiclo] = useState(0)
@@ -39,12 +30,13 @@ export function TicketRecorrido() {
   useEffect(() => {
     if (sinMovimiento) return
     const temporizadores = PASOS.map((_, i) =>
-      window.setTimeout(() => setAlcanzado(i + 1), 500 + i * 800),
+      window.setTimeout(() => setAlcanzado(i + 1), 700 + i * 1100),
     )
     return () => temporizadores.forEach((t) => clearTimeout(t))
   }, [sinMovimiento, ciclo])
 
   const pasosAlcanzados = sinMovimiento ? PASOS.length : alcanzado
+  const completo = pasosAlcanzados === PASOS.length
 
   return (
     <aside
@@ -55,6 +47,14 @@ export function TicketRecorrido() {
         <p className="ticket__titulo">Recorrido de una Postulación</p>
         <span className="pill">Ejemplo</span>
       </div>
+
+      <div className="ticket__progreso" aria-hidden="true">
+        <span
+          className={cn('ticket__progreso-barra', completo && 'is-completo')}
+          style={{ transform: `scaleX(${pasosAlcanzados / PASOS.length})` }}
+        />
+      </div>
+
       <ol className="ticket__lista">
         {PASOS.map((paso, i) => (
           <li
@@ -81,7 +81,7 @@ export function TicketRecorrido() {
                 </svg>
               ) : null}
             </span>
-            <div>
+            <div className="ticket__texto">
               <strong>{paso.titulo}</strong>
               <span>{paso.detalle}</span>
             </div>
