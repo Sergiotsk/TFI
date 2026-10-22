@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { 
   CheckCircle2, 
   Clock, 
@@ -96,12 +97,10 @@ export default function EstadoFinalPage({ params }: PageProps) {
               <span>Descargar Constancia en PDF</span>
             </Button>
 
-            <Button asChild className="w-full sm:w-auto">
-              <Link href="/">
-                <Home className="w-4 h-4" />
-                <span>Volver al Portal Principal</span>
-              </Link>
-            </Button>
+            <Link href="/" className={cn(buttonVariants(), 'w-full sm:w-auto')}>
+              <Home className="w-4 h-4" />
+              <span>Volver al Portal Principal</span>
+            </Link>
           </div>
         </div>
 

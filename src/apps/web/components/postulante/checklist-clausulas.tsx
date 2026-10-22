@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface ChecklistClausulasProps {
   idPostulacion: string
@@ -111,12 +112,13 @@ export function ChecklistClausulas({ idPostulacion }: ChecklistClausulasProps) {
         </span>
 
         {todosSeleccionados ? (
-          <Button asChild className="w-full sm:w-auto shrink-0 whitespace-nowrap px-5">
-            <Link href={`/postulacion/${idPostulacion}/pago`} className="inline-flex items-center justify-center gap-2">
-              <span>Continuar a Datos y Pago de Reserva</span>
-              <ArrowRight className="h-4 w-4 shrink-0" />
-            </Link>
-          </Button>
+          <Link
+            href={`/postulacion/${idPostulacion}/pago`}
+            className={cn(buttonVariants(), 'w-full sm:w-auto shrink-0 whitespace-nowrap px-5 gap-2')}
+          >
+            <span>Continuar a Datos y Pago de Reserva</span>
+            <ArrowRight className="h-4 w-4 shrink-0" />
+          </Link>
         ) : (
           <Button disabled className="w-full sm:w-auto shrink-0 whitespace-nowrap px-5 inline-flex items-center justify-center gap-2">
             <span>Continuar a Datos y Pago de Reserva</span>
