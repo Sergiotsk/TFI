@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ROLES_DEL_PERSONAL } from '@tfi/domain'
+import { NumeroDePostulacion, ROLES_DEL_PERSONAL } from '@tfi/domain'
 import { crearCliente } from '@/lib/supabase/servidor'
 import { crearDependencias } from '@/composition-root'
 import { jsonError, jsonOk } from '@/http/respuesta'
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const postulaciones = await repoPostulaciones.obtenerPorEstado(parsed.data)
+    const postulaciones = await repoPostulaciones.listar({ estado: parsed.data })
     return jsonOk(postulaciones)
   }
 
@@ -73,19 +73,21 @@ export async function GET(request: Request) {
 
   if (numeroParam !== null) {
     const numero = Number(numeroParam)
-    if (!Number.isInteger(numero)) {
+    if (!Number.isInteger(numero) || numero <= 0) {
       return jsonError(
         'DATOS_INVALIDOS',
         'Los datos ingresados no son válidos',
         400,
-        { numero: 'Debe ser un número entero' },
+        { numero: 'Debe ser un número entero positivo' },
       )
     }
 
-    const postulaciones = await repoPostulaciones.obtenerPorNumero(numero)
+    const postulaciones = await repoPostulaciones.obtenerPorNumero(
+      NumeroDePostulacion.desde(numero),
+    )
     return jsonOk(postulaciones)
   }
 
-  const postulaciones = await repoPostulaciones.obtenerTodos()
+  const postulaciones = await repoPostulaciones.listar({})
   return jsonOk(postulaciones)
 }
