@@ -22,6 +22,7 @@ qué consecuencias trae.
 | [0005](0005-excepciones-de-vacante-decide-direccion.md) | Los pagos excepcionales los decide Dirección, caso por caso | Aceptado |
 | [0006](0006-instituciones-en-el-esquema.md) | La institución como dato del esquema desde ahora | Aceptado |
 | [0007](0007-renombrar-procedure-a-postulacion.md) | Renombrar Procedure a Postulación y alinear los roles | Aceptado |
+| [0008](0008-consultar-postulaciones.md) | Consultar Postulaciones: filtros, vencimiento perezoso y concurrencia | Aceptado |
 
 ## Plantilla
 
