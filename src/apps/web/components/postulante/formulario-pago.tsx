@@ -6,13 +6,9 @@ import { CreditCard, QrCode, Building2, ShieldCheck, ArrowRight } from 'lucide-r
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-interface FormularioPagoProps {
-  idPostulacion: string
-}
-
 type MetodoPago = 'transferencia' | 'mercadopago' | 'tarjeta'
 
-export function FormularioPago({ idPostulacion }: FormularioPagoProps) {
+export function FormularioPago() {
   const router = useRouter()
   const [metodo, setMetodo] = useState<MetodoPago>('transferencia')
   const [procesando, setProcesando] = useState(false)
@@ -24,7 +20,7 @@ export function FormularioPago({ idPostulacion }: FormularioPagoProps) {
     // Simulación de pasarela de pago y transición al paso 3 (Documentación)
     setTimeout(() => {
       setProcesando(false)
-      router.push(`/postulacion/${idPostulacion}/documentacion`)
+      router.push('/aspirante/postulacion/documentacion')
     }, 1200)
   }
 

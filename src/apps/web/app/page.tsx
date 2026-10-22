@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-8 text-foreground">
       <h1 className="text-3xl font-semibold">Gestión de ingresantes</h1>
-      <Link href="/inscripcion" className={buttonVariants()}>
+      <Link href="/aspirante/inscripcion" className={buttonVariants()}>
         Iniciar Inscripción
       </Link>
     </main>

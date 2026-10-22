@@ -1,4 +1,4 @@
-// src/apps/web/app/inscripcion/page.tsx
+// src/apps/web/app/aspirante/inscripcion/page.tsx
 'use client'
 
 import { useState } from 'react'
@@ -68,9 +68,8 @@ export default function InscripcionPage() {
       return
     }
     try {
-      // ID provisorio hasta conectar con el caso de uso del backend
-      const idPostulacionFalsa = 'postulacion-temp-123'
-      router.push(`/postulacion/${idPostulacionFalsa}/requisitos`)
+      // Sin id en la URL: la Postulación sale de la sesión (una activa por aspirante y período)
+      router.push('/aspirante/postulacion/requisitos')
     } catch {
       setIsSubmitting(false)
     }

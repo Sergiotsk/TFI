@@ -3,13 +3,7 @@ import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { UploadDocumentos } from '@/components/postulante/upload-documentos'
 import { Clock, ShieldAlert, FileText } from 'lucide-react'
 
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
-export default async function DocumentacionPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function DocumentacionPage() {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
       <HeaderInstitucional pasoActual={3} dniPostulante="**.***.***" />
@@ -48,7 +42,7 @@ export default async function DocumentacionPage({ params }: PageProps) {
               </p>
             </div>
 
-            <UploadDocumentos idPostulacion={id} />
+            <UploadDocumentos />
           </div>
 
           {/* Columna Derecha: Reglas y Recomendaciones */}

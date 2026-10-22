@@ -6,10 +6,6 @@ import { ArrowRight } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-interface ChecklistClausulasProps {
-  idPostulacion: string
-}
-
 const clausulas = [
   {
     id: 1,
@@ -43,7 +39,7 @@ const clausulas = [
   },
 ]
 
-export function ChecklistClausulas({ idPostulacion }: ChecklistClausulasProps) {
+export function ChecklistClausulas() {
   const [seleccionados, setSeleccionados] = useState<number[]>([])
 
   const todosSeleccionados = seleccionados.length === clausulas.length
@@ -113,7 +109,7 @@ export function ChecklistClausulas({ idPostulacion }: ChecklistClausulasProps) {
 
         {todosSeleccionados ? (
           <Link
-            href={`/postulacion/${idPostulacion}/pago`}
+            href="/aspirante/postulacion/pago"
             className={cn(buttonVariants(), 'w-full sm:w-auto shrink-0 whitespace-nowrap px-5 gap-2')}
           >
             <span>Continuar a Datos y Pago de Reserva</span>

@@ -5,10 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Upload, FileCheck, AlertCircle, ArrowRight, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-interface UploadDocumentosProps {
-  idPostulacion: string
-}
-
 interface DocumentoItem {
   id: string
   titulo: string
@@ -16,7 +12,7 @@ interface DocumentoItem {
   archivo: File | null
 }
 
-export function UploadDocumentos({ idPostulacion }: UploadDocumentosProps) {
+export function UploadDocumentos() {
   const router = useRouter()
   const [documentos, setDocumentos] = useState<DocumentoItem[]>([
     {
@@ -56,8 +52,8 @@ export function UploadDocumentos({ idPostulacion }: UploadDocumentosProps) {
     setEnviando(true)
     setTimeout(() => {
       setEnviando(false)
-      // Navegación al Paso 4 (Estado Final)
-      router.push(`/postulacion/${idPostulacion}/estado`)
+      // Paso 4 (Estado Final): el panel del aspirante (tasks.md, app/aspirante/postulacion)
+      router.push('/aspirante/postulacion')
     }, 1200)
   }
 

@@ -3,13 +3,7 @@ import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { FormularioPago } from '@/components/postulante/formulario-pago'
 import { Info, Receipt } from 'lucide-react'
 
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
-export default async function PagoPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function PagoPage() {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
       <HeaderInstitucional pasoActual={2} dniPostulante="**.***.***" />
@@ -30,7 +24,7 @@ export default async function PagoPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Columna Izquierda: Formulario de Pago */}
           <div className="lg:col-span-2">
-            <FormularioPago idPostulacion={id} />
+            <FormularioPago />
           </div>
 
           {/* Columna Derecha: Desglose */}

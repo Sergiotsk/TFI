@@ -9,13 +9,7 @@ import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { ChecklistClausulas } from '@/components/postulante/checklist-clausulas'
 
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
-export default async function RequisitosPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function RequisitosPage() {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
       <HeaderInstitucional pasoActual={1} dniPostulante="**.***.***" />
@@ -112,7 +106,7 @@ export default async function RequisitosPage({ params }: PageProps) {
             </div>
 
             {/* Checklist de Conformidad */}
-            <ChecklistClausulas idPostulacion={id} />
+            <ChecklistClausulas />
           </div>
 
           {/* Columna Lateral */}
