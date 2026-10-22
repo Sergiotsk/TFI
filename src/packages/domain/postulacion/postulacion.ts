@@ -79,6 +79,24 @@ export class Postulacion {
     return this.con({ estado: 'VENCIDO' })
   }
 
+  /**
+   * Acción del personal: extiende (o reinicia) el plazo de pago.
+   *
+   * Sirve tanto para una `PAGO_PENDIENTE` vigente como para una `VENCIDO` a la
+   * que se le quiere dar otra oportunidad. No es una transición del grafo: el
+   * estado destino siempre es `PAGO_PENDIENTE`; lo que cambia es el vencimiento.
+   * El caso de uso valida que el nuevo plazo no pase del cierre del período.
+   */
+  prorrogar(venceEl: Date, ahora: Date): Postulacion {
+    const desde = this.estadoEn(ahora)
+
+    if (desde !== 'PAGO_PENDIENTE' && desde !== 'VENCIDO') {
+      throw new TransicionInvalida(desde, 'PAGO_PENDIENTE')
+    }
+
+    return this.con({ estado: 'PAGO_PENDIENTE', venceEl, motivoRevision: null })
+  }
+
   /** Dirección acepta la excepción: la vacante se confirma aunque el período esté lleno. */
   aceptarExcepcion(ahora: Date): Postulacion {
     this.exigirTransicion('VACANTE_CONFIRMADA', ahora, ['PAGO_EN_REVISION'])

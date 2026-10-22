@@ -18,6 +18,7 @@ export {
   TransicionInvalida,
   PeriodoCerrado,
   SinCuposParaIniciar,
+  SinCuposParaConfirmar,
   CuposPorDebajoDeConfirmadas,
   PostulacionDuplicada,
 } from './postulacion/errores'

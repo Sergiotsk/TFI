@@ -143,6 +143,42 @@ describe('Postulacion: transiciones válidas', () => {
   })
 })
 
+describe('Postulacion.prorrogar', () => {
+  it('extiende el plazo de una PAGO_PENDIENTE vigente', () => {
+    const prorrogada = crear('PAGO_PENDIENTE').prorrogar(NUEVO_VENCE_EL, DENTRO_DEL_PLAZO)
+
+    expect(prorrogada.estado).toBe('PAGO_PENDIENTE')
+    expect(prorrogada.venceEl).toEqual(NUEVO_VENCE_EL)
+  })
+
+  it('reactiva una VENCIDO con un plazo nuevo', () => {
+    const reactivada = crear('VENCIDO').prorrogar(NUEVO_VENCE_EL, VENCIDA)
+
+    expect(reactivada.estado).toBe('PAGO_PENDIENTE')
+    expect(reactivada.venceEl).toEqual(NUEVO_VENCE_EL)
+  })
+
+  it('también reactiva una PAGO_PENDIENTE que ya venció', () => {
+    const reactivada = crear('PAGO_PENDIENTE').prorrogar(NUEVO_VENCE_EL, VENCIDA)
+
+    expect(reactivada.estado).toBe('PAGO_PENDIENTE')
+    expect(reactivada.venceEl).toEqual(NUEVO_VENCE_EL)
+  })
+
+  it('no prorroga una Postulación que no está pendiente de pago o vencida', () => {
+    for (const estado of [
+      'PREINSCRIPTO',
+      'PAGO_EN_REVISION',
+      'VACANTE_CONFIRMADA',
+      'CONFIRMADO_PARA_EXPORTAR',
+    ] as const) {
+      expect(() => crear(estado).prorrogar(NUEVO_VENCE_EL, DENTRO_DEL_PLAZO)).toThrow(
+        TransicionInvalida,
+      )
+    }
+  })
+})
+
 const TRANSICIONES_INVALIDAS: ReadonlyArray<{
   estado: EstadoPostulacion
   intento: string

@@ -27,6 +27,14 @@ export class SinCuposParaIniciar extends Error {
   }
 }
 
+/** El período se llenó antes de que el personal pudiera confirmar la vacante. */
+export class SinCuposParaConfirmar extends Error {
+  constructor(readonly periodoId: string) {
+    super('El período no tiene cupos libres para confirmar la vacante')
+    this.name = 'SinCuposParaConfirmar'
+  }
+}
+
 /** No se puede bajar el total de cupos por debajo de las vacantes ya confirmadas. */
 export class CuposPorDebajoDeConfirmadas extends Error {
   constructor(
