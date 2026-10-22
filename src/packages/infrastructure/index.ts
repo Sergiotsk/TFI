@@ -3,3 +3,5 @@ export { RepositorioDePerfilesSupabase } from './supabase/repositorio-de-perfile
 export { crearClienteSupabase } from './supabase/servidor'
 
 export { RepositorioDePostulacionesSupabase } from './supabase/repositorio-de-postulaciones'
+export { RepositorioDePeriodosSupabase } from './supabase/repositorio-de-periodos'
+export { RelojDeSistema } from './reloj/reloj-de-sistema'

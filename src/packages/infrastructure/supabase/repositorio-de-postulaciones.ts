@@ -1,35 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { NumeroDePostulacion, Postulacion, PostulacionDuplicada } from '@tfi/domain'
-import type { EstadoPostulacion, MotivoRevision } from '@tfi/domain'
+import { NumeroDePostulacion, PostulacionDuplicada } from '@tfi/domain'
+import type { Postulacion } from '@tfi/domain'
 import type { FiltrosDePostulacion, RepositorioDePostulaciones } from '@tfi/application'
-
-// Lo que devuelve PostgREST: snake_case y fechas ISO. `vence_el` es NULL en
-// toda Postulación que todavía no inició el pago.
-interface FilaPostulacion {
-  id: string
-  aspirante_id: string
-  estado: EstadoPostulacion
-  creado_el: string
-  actualizado_el: string
-  periodo_id: string
-  numero: number
-  vence_el: string | null
-  motivo_revision: MotivoRevision | null
-}
-
-function mapearPostulacion(fila: FilaPostulacion): Postulacion {
-  return new Postulacion(
-    fila.id,
-    NumeroDePostulacion.desde(fila.numero),
-    fila.aspirante_id,
-    fila.periodo_id,
-    fila.estado,
-    fila.vence_el === null ? null : new Date(fila.vence_el),
-    fila.motivo_revision,
-    new Date(fila.creado_el),
-    new Date(fila.actualizado_el),
-  )
-}
+import { mapearPostulacion } from './mapeadores/postulacion'
 
 /**
  * Adaptador de `RepositorioDePostulaciones` sobre Supabase.
@@ -49,7 +22,7 @@ export class RepositorioDePostulacionesSupabase implements RepositorioDePostulac
       .maybeSingle()
     if (error || !data) return null
 
-    return mapearPostulacion(data as FilaPostulacion)
+    return mapearPostulacion(data)
   }
 
   async obtenerPorNumero(numero: NumeroDePostulacion): Promise<Postulacion | null> {
@@ -60,7 +33,7 @@ export class RepositorioDePostulacionesSupabase implements RepositorioDePostulac
       .maybeSingle()
     if (error || !data) return null
 
-    return mapearPostulacion(data as FilaPostulacion)
+    return mapearPostulacion(data)
   }
 
   async listar(filtros: FiltrosDePostulacion): Promise<Postulacion[]> {
@@ -82,7 +55,7 @@ export class RepositorioDePostulacionesSupabase implements RepositorioDePostulac
     const { data, error } = await consulta.order('numero', { ascending: true })
     if (error || !data) return []
 
-    return (data as FilaPostulacion[]).map(mapearPostulacion)
+    return data.map(mapearPostulacion)
   }
 
   async buscarPorDni(dni: string, periodoId?: string): Promise<Postulacion[]> {
@@ -111,7 +84,7 @@ export class RepositorioDePostulacionesSupabase implements RepositorioDePostulac
       throw new Error(`No se pudo crear la Postulación: ${error.message}`)
     }
 
-    return mapearPostulacion(data as FilaPostulacion)
+    return mapearPostulacion(data)
   }
 
   async guardarTransicion(
