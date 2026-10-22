@@ -12,6 +12,8 @@ probarContratoDeRepositorioDePeriodos(() => {
 
   return {
     repositorio,
+    institucionId: 'institucion-fake',
+    otraInstitucionId: 'otra-institucion-fake',
     crearAspirante: async (dni: string) => {
       contador += 1
       const aspiranteId = `aspirante-fake-${contador}`

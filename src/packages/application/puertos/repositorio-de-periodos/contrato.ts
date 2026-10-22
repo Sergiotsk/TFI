@@ -10,6 +10,10 @@ import type { RepositorioDePeriodos } from './puerto'
  */
 export interface EntornoDePeriodos {
   repositorio: RepositorioDePeriodos
+  /** Institución cuyos períodos se listan en los tests. */
+  institucionId: string
+  /** Otra institución, para verificar que el listado no mezcla. */
+  otraInstitucionId: string
   crearAspirante: (dni: string) => Promise<string>
   crearPeriodo: (datos?: DatosDePeriodoDePrueba) => Promise<PeriodoDeIngreso>
   sembrarPostulacion: (datos: DatosDePostulacionSembrada) => Promise<Postulacion>
@@ -50,21 +54,20 @@ export function probarContratoDeRepositorioDePeriodos(
     })
 
     it('listarAbiertos() devuelve solo los abiertos de esa institución', async () => {
-      const { repositorio, crearPeriodo } = await crearEntorno()
+      const { repositorio, institucionId, otraInstitucionId, crearPeriodo } = await crearEntorno()
       const ahora = new Date()
-      const abierto = await crearPeriodo({ institucionId: 'institucion-1' })
+      const abierto = await crearPeriodo({ institucionId })
       const cerrado = await crearPeriodo({
-        institucionId: 'institucion-1',
+        institucionId,
         cierraEl: new Date(ahora.getTime() - UN_DIA),
       })
-      const otraInstitucion = await crearPeriodo({ institucionId: 'institucion-2' })
-      await repositorio.guardar(abierto)
-      await repositorio.guardar(cerrado)
-      await repositorio.guardar(otraInstitucion)
+      const otraInstitucion = await crearPeriodo({ institucionId: otraInstitucionId })
 
-      const abiertos = await repositorio.listarAbiertos('institucion-1', ahora)
+      const abiertos = await repositorio.listarAbiertos(institucionId, ahora)
 
       expect(abiertos.map((p) => p.id)).toEqual([abierto.id])
+      expect(abiertos.map((p) => p.id)).not.toContain(cerrado.id)
+      expect(abiertos.map((p) => p.id)).not.toContain(otraInstitucion.id)
     })
 
     it('contarOcupados() cuenta las vacantes confirmadas y posteriores', async () => {

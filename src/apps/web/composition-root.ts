@@ -4,6 +4,8 @@ import {
   ServicioDeAutenticacionSupabase,
   RepositorioDePerfilesSupabase,
   RepositorioDePostulacionesSupabase,
+  RepositorioDePeriodosSupabase,
+  RelojDeSistema,
 } from '@tfi/infrastructure'
 import {
   RegistrarAspiranteUseCase,
@@ -11,6 +13,9 @@ import {
   CerrarSesionUseCase,
   ConsultarPerfilPropioUseCase,
   ObtenerActorUseCase,
+  CrearPostulacionUseCase,
+  IniciarPagoUseCase,
+  ConsultarPostulacionUseCase,
 } from '@tfi/application'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
@@ -20,6 +25,8 @@ export function crearDependencias(supabase: SupabaseClient) {
   const auth = new ServicioDeAutenticacionSupabase(supabase)
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
   const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
+  const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
+  const reloj = new RelojDeSistema()
   // Los documentos todavía no tienen adaptador: public.documentos se lee con
   // el fake hasta que la feature de documentación los migre (tarea T032).
   const repoDocumentos = new RepositorioDeDocumentosFake()
@@ -29,12 +36,17 @@ export function crearDependencias(supabase: SupabaseClient) {
     auth,
     repoPerfiles,
     repoPostulaciones,
+    repoPeriodos,
+    reloj,
     repoDocumentos,
     registrarAspirante: new RegistrarAspiranteUseCase(auth),
     iniciarSesion: new IniciarSesionUseCase(auth),
     cerrarSesion: new CerrarSesionUseCase(auth),
     consultarPerfilPropio: new ConsultarPerfilPropioUseCase(auth, repoPerfiles),
     obtenerActorUseCase: new ObtenerActorUseCase(auth, repoPerfiles),
+    crearPostulacion: new CrearPostulacionUseCase(repoPostulaciones, repoPeriodos, reloj),
+    iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),
+    consultarPostulacion: new ConsultarPostulacionUseCase(repoPostulaciones, reloj),
   }
 }
 

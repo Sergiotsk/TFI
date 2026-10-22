@@ -1,36 +1,28 @@
-import { z } from 'zod'
-import { NumeroDePostulacion, ROLES_DEL_PERSONAL } from '@tfi/domain'
 import { crearCliente } from '@/lib/supabase/servidor'
 import { crearDependencias } from '@/composition-root'
+import { esquemaCrearPostulacion } from '@/http/esquemas/postulaciones'
+import { respuestaDeErrorDePostulacion } from '@/http/errores'
 import { jsonError, jsonOk } from '@/http/respuesta'
 
-// aca se va a implementar las cosas para el manejo de postulaciones SIN ID, VER TODOS, VER TODOS POR ESTADO, VER TODOS POR MOTIVO REVISION
-const esquemaEstado = z.enum(
-  [
-    'PREINSCRIPTO',
-    'PAGO_PENDIENTE',
-    'PAGO_EN_REVISION',
-    'VACANTE_CONFIRMADA',
-    'VENCIDO',
-    'ESPERANDO_DOCUMENTACION',
-    'DOCUMENTACION_EN_REVISION',
-    'OBSERVADO',
-    'DOCUMENTACION_VALIDADA',
-    'CONFIRMADO_PARA_EXPORTAR',
-  ],
-  {
-    errorMap: () => ({ message: 'Estado desconocido' }),
-  },
-)
+/**
+ * `POST /api/postulaciones` `{ periodoId }` → `CrearPostulacion` (US2).
+ *
+ * Crea la Postulación del aspirante autenticado en un período abierto. El
+ * route handler solo valida el borde: la autorización, el período y la
+ * duplicada los decide el caso de uso y el dominio.
+ */
+export async function POST(request: Request) {
+  const cuerpo: unknown = await request.json().catch(() => null)
+  const parsed = esquemaCrearPostulacion.safeParse(cuerpo)
 
-// const esquemaMotivoRevision = z.enum(['FUERA_DE_PLAZO', 'SIN_CUPO'], {
-//   errorMap: () => ({ message: 'Motivo de la Revision desconocido' }),
-// })
+  if (!parsed.success) {
+    return jsonError('DATOS_INVALIDOS', 'Los datos ingresados no son válidos', 400, {
+      periodoId: parsed.error.issues[0]?.message ?? 'Dato inválido',
+    })
+  }
 
-export async function GET(request: Request) {
   const supabase = await crearCliente()
-
-  const { obtenerActorUseCase, repoPostulaciones } = crearDependencias(supabase)
+  const { obtenerActorUseCase, crearPostulacion } = crearDependencias(supabase)
 
   const actor = await obtenerActorUseCase.ejecutar()
 
@@ -42,52 +34,11 @@ export async function GET(request: Request) {
     return jsonError('SIN_PERFIL', 'Perfil no encontrado', 403)
   }
 
-  if (!ROLES_DEL_PERSONAL.includes(actor.actor.rol)) {
-    return jsonError(
-      'NO_AUTORIZADO',
-      'No tenés permisos para listar perfiles',
-      403,
-    )
+  try {
+    const creada = await crearPostulacion.ejecutar(actor.actor, parsed.data.periodoId)
+
+    return jsonOk(creada, 201)
+  } catch (error) {
+    return respuestaDeErrorDePostulacion(error)
   }
-
-  const estado = new URL(request.url).searchParams.get('estado')
-
-  if (estado !== null) {
-    const parsed = esquemaEstado.safeParse(estado)
-    if (!parsed.success) {
-      return jsonError(
-        'DATOS_INVALIDOS',
-        'Los datos ingresados no son válidos',
-        400,
-        {
-          rol: parsed.error.issues[0]?.message ?? 'Estado desconocido',
-        },
-      )
-    }
-
-    const postulaciones = await repoPostulaciones.listar({ estado: parsed.data })
-    return jsonOk(postulaciones)
-  }
-
-  const numeroParam = new URL(request.url).searchParams.get('numero')
-
-  if (numeroParam !== null) {
-    const numero = Number(numeroParam)
-    if (!Number.isInteger(numero) || numero <= 0) {
-      return jsonError(
-        'DATOS_INVALIDOS',
-        'Los datos ingresados no son válidos',
-        400,
-        { numero: 'Debe ser un número entero positivo' },
-      )
-    }
-
-    const postulaciones = await repoPostulaciones.obtenerPorNumero(
-      NumeroDePostulacion.desde(numero),
-    )
-    return jsonOk(postulaciones)
-  }
-
-  const postulaciones = await repoPostulaciones.listar({})
-  return jsonOk(postulaciones)
 }

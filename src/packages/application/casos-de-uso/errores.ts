@@ -8,3 +8,19 @@ export class NoAutorizado extends Error {
     this.name = 'NoAutorizado'
   }
 }
+
+/** El recurso que pidió el caso de uso no existe. */
+export class NoEncontrado extends Error {
+  constructor(mensaje = 'No encontrado') {
+    super(mensaje)
+    this.name = 'NoEncontrado'
+  }
+}
+
+/** Otro proceso movió el estado antes de que este pudiera guardar. */
+export class ConflictoDeEstado extends Error {
+  constructor(mensaje = 'La Postulación cambió de estado mientras tanto') {
+    super(mensaje)
+    this.name = 'ConflictoDeEstado'
+  }
+}
