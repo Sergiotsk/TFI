@@ -20,11 +20,16 @@ export { NoAutorizado, NoEncontrado, ConflictoDeEstado } from './casos-de-uso/er
 export type { Actor } from './casos-de-uso/actor'
 export { exigirRol } from './casos-de-uso/actor'
 export { CrearPostulacionUseCase } from './casos-de-uso/crear-postulacion'
+export { CrearPeriodoUseCase } from './casos-de-uso/crear-periodo'
+export type { DatosDeNuevoPeriodo } from './casos-de-uso/crear-periodo'
+export { ListarPeriodosAbiertosUseCase } from './casos-de-uso/listar-periodos-abiertos'
 export { IniciarPagoUseCase } from './casos-de-uso/iniciar-pago'
 export { ConsultarPostulacionUseCase } from './casos-de-uso/consultar-postulacion'
 export type { PostulacionConsultada } from './casos-de-uso/postulacion-consultada'
 export type { Reloj } from './puertos/reloj/puerto'
 export { RelojFijo } from './puertos/reloj/fake'
+export type { GeneradorDeIds } from './puertos/generador-de-ids/puerto'
+export { GeneradorDeIdsFake } from './puertos/generador-de-ids/fake'
 export type {
   FiltrosDePostulacion,
   RepositorioDePostulaciones,
