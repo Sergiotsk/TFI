@@ -1,6 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { RepositorioDeDocumentosFake } from '@tfi/application'
-import { ServicioDeAutenticacionSupabase, RepositorioDePerfilesSupabase } from '@tfi/infrastructure'
+import {
+  ServicioDeAutenticacionSupabase,
+  RepositorioDePerfilesSupabase,
+  RepositorioDePostulacionesSupabase,
+} from '@tfi/infrastructure'
 import {
   RegistrarAspiranteUseCase,
   IniciarSesionUseCase,
@@ -15,6 +19,7 @@ import {
 export function crearDependencias(supabase: SupabaseClient) {
   const auth = new ServicioDeAutenticacionSupabase(supabase)
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
+  const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
   // Los documentos todavía no tienen adaptador: public.documentos se lee con
   // el fake hasta que la feature de documentación los migre (tarea T032).
   const repoDocumentos = new RepositorioDeDocumentosFake()
@@ -23,6 +28,7 @@ export function crearDependencias(supabase: SupabaseClient) {
     supabase,
     auth,
     repoPerfiles,
+    repoPostulaciones,
     repoDocumentos,
     registrarAspirante: new RegistrarAspiranteUseCase(auth),
     iniciarSesion: new IniciarSesionUseCase(auth),

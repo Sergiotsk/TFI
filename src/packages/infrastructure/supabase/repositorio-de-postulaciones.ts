@@ -5,31 +5,31 @@ import type { RepositorioDePostulaciones } from '@tfi/application'
 
 interface FilaPostulacion {
   id: string
-  aspiranteId: string
+  aspirante_id: string
   estado: EstadoPostulacion
-  creadoEl: Date
-  actualizadoEl: Date
-  periodoId: string
+  creado_el: Date
+  actualizado_el: Date
+  periodo_id: string
   numero: number | null
-  venceEl: Date
+  vence_el: Date
   motivo_revision: MotivoRevision | null
 }
 
 function mapearPostulacion(fila: FilaPostulacion): Postulacion {
   return new Postulacion(
     fila.id,
-    fila.aspiranteId,
+    fila.aspirante_id,
     fila.estado,
-    new Date(fila.creadoEl),
-    new Date(fila.actualizadoEl),
-    fila.periodoId,
+    new Date(fila.creado_el),
+    new Date(fila.actualizado_el),
+    fila.periodo_id,
     fila.numero,
-    new Date(fila.venceEl),
+    new Date(fila.vence_el),
     fila.motivo_revision,
   )
 }
 
-export class RepositorioDePostulacionSupabase implements RepositorioDePostulaciones {
+export class RepositorioDePostulacionesSupabase implements RepositorioDePostulaciones {
   constructor(private readonly supabase: SupabaseClient) {}
 
   async obtenerTodos(): Promise<Postulacion[]> {
@@ -50,19 +50,31 @@ export class RepositorioDePostulacionSupabase implements RepositorioDePostulacio
     return mapearPostulacion(data as FilaPostulacion)
   }
 
-  async obtenerPorEstado(
-    estado: EstadoPostulacion,
-  ): Promise<Postulacion[] | null> {
+  async obtenerPorEstado(estado: EstadoPostulacion): Promise<Postulacion[]> {
     const { data, error } = await this.supabase
       .from('postulaciones')
       .select('*')
       .eq('estado', estado)
-    if (error || !data) return null
+    if (error || !data) return []
     return (data as FilaPostulacion[]).map(mapearPostulacion)
   }
 
-  async guardar(postulacion: Postulacion): Promise<void> {
-    console.log('No se que hacer jeje', postulacion)
-    // aca no se si tendria que ir a un trigger que cree la postulacion en el momento que esta persona inicia el tramite o si tengo que crearlo desde aca
+  async obtenerPorNumero(numero: number): Promise<Postulacion | null> {
+    const { data, error } = await this.supabase
+      .from('postulaciones')
+      .select('*')
+      .eq('numero', numero)
+      .maybeSingle()
+    if (error || !data) return null
+
+    return mapearPostulacion(data as FilaPostulacion)
   }
+
+  // async obtenerPorD(dni: Dni, periodoId: string): Promise<Postulacion[]>{}
+
+  // async obtenerPorAspirante(aspiranteId: string): Promise<Postulacion[]>{}
+
+  // async crear(aspiranteId: string, periodoId: string): Promise<Postulacion>{}
+
+  // async guardarTransicion(antes: Postulacion, despues: Postulacion): Promise<'ok' | 'conflicto'>
 }
