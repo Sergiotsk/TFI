@@ -23,6 +23,31 @@ interface Llamada {
   cuerpo: unknown
 }
 
+interface Periodo {
+  id: string
+  nombre: string
+  totalCupos: number
+  cierraEl: string
+  diasPlazoPago: number
+  montoMatriculaCentavos: number
+}
+
+interface NuevoPeriodo {
+  nombre: string
+  totalCupos: string
+  cierraEl: string
+  diasPlazoPago: string
+  montoArs: string
+}
+
+const NUEVO_PERIODO_INICIAL: NuevoPeriodo = {
+  nombre: 'Período de prueba',
+  totalCupos: '50',
+  cierraEl: '',
+  diasPlazoPago: '3',
+  montoArs: '94000',
+}
+
 export function PanelDePruebas() {
   const [sesion, setSesion] = useState<Sesion | null>(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
@@ -30,25 +55,41 @@ export function PanelDePruebas() {
   const [contrasena, setContrasena] = useState('')
   const [mensaje, setMensaje] = useState<string | null>(null)
   const [periodoId, setPeriodoId] = useState('')
+  const [periodos, setPeriodos] = useState<Periodo[]>([])
+  const [nuevoPeriodo, setNuevoPeriodo] = useState<NuevoPeriodo>(NUEVO_PERIODO_INICIAL)
   const [postulacionId, setPostulacionId] = useState('')
   const [historial, setHistorial] = useState<Llamada[]>([])
   const [ocupado, setOcupado] = useState(false)
   const secuencia = useRef(0)
+
+  const cargarPeriodos = useCallback(async () => {
+    const respuesta = await fetch('/api/periodos', { cache: 'no-store' })
+    if (!respuesta.ok) {
+      setPeriodos([])
+      return
+    }
+    const cuerpo: unknown = await interpretarJson(await respuesta.text())
+    setPeriodos(periodosDe(cuerpo))
+  }, [])
 
   const cargarSesion = useCallback(async () => {
     try {
       const respuesta = await fetch('/api/auth/yo', { cache: 'no-store' })
       if (respuesta.status === 401) {
         setSesion(null)
+        setPeriodos([])
         return
       }
       const cuerpo: unknown = await interpretarJson(await respuesta.text())
       const datos = datosDe(cuerpo)
-      setSesion(esSesion(datos) ? datos : null)
+      const sesionNueva = esSesion(datos) ? datos : null
+      setSesion(sesionNueva)
+      if (sesionNueva) await cargarPeriodos()
+      else setPeriodos([])
     } finally {
       setCargandoSesion(false)
     }
-  }, [])
+  }, [cargarPeriodos])
 
   useEffect(() => {
     void cargarSesion()
@@ -86,9 +127,34 @@ export function PanelDePruebas() {
         const id = primerIdDe(json)
         if (id) setPostulacionId((actual) => actual || id)
       }
+      if (respuesta.ok && metodo === 'GET' && url === '/api/periodos') {
+        setPeriodos(periodosDe(json))
+      }
+      if (respuesta.ok && metodo === 'POST' && url === '/api/periodos') {
+        const id = idDe(json)
+        if (id) setPeriodoId(id)
+        await cargarPeriodos()
+      }
     } finally {
       setOcupado(false)
     }
+  }
+
+  async function crearPeriodo(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault()
+    if (nuevoPeriodo.cierraEl === '') return
+
+    await llamar('POST', '/api/periodos', {
+      nombre: nuevoPeriodo.nombre.trim(),
+      totalCupos: Number(nuevoPeriodo.totalCupos),
+      diasPlazoPago: Number(nuevoPeriodo.diasPlazoPago),
+      montoMatriculaCentavos: Math.round(Number(nuevoPeriodo.montoArs) * 100),
+      cierraEl: new Date(nuevoPeriodo.cierraEl).toISOString(),
+    })
+  }
+
+  function editarNuevoPeriodo(campo: keyof NuevoPeriodo, valor: string) {
+    setNuevoPeriodo((actual) => ({ ...actual, [campo]: valor }))
   }
 
   async function ingresar(evento: FormEvent<HTMLFormElement>) {
@@ -119,6 +185,7 @@ export function PanelDePruebas() {
     try {
       await fetch('/api/auth/cierre-de-sesion', { method: 'POST' })
       setSesion(null)
+      setPeriodos([])
     } finally {
       setOcupado(false)
     }
@@ -126,6 +193,7 @@ export function PanelDePruebas() {
 
   const sinSesion = sesion === null
   const deshabilitado = sinSesion || ocupado
+  const puedeCrearPeriodos = sesion?.rol === 'SECRETARIA' || sesion?.rol === 'DIRECCION'
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background px-4 py-10">
@@ -238,6 +306,164 @@ export function PanelDePruebas() {
         </section>
 
         <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-foreground">Períodos</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Cualquier usuario autenticado ve los períodos abiertos de su institución. Los crea
+            Secretaría o Dirección.
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={deshabilitado}
+              onClick={() => void llamar('GET', '/api/periodos')}
+            >
+              GET /api/periodos
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="periodo" className={CLASE_ETIQUETA}>
+              Período elegido (se completa al tocar “Usar”)
+            </label>
+            <input
+              id="periodo"
+              placeholder="periodoId (UUID)"
+              value={periodoId}
+              onChange={(evento) => setPeriodoId(evento.target.value)}
+              className={CLASE_CAMPO}
+            />
+          </div>
+
+          {sinSesion ? null : periodos.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              No hay períodos abiertos.{' '}
+              {puedeCrearPeriodos
+                ? 'Creá uno acá abajo.'
+                : 'Pedile a Secretaría que cree uno para poder postularte.'}
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-2">
+              {periodos.map((periodo) => (
+                <li
+                  key={periodo.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{periodo.nombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      cierra {fechaCorta(periodo.cierraEl)} · {periodo.totalCupos} cupos · plazo{' '}
+                      {periodo.diasPlazoPago} días · matrícula{' '}
+                      {formatearPesos(periodo.montoMatriculaCentavos)}
+                    </p>
+                    <p className="mt-1 break-all font-mono text-xs text-muted-foreground">
+                      {periodo.id}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={ocupado || periodoId === periodo.id}
+                    onClick={() => setPeriodoId(periodo.id)}
+                  >
+                    {periodoId === periodo.id ? 'Elegido' : 'Usar'}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {puedeCrearPeriodos ? (
+            <form
+              onSubmit={crearPeriodo}
+              className="mt-5 space-y-3 border-t border-border pt-5"
+            >
+              <p className="text-sm font-medium text-foreground">
+                Crear período (SECRETARIA / DIRECCION)
+              </p>
+
+              <div>
+                <label htmlFor="periodo-nombre" className={CLASE_ETIQUETA}>
+                  Nombre
+                </label>
+                <input
+                  id="periodo-nombre"
+                  value={nuevoPeriodo.nombre}
+                  onChange={(evento) => editarNuevoPeriodo('nombre', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="periodo-cupos" className={CLASE_ETIQUETA}>
+                    Total de cupos
+                  </label>
+                  <input
+                    id="periodo-cupos"
+                    type="number"
+                    min={0}
+                    value={nuevoPeriodo.totalCupos}
+                    onChange={(evento) => editarNuevoPeriodo('totalCupos', evento.target.value)}
+                    className={CLASE_CAMPO}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="periodo-plazo" className={CLASE_ETIQUETA}>
+                    Días de plazo
+                  </label>
+                  <input
+                    id="periodo-plazo"
+                    type="number"
+                    min={1}
+                    value={nuevoPeriodo.diasPlazoPago}
+                    onChange={(evento) => editarNuevoPeriodo('diasPlazoPago', evento.target.value)}
+                    className={CLASE_CAMPO}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="periodo-monto" className={CLASE_ETIQUETA}>
+                    Matrícula (ARS)
+                  </label>
+                  <input
+                    id="periodo-monto"
+                    type="number"
+                    min={1}
+                    value={nuevoPeriodo.montoArs}
+                    onChange={(evento) => editarNuevoPeriodo('montoArs', evento.target.value)}
+                    className={CLASE_CAMPO}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="periodo-cierre" className={CLASE_ETIQUETA}>
+                  Cierra el
+                </label>
+                <input
+                  id="periodo-cierre"
+                  type="datetime-local"
+                  value={nuevoPeriodo.cierraEl}
+                  onChange={(evento) => editarNuevoPeriodo('cierraEl', evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                El nombre no se puede repetir dentro de la institución.
+              </p>
+
+              <Button
+                type="submit"
+                disabled={deshabilitado || nuevoPeriodo.cierraEl === ''}
+              >
+                POST /api/periodos
+              </Button>
+            </form>
+          ) : null}
+        </section>
+
+        <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h2 className="text-base font-semibold text-foreground">Postulaciones</h2>
           {sinSesion ? (
             <p className="mt-2 text-sm text-muted-foreground">
@@ -257,16 +483,17 @@ export function PanelDePruebas() {
             </div>
 
             <div>
-              <label htmlFor="periodo" className={CLASE_ETIQUETA}>
-                Crear Postulación (solo ASPIRANTE)
-              </label>
-              <input
-                id="periodo"
-                placeholder="periodoId (UUID del período abierto)"
-                value={periodoId}
-                onChange={(evento) => setPeriodoId(evento.target.value)}
-                className={CLASE_CAMPO}
-              />
+              <p className={CLASE_ETIQUETA}>Crear Postulación (solo ASPIRANTE)</p>
+              <p className="text-sm text-muted-foreground">
+                {periodoId.trim() === '' ? (
+                  'Elegí un período en la tarjeta de arriba.'
+                ) : (
+                  <>
+                    Período:{' '}
+                    <span className="break-all font-mono text-xs">{periodoId.trim()}</span>
+                  </>
+                )}
+              </p>
               <Button
                 className="mt-2"
                 disabled={deshabilitado || periodoId.trim() === ''}
@@ -358,34 +585,42 @@ export function PanelDePruebas() {
 
           <div className="mt-3 space-y-4 text-sm text-muted-foreground">
             <div>
-              <p className="font-medium text-foreground">1. Un período abierto</p>
+              <p className="font-medium text-foreground">1. Una cuenta de Secretaría</p>
               <p className="mt-1">
-                Crear una Postulación necesita el id de un período. Si no hay ninguno, creá uno
-                desde el SQL Editor de Supabase (o usá el del seed local) y copiá el id acá arriba:
-              </p>
-              <pre className="mt-2 overflow-auto rounded-md bg-muted p-3 text-xs text-foreground">{`select id, nombre, cierra_el
-from public.periodos_de_ingreso
-order by cierra_el desc;`}</pre>
-            </div>
-
-            <div>
-              <p className="font-medium text-foreground">2. Como aspirante</p>
-              <p className="mt-1">
-                Registrate en <code>/registro</code>, iniciá sesión acá y usá los botones de
-                Postulaciones. El rol <code>ASPIRANTE</code> es el que asigna el trigger de registro.
-              </p>
-            </div>
-
-            <div>
-              <p className="font-medium text-foreground">3. Como admin (secretaría, dirección o tesorería)</p>
-              <p className="mt-1">
-                El rol vive en el perfil, no en la sesión: cambialo desde el SQL Editor y volvé a
-                entrar. Después probá <code>GET /api/postulaciones/:id</code> con el id de la
-                Postulación de un aspirante: responde 200. Crear e iniciar pago responden 403.
+                El registro siempre crea <code>ASPIRANTE</code>. Para poder dar de alta períodos,
+                promové una cuenta desde el SQL Editor de Supabase y volvé a entrar:
               </p>
               <pre className="mt-2 overflow-auto rounded-md bg-muted p-3 text-xs text-foreground">{`update public.perfiles
 set rol = 'SECRETARIA'
 where email = 'tu@email.com';`}</pre>
+            </div>
+
+            <div>
+              <p className="font-medium text-foreground">2. Creá el período</p>
+              <p className="mt-1">
+                Con la cuenta <code>SECRETARIA</code> (o <code>DIRECCION</code>) aparece el alta en la
+                tarjeta de Períodos. Al crearlo queda abierto y lo ve cualquier usuario de la
+                institución.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-medium text-foreground">3. Como aspirante</p>
+              <p className="mt-1">
+                Entrá con una cuenta <code>ASPIRANTE</code>, elegí el período con “Usar” y probá{' '}
+                <code>POST /api/postulaciones</code>, <code>GET /api/postulaciones/mias</code>,{' '}
+                <code>GET /api/postulaciones/:id</code> y{' '}
+                <code>POST /api/postulaciones/:id/iniciar-pago</code>.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-medium text-foreground">4. Como admin</p>
+              <p className="mt-1">
+                Con <code>SECRETARIA</code>, <code>DIRECCION</code> o <code>TESORERIA</code>,{' '}
+                <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200. Crear e
+                iniciar pago responden 403.
+              </p>
             </div>
           </div>
         </details>
@@ -432,6 +667,39 @@ function esSesion(valor: unknown): valor is Sesion {
 
 function datosDe(cuerpo: unknown): unknown {
   return esObjeto(cuerpo) ? cuerpo.data : undefined
+}
+
+function esPeriodo(valor: unknown): valor is Periodo {
+  return (
+    esObjeto(valor) &&
+    typeof valor.id === 'string' &&
+    typeof valor.nombre === 'string' &&
+    typeof valor.totalCupos === 'number' &&
+    typeof valor.cierraEl === 'string' &&
+    typeof valor.diasPlazoPago === 'number' &&
+    typeof valor.montoMatriculaCentavos === 'number'
+  )
+}
+
+function periodosDe(cuerpo: unknown): Periodo[] {
+  const datos = datosDe(cuerpo)
+
+  return Array.isArray(datos) ? datos.filter(esPeriodo) : []
+}
+
+function fechaCorta(iso: string): string {
+  const fecha = new Date(iso)
+  if (Number.isNaN(fecha.getTime())) return iso
+
+  return fecha.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function formatearPesos(centavos: number): string {
+  return (centavos / 100).toLocaleString('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  })
 }
 
 function idDe(cuerpo: unknown): string | null {
