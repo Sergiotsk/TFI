@@ -7,3 +7,11 @@
 export { probarContratoServicioDeAutenticacion } from '../puertos/servicio-de-autenticacion/contrato'
 export { probarContratoRepositorioDePerfiles } from '../puertos/repositorio-de-perfiles/contrato'
 export { probarContratoRepositorioDeDocumentos } from '../puertos/repositorio-de-documentos/contrato'
+export { probarContratoDeReloj } from '../puertos/reloj/contrato'
+export { probarContratoDeRepositorioDePostulaciones } from '../puertos/repositorio-de-postulaciones/contrato'
+export type {
+  DatosDePeriodoDePrueba,
+  EntornoDePostulaciones,
+} from '../puertos/repositorio-de-postulaciones/contrato'
+export { probarContratoDeRepositorioDePeriodos } from '../puertos/repositorio-de-periodos/contrato'
+export type { EntornoDePeriodos } from '../puertos/repositorio-de-periodos/contrato'

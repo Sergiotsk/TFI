@@ -19,4 +19,13 @@ export type { ResultadoDeActor } from './casos-de-uso/autenticacion/obtener-acto
 export { NoAutorizado } from './casos-de-uso/errores'
 export type { Actor } from './casos-de-uso/actor'
 export { exigirRol } from './casos-de-uso/actor'
-export type { RepositorioDePostulaciones } from './puertos/repositorio-de-postulaciones/puerto'
+export type { Reloj } from './puertos/reloj/puerto'
+export { RelojFijo } from './puertos/reloj/fake'
+export type {
+  FiltrosDePostulacion,
+  RepositorioDePostulaciones,
+} from './puertos/repositorio-de-postulaciones/puerto'
+export { RepositorioDePostulacionesFake } from './puertos/repositorio-de-postulaciones/fake'
+export type { DatosDePostulacionSembrada } from './puertos/repositorio-de-postulaciones/fake'
+export type { RepositorioDePeriodos } from './puertos/repositorio-de-periodos/puerto'
+export { RepositorioDePeriodosFake } from './puertos/repositorio-de-periodos/fake'
