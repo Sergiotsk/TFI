@@ -10,7 +10,6 @@ import { CLASE_CAMPO, CLASE_ETIQUETA } from '@/components/auth/clases'
 import { ETIQUETAS_DE_ROL, INSTITUCION } from '@/config/institucion'
 
 const ROLES: Rol[] = ['ASPIRANTE', 'SECRETARIA', 'DIRECCION', 'TESORERIA']
-const DIRECTIVOS: Rol[] = ['SECRETARIA', 'DIRECCION']
 
 interface Sesion {
   perfilId: string
@@ -265,8 +264,7 @@ export function PanelDePruebas() {
 
   const sinSesion = sesion === null
   const deshabilitado = sinSesion || ocupado
-  const puedeCrearPeriodos = sesion?.rol === 'DIRECCION'
-  const puedeEditarPeriodos = sesion !== null && DIRECTIVOS.includes(sesion.rol)
+  const puedeGestionarPeriodos = sesion?.rol === 'DIRECCION'
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background px-4 py-10">
@@ -411,7 +409,7 @@ export function PanelDePruebas() {
                 <FilaPermiso endpoint="GET /api/perfiles/:id" quien="El propio o personal" />
                 <FilaPermiso endpoint="GET /api/periodos" quien="Autenticado" />
                 <FilaPermiso endpoint="POST /api/periodos" quien="Director" />
-                <FilaPermiso endpoint="PATCH /api/periodos/:id" quien={rolesDe(DIRECTIVOS)} />
+                <FilaPermiso endpoint="PATCH /api/periodos/:id" quien="Director" />
                 <FilaPermiso endpoint="GET /api/postulaciones" quien={rolesDe(ROLES_DEL_PERSONAL)} />
                 <FilaPermiso endpoint="POST /api/postulaciones" quien="Aspirante" />
                 <FilaPermiso endpoint="GET /api/postulaciones/mias" quien="Aspirante" />
@@ -510,8 +508,8 @@ export function PanelDePruebas() {
           descripcion={
             <>
               <code>GET</code> lo ve cualquier usuario autenticado (solo los abiertos);{' '}
-              <code>POST</code> es solo del Director y <code>PATCH</code> es de Secretaría o
-              Dirección. No hay DELETE: el período se cierra cambiando la fecha.
+              <code>POST</code> y <code>PATCH</code> son solo del Director. Secretaría y Tesorería
+              solo consultan. No hay DELETE: el período se cierra cambiando la fecha.
             </>
           }
         >
@@ -541,7 +539,7 @@ export function PanelDePruebas() {
           {sinSesion ? null : periodos.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">
               No hay períodos abiertos.{' '}
-              {puedeCrearPeriodos
+              {puedeGestionarPeriodos
                 ? 'Creá uno acá abajo.'
                 : 'Pedile al Director que cree uno para poder postularte.'}
             </p>
@@ -572,7 +570,7 @@ export function PanelDePruebas() {
                     >
                       {periodoId === periodo.id ? 'Elegido' : 'Usar'}
                     </Button>
-                    {puedeEditarPeriodos ? (
+                    {puedeGestionarPeriodos ? (
                       <Button variant="ghost" size="sm" onClick={() => empezarEdicion(periodo)}>
                         Editar
                       </Button>
@@ -583,7 +581,7 @@ export function PanelDePruebas() {
             </ul>
           )}
 
-          {puedeCrearPeriodos ? (
+          {puedeGestionarPeriodos ? (
             <form onSubmit={crearPeriodo} className="mt-5 space-y-3 border-t border-border pt-5">
               <p className="text-sm font-medium text-foreground">
                 Crear período (solo Director)
@@ -605,7 +603,7 @@ export function PanelDePruebas() {
             </form>
           ) : null}
 
-          {puedeEditarPeriodos && periodoEnEdicion ? (
+          {puedeGestionarPeriodos && periodoEnEdicion ? (
             <form
               onSubmit={modificarPeriodo}
               className="mt-5 space-y-3 border-t border-border pt-5"
@@ -892,9 +890,9 @@ where email = 'tu@email.com';`}</pre>
             <div>
               <p className="font-medium text-foreground">2. Creá el período</p>
               <p className="mt-1">
-                Con la cuenta <code>DIRECCION</code> aparece el alta en el apartado de Períodos; es
-                el único rol que puede crear. Al crearlo queda abierto y lo ve cualquier usuario de
-                la institución.
+                Con la cuenta <code>DIRECCION</code> aparece la gestión en el apartado de Períodos:
+                es el único rol que puede crear y modificar. Secretaría y Tesorería solo los ven.
+                Al crearlo queda abierto y lo ve cualquier usuario de la institución.
               </p>
             </div>
 
@@ -916,7 +914,9 @@ where email = 'tu@email.com';`}</pre>
                 <code>aspiranteId</code>, período o estado (el id del perfil sale del apartado de
                 Perfiles). <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200.
                 Crear e iniciar pago responden 403. En Perfiles podés listar y filtrar por rol; en
-                Documentos, leer (datos de prueba).
+                Documentos, leer (datos de prueba). Con <code>SECRETARIA</code> o{' '}
+                <code>TESORERIA</code> los períodos son de solo lectura; con <code>DIRECCION</code>{' '}
+                podés crearlos y modificarlos.
               </p>
             </div>
           </div>

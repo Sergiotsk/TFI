@@ -11,9 +11,10 @@ import { jsonError, jsonOk } from '@/http/respuesta'
 /**
  * `PATCH /api/periodos/:id` → `ModificarPeriodo` (US3).
  *
- * Solo `SECRETARIA` y `DIRECCION` (FR-008). El body es parcial: los campos que
- * no vienen quedan como estaban. Bajar el total por debajo de las vacantes
- * confirmadas devuelve 409 (FR-005).
+ * Solo `DIRECCION`: el Director es el único que crea y modifica períodos.
+ * Secretaría y Tesorería solo pueden consultarlos. El body es parcial: los
+ * campos que no vienen quedan como estaban. Bajar el total por debajo de las
+ * vacantes confirmadas devuelve 409 (FR-005).
  */
 export async function PATCH(
   request: Request,

@@ -13,11 +13,12 @@ export interface CambiosDePeriodo {
 }
 
 /**
- * US3: SECRETARIA o DIRECCION modifican un período de ingreso.
+ * US3: DIRECCION modifica un período de ingreso.
  *
- * El total de cupos nunca puede quedar por debajo de las vacantes ya
- * confirmadas (FR-005). No se puede cambiar de institución: el período se busca
- * dentro de la institución del actor.
+ * Solo el Director: Secretaría y Tesorería pueden ver los períodos, pero no
+ * crearlos ni modificarlos. El total de cupos nunca puede quedar por debajo de
+ * las vacantes ya confirmadas (FR-005). No se puede cambiar de institución: el
+ * período se busca dentro de la institución del actor.
  */
 export class ModificarPeriodoUseCase {
   constructor(private readonly periodos: RepositorioDePeriodos) {}
@@ -27,7 +28,7 @@ export class ModificarPeriodoUseCase {
     periodoId: string,
     cambios: CambiosDePeriodo,
   ): Promise<PeriodoDeIngreso> {
-    exigirRol(actor, 'SECRETARIA', 'DIRECCION')
+    exigirRol(actor, 'DIRECCION')
 
     const actual = await this.periodos.obtenerPorId(periodoId)
     if (!actual || actual.institucionId !== actor.institucionId) {

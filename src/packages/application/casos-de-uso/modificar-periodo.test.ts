@@ -6,9 +6,9 @@ import type { Actor } from './actor'
 import { NoAutorizado, NoEncontrado } from './errores'
 import { ModificarPeriodoUseCase } from './modificar-periodo'
 
-const secretaria: Actor = {
-  perfilId: 'perfil-secretaria',
-  rol: 'SECRETARIA',
+const director: Actor = {
+  perfilId: 'perfil-director',
+  rol: 'DIRECCION',
   institucionId: 'institucion-1',
 }
 
@@ -39,7 +39,7 @@ describe('ModificarPeriodo', () => {
   it('actualiza solo los campos que recibe', async () => {
     const { caso, periodos } = await armarMundo()
 
-    const actualizado = await caso.ejecutar(secretaria, 'periodo-1', { totalCupos: 20 })
+    const actualizado = await caso.ejecutar(director, 'periodo-1', { totalCupos: 20 })
 
     expect(actualizado.nombre).toBe('Primer cuatrimestre 2027')
     expect(actualizado.totalCupos).toBe(20)
@@ -47,12 +47,14 @@ describe('ModificarPeriodo', () => {
     expect((await periodos.obtenerPorId('periodo-1'))?.totalCupos).toBe(20)
   })
 
-  it('también lo puede modificar DIRECCION', async () => {
+  it('no lo pueden modificar SECRETARIA, TESORERIA ni ASPIRANTE', async () => {
     const { caso } = await armarMundo()
 
-    await expect(
-      caso.ejecutar({ ...secretaria, rol: 'DIRECCION' }, 'periodo-1', { nombre: 'Otro nombre' }),
-    ).resolves.toBeDefined()
+    for (const rol of ['SECRETARIA', 'TESORERIA', 'ASPIRANTE'] as const) {
+      await expect(
+        caso.ejecutar({ ...director, rol }, 'periodo-1', { totalCupos: 5 }),
+      ).rejects.toThrow(NoAutorizado)
+    }
   })
 
   it('no deja bajar los cupos por debajo de las vacantes confirmadas', async () => {
@@ -60,7 +62,7 @@ describe('ModificarPeriodo', () => {
     postulaciones.sembrar({ aspiranteId: 'a-1', periodoId: 'periodo-1', estado: 'VACANTE_CONFIRMADA' })
     postulaciones.sembrar({ aspiranteId: 'a-2', periodoId: 'periodo-1', estado: 'VACANTE_CONFIRMADA' })
 
-    await expect(caso.ejecutar(secretaria, 'periodo-1', { totalCupos: 1 })).rejects.toThrow(
+    await expect(caso.ejecutar(director, 'periodo-1', { totalCupos: 1 })).rejects.toThrow(
       CuposPorDebajoDeConfirmadas,
     )
   })
@@ -69,27 +71,16 @@ describe('ModificarPeriodo', () => {
     const { caso, postulaciones } = await armarMundo()
     postulaciones.sembrar({ aspiranteId: 'a-1', periodoId: 'periodo-1', estado: 'VACANTE_CONFIRMADA' })
 
-    const actualizado = await caso.ejecutar(secretaria, 'periodo-1', { totalCupos: 1 })
+    const actualizado = await caso.ejecutar(director, 'periodo-1', { totalCupos: 1 })
 
     expect(actualizado.totalCupos).toBe(1)
-  })
-
-  it('no lo pueden modificar ASPIRANTE ni TESORERIA', async () => {
-    const { caso } = await armarMundo()
-
-    await expect(
-      caso.ejecutar({ ...secretaria, rol: 'ASPIRANTE' }, 'periodo-1', { totalCupos: 5 }),
-    ).rejects.toThrow(NoAutorizado)
-    await expect(
-      caso.ejecutar({ ...secretaria, rol: 'TESORERIA' }, 'periodo-1', { totalCupos: 5 }),
-    ).rejects.toThrow(NoAutorizado)
   })
 
   it('no encuentra un período de otra institución', async () => {
     const { caso } = await armarMundo()
 
     await expect(
-      caso.ejecutar({ ...secretaria, institucionId: 'institucion-2' }, 'periodo-1', {
+      caso.ejecutar({ ...director, institucionId: 'institucion-2' }, 'periodo-1', {
         totalCupos: 5,
       }),
     ).rejects.toThrow(NoEncontrado)
@@ -98,7 +89,7 @@ describe('ModificarPeriodo', () => {
   it('no encuentra un período inexistente', async () => {
     const { caso } = await armarMundo()
 
-    await expect(caso.ejecutar(secretaria, 'no-existe', { totalCupos: 5 })).rejects.toThrow(
+    await expect(caso.ejecutar(director, 'no-existe', { totalCupos: 5 })).rejects.toThrow(
       NoEncontrado,
     )
   })
