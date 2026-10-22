@@ -212,7 +212,7 @@ confirmada y la ocupación supera el total.
 - **Postulación**: el intento de ingreso de un aspirante a un período. Tiene ID de Postulación, estado, vencimiento
   del plazo de pago (cuando está pendiente), período e institución. Reemplaza a "procedure/trámite" en el lenguaje
   ubicuo.
-- **Período de ingreso**: tiene nombre, total de cupos, institución y, opcionalmente, una fecha de cierre. La
+- **Período de ingreso**: tiene nombre, total de cupos, institución y una fecha de cierre. La
   ocupación no se guarda: se deriva.
 - **Pago**: nace solo cuando llega una acreditación (una fila del informe o un aviso de Pagos360). Tiene proveedor,
   referencia externa (el par proveedor + referencia es único), monto en centavos enteros, fecha de pago (evalúa el
