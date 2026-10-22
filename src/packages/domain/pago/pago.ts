@@ -1,4 +1,5 @@
 import type { Dni } from '../perfil/dni'
+import { TransicionInvalida } from '../postulacion/errores'
 import type { MotivoDeRevision } from '../postulacion/estados'
 import type { NumeroDePostulacion } from '../postulacion/numero-de-postulacion'
 import type { Monto } from './monto'
@@ -63,8 +64,12 @@ export class Pago {
     if (estado !== 'NO_IMPUTADO' && postulacionId === undefined) {
       throw new Error(`Un pago ${estado} requiere postulacionId.`)
     }
-    if ((estado === 'A_DECIDIR') !== (motivoRevision !== undefined)) {
-      throw new Error('motivoRevision es obligatorio en A_DECIDIR y solo se admite en ese estado.')
+    // Después de la decisión de Dirección, ACREDITADO y DEVUELTO conservan el motivo para auditoría.
+    if (estado === 'A_DECIDIR' && motivoRevision === undefined) {
+      throw new Error('motivoRevision es obligatorio en A_DECIDIR.')
+    }
+    if (estado === 'NO_IMPUTADO' && motivoRevision !== undefined) {
+      throw new Error('motivoRevision no se admite en NO_IMPUTADO.')
     }
     if ((estado === 'NO_IMPUTADO') !== (motivoNoImputado !== undefined)) {
       throw new Error('motivoNoImputado es obligatorio en NO_IMPUTADO y solo se admite en ese estado.')
@@ -76,5 +81,28 @@ export class Pago {
     this.cargaId = opcionales.cargaId
     this.dniInformado = opcionales.dniInformado
     this.numeroInformado = opcionales.numeroInformado
+  }
+
+  /** A_DECIDIR → ACREDITADO (Dirección acepta la excepción). */
+  aceptar(): Pago {
+    return this.decidir('ACREDITADO')
+  }
+
+  /** A_DECIDIR → DEVUELTO (Dirección rechaza; Tesorería reintegra la plata fuera del sistema, FR-014). */
+  devolver(): Pago {
+    return this.decidir('DEVUELTO')
+  }
+
+  private decidir(estado: 'ACREDITADO' | 'DEVUELTO'): Pago {
+    if (this.estado !== 'A_DECIDIR') {
+      throw new TransicionInvalida(`Solo se decide un pago A_DECIDIR, y este está ${this.estado}.`)
+    }
+    return new Pago(this.id, this.referencia, this.monto, this.pagadoEl, this.registradoEl, estado, {
+      motivoRevision: this.motivoRevision,
+      postulacionId: this.postulacionId,
+      cargaId: this.cargaId,
+      dniInformado: this.dniInformado,
+      numeroInformado: this.numeroInformado,
+    })
   }
 }

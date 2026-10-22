@@ -34,8 +34,11 @@ detrás del adaptador). El adaptador mapea uno a otro, y los tipos generados por
 
 **Pago**
 - `id`, `referencia: ReferenciaDePago`, `monto: Monto` (> 0), `pagadoEl`, `registradoEl`, `estado`,
-  `motivoRevision?` (si está `A_DECIDIR`), `motivoNoImputado?` (si está `NO_IMPUTADO`), `postulacionId?`,
-  `cargaId?`, `dniInformado?`, `numeroInformado?`.
+  `motivoRevision?` (obligatorio en `A_DECIDIR`; `ACREDITADO` y `DEVUELTO` lo conservan después de la decisión, para
+  auditoría), `motivoNoImputado?` (si está `NO_IMPUTADO`), `postulacionId?`, `cargaId?`, `dniInformado?`,
+  `numeroInformado?`.
+- Decisión de Dirección: `aceptar()` (`A_DECIDIR → ACREDITADO`) y `devolver()` (`A_DECIDIR → DEVUELTO`). Desde
+  cualquier otro estado lanzan `TransicionInvalida`.
 
 **CargaDeInforme**
 - `id`, `institucionId`, `cargadaPor` (perfil `TESORERIA`), `cargadaEl`, `nombreArchivo`, y el resumen:
