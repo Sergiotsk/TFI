@@ -3,12 +3,16 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./contratos": "./contratos/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tfi/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
   }
 }
