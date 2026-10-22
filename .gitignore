@@ -10,6 +10,8 @@ node_modules
 package-lock.json
 *.tsbuildinfo
 .next/
+# Estado local del Supabase CLI (link, claves, ref del proyecto)
+supabase/.temp/
 # Lo genera Next en cada dev/build/typegen (docs: config/typescript)
 next-env.d.ts
 

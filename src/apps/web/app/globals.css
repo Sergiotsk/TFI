@@ -47,6 +47,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Tema UTN FRH: los componentes solo usan tokens semanticos, nunca colores fijos. */
 :root {
   /* Fondo general sutil de los prototipos (#f0f3ff) */
   --background: #f0f3ff;

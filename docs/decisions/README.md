@@ -16,9 +16,12 @@ qué consecuencias trae.
 | # | Título | Estado |
 |---|---|---|
 | [0001](0001-usar-arquitectura-hexagonal.md) | Usar arquitectura hexagonal | Aceptado |
-| [0002](0002-disenar-para-multi-institucion.md) | Diseñar para multi-institución | Aceptado |
+| [0002](0002-disenar-para-multi-institucion.md) | Diseñar para multi-institución | Aceptado (supersedido parcialmente por [0006](0006-instituciones-en-el-esquema.md) en lo que respecta al esquema) |
 | [0003](0003-src-como-raiz-del-workspace.md) | `src/` como raíz del workspace, con paquetes planos | Aceptado |
 | [0004](0004-migraciones-por-integracion-github.md) | Migraciones al remoto por la integración de GitHub de Supabase | Aceptado |
+| [0005](0005-excepciones-de-vacante-decide-direccion.md) | Los pagos excepcionales los decide Dirección, caso por caso | Aceptado |
+| [0006](0006-instituciones-en-el-esquema.md) | La institución como dato del esquema desde ahora | Aceptado |
+| [0007](0007-renombrar-procedure-a-postulacion.md) | Renombrar Procedure a Postulación y alinear los roles | Aceptado |
 
 ## Plantilla
 
