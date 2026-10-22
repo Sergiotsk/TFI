@@ -19,6 +19,9 @@ export class PeriodoDeIngreso {
     if (!Number.isSafeInteger(diasPlazoPago) || diasPlazoPago <= 0) {
       throw new Error(`diasPlazoPago inválido: ${diasPlazoPago}. Debe ser un entero mayor a 0.`)
     }
+    if (montoMatricula.centavos === 0) {
+      throw new Error('montoMatricula inválido: debe ser mayor a 0 centavos.')
+    }
   }
 
   /** Abierto hasta el instante de cierre inclusive. */

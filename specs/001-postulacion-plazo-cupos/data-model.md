@@ -21,7 +21,7 @@ detrás del adaptador). El adaptador mapea uno a otro, y los tipos generados por
 
 **PeriodoDeIngreso**
 - `id`, `institucionId`, `nombre`, `totalCupos` (entero ≥ 0), `cierraEl` (fecha), `diasPlazoPago` (entero > 0),
-  `montoMatricula: Monto`.
+  `montoMatricula: Monto` (> 0).
 - `estaAbierto(ahora)`: `ahora <= cierraEl`.
 - `calcularVencimiento(ahora)`: `min(ahora + diasPlazoPago, cierraEl)`.
 - Regla: `totalCupos` no puede bajar por debajo de las vacantes ya confirmadas (lo verifica el caso de uso
@@ -33,7 +33,7 @@ detrás del adaptador). El adaptador mapea uno a otro, y los tipos generados por
 - Es inmutable: cada transición devuelve una Postulación nueva o lanza `TransicionInvalida`.
 
 **Pago**
-- `id`, `referencia: ReferenciaDePago`, `monto: Monto`, `pagadoEl`, `registradoEl`, `estado`,
+- `id`, `referencia: ReferenciaDePago`, `monto: Monto` (> 0), `pagadoEl`, `registradoEl`, `estado`,
   `motivoRevision?` (si está `A_DECIDIR`), `motivoNoImputado?` (si está `NO_IMPUTADO`), `postulacionId?`,
   `cargaId?`, `dniInformado?`, `numeroInformado?`.
 

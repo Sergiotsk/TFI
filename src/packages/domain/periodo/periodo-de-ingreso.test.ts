@@ -5,7 +5,9 @@ import { PeriodoDeIngreso } from './periodo-de-ingreso'
 
 const DIA = 24 * 60 * 60 * 1000
 
-function periodo(sobrescribir: { totalCupos?: number; cierraEl?: Date; diasPlazoPago?: number } = {}) {
+function periodo(
+  sobrescribir: { totalCupos?: number; cierraEl?: Date; diasPlazoPago?: number; montoMatricula?: Monto } = {},
+) {
   return new PeriodoDeIngreso(
     'per-1',
     'inst-1',
@@ -13,7 +15,7 @@ function periodo(sobrescribir: { totalCupos?: number; cierraEl?: Date; diasPlazo
     sobrescribir.totalCupos ?? 50,
     sobrescribir.cierraEl ?? new Date('2027-03-01T00:00:00Z'),
     sobrescribir.diasPlazoPago ?? 5,
-    new Monto(1500000),
+    sobrescribir.montoMatricula ?? new Monto(1500000),
   )
 }
 
@@ -42,6 +44,11 @@ describe('PeriodoDeIngreso', () => {
     expect(() => periodo({ diasPlazoPago: 0 })).toThrow()
     expect(() => periodo({ diasPlazoPago: -2 })).toThrow()
     expect(() => periodo({ diasPlazoPago: 2.5 })).toThrow()
+  })
+
+  test('rechaza una matrícula de 0 centavos (CHECK monto_matricula_centavos > 0)', () => {
+    expect(() => periodo({ montoMatricula: new Monto(0) })).toThrow()
+    expect(periodo({ montoMatricula: new Monto(1) }).montoMatricula.centavos).toBe(1)
   })
 
   describe('estaAbierto', () => {

@@ -47,6 +47,12 @@ describe('Pago', () => {
     ).toBe('AMBIGUA')
   })
 
+  test('rechaza un monto de 0 centavos (CHECK monto_centavos > 0)', () => {
+    const noImputado = { motivoNoImputado: 'AMBIGUA' } as const
+    expect(() => new Pago('pg-1', referencia, new Monto(0), pagadoEl, registradoEl, 'NO_IMPUTADO', noImputado)).toThrow()
+    expect(new Pago('pg-1', referencia, new Monto(1), pagadoEl, registradoEl, 'NO_IMPUTADO', noImputado).monto.centavos).toBe(1)
+  })
+
   test('ACREDITADO y DEVUELTO exigen postulación', () => {
     expect(() => new Pago('pg-1', referencia, monto, pagadoEl, registradoEl, 'ACREDITADO')).toThrow()
     expect(() => new Pago('pg-1', referencia, monto, pagadoEl, registradoEl, 'DEVUELTO')).toThrow()

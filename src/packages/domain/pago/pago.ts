@@ -57,6 +57,9 @@ export class Pago {
   ) {
     const { motivoRevision, motivoNoImputado, postulacionId } = opcionales
 
+    if (monto.centavos === 0) {
+      throw new Error('Un pago debe tener un monto mayor a 0 centavos.')
+    }
     if (estado !== 'NO_IMPUTADO' && postulacionId === undefined) {
       throw new Error(`Un pago ${estado} requiere postulacionId.`)
     }
