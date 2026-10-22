@@ -5,6 +5,7 @@ import type { RepositorioDePerfiles } from './puerto'
 // Los ids tienen que ser unicos por corrida: contra una base real, guardar dos
 // veces el mismo id choca contra la clave primaria.
 let contador = 0
+let dniContador = 20_000_000
 
 function idUnico(): string {
   contador += 1
@@ -12,13 +13,17 @@ function idUnico(): string {
 }
 
 function perfilDePrueba(id: string, rol: Rol): Perfil {
+  dniContador += 1
+  const dni = String(dniContador)
+  const cuil = `20${dni.padStart(8, '0')}3`
+
   return new Perfil(
     id,
     `perfil.${id}@example.com`,
     'Ana',
     'García',
-    '10000001',
-    '20100000013',
+    dni,
+    cuil,
     new Date('1990-05-15'),
     'F',
     '1122334455',

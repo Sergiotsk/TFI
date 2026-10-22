@@ -1,5 +1,6 @@
 import { Perfil } from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
+import { DatosDuplicados } from '../../casos-de-uso/errores'
 import type { RepositorioDePerfiles } from './puerto'
 
 export class RepositorioDePerfilesFake implements RepositorioDePerfiles {
@@ -84,6 +85,11 @@ export class RepositorioDePerfilesFake implements RepositorioDePerfiles {
   }
 
   async guardar(perfil: Perfil): Promise<void> {
+    const repetido = this.perfiles.find(
+      (otro) => otro.id !== perfil.id && (otro.dni === perfil.dni || otro.cuil === perfil.cuil),
+    )
+    if (repetido) throw new DatosDuplicados()
+
     const index = this.perfiles.findIndex((u) => u.id === perfil.id)
     if (index >= 0) {
       this.perfiles[index] = perfil

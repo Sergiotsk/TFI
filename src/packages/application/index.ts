@@ -16,7 +16,7 @@ export { CerrarSesionUseCase } from './casos-de-uso/autenticacion/cerrar-sesion'
 export { ConsultarPerfilPropioUseCase } from './casos-de-uso/autenticacion/consultar-perfil-propio'
 export { ObtenerActorUseCase } from './casos-de-uso/autenticacion/obtener-actor'
 export type { ResultadoDeActor } from './casos-de-uso/autenticacion/obtener-actor'
-export { NoAutorizado, NoEncontrado, ConflictoDeEstado } from './casos-de-uso/errores'
+export { NoAutorizado, NoEncontrado, ConflictoDeEstado, DatosDuplicados } from './casos-de-uso/errores'
 export type { Actor } from './casos-de-uso/actor'
 export { exigirRol } from './casos-de-uso/actor'
 export { CrearPostulacionUseCase } from './casos-de-uso/crear-postulacion'
@@ -28,6 +28,16 @@ export { ListarPeriodosAbiertosUseCase } from './casos-de-uso/listar-periodos-ab
 export { IniciarPagoUseCase } from './casos-de-uso/iniciar-pago'
 export { ConsultarPostulacionUseCase } from './casos-de-uso/consultar-postulacion'
 export { ListarPostulacionesUseCase } from './casos-de-uso/listar-postulaciones'
+export { AcreditarPagoManualUseCase } from './casos-de-uso/acreditar-pago-manual'
+export { ProrrogarPlazoDePagoUseCase } from './casos-de-uso/prorrogar-plazo-de-pago'
+export { ActualizarPerfilUseCase } from './casos-de-uso/actualizar-perfil'
+export type { CambiosDePerfil } from './casos-de-uso/actualizar-perfil'
+export type {
+  AccionesDelPersonal,
+  ResultadoDeConfirmacion,
+  ResultadoDeProrroga,
+} from './puertos/acciones-del-personal/puerto'
+export { AccionesDelPersonalFake } from './puertos/acciones-del-personal/fake'
 export type { PostulacionConsultada } from './casos-de-uso/postulacion-consultada'
 export type { Reloj } from './puertos/reloj/puerto'
 export { RelojFijo } from './puertos/reloj/fake'

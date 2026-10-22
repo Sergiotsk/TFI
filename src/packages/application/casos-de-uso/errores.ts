@@ -24,3 +24,11 @@ export class ConflictoDeEstado extends Error {
     this.name = 'ConflictoDeEstado'
   }
 }
+
+/** Ya existe otro perfil con el mismo DNI o CUIL (restricción UNIQUE). */
+export class DatosDuplicados extends Error {
+  constructor(mensaje = 'Ya existe un perfil con ese DNI o CUIL') {
+    super(mensaje)
+    this.name = 'DatosDuplicados'
+  }
+}

@@ -9,6 +9,7 @@ export { probarContratoRepositorioDePerfiles } from '../puertos/repositorio-de-p
 export { probarContratoRepositorioDeDocumentos } from '../puertos/repositorio-de-documentos/contrato'
 export { probarContratoDeReloj } from '../puertos/reloj/contrato'
 export { probarContratoDeGeneradorDeIds } from '../puertos/generador-de-ids/contrato'
+export { probarContratoDeAccionesDelPersonal } from '../puertos/acciones-del-personal/contrato'
 export { probarContratoDeRepositorioDePostulaciones } from '../puertos/repositorio-de-postulaciones/contrato'
 export type {
   DatosDePeriodoDePrueba,
