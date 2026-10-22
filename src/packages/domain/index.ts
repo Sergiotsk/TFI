@@ -1,7 +1,10 @@
 // API pública de @tfi/domain: lo que no se exporta acá no se puede importar desde otros paquetes.
-export { User } from './user/user'
-export { Procedure } from './procedure/procedure'
-export { Document } from './document/document'
+export { Perfil } from './perfil/perfil'
+export type { Rol } from './perfil/rol'
+export { ROLES_DEL_PERSONAL } from './perfil/rol'
+export type { Sexo } from './perfil/sexo'
+export { Documento } from './documento/documento'
+export type { EstadoDocumento } from './documento/estado'
 
 // Feature 001: postulación con plazo de pago y control de cupos
 export { Monto } from './pago/monto'
