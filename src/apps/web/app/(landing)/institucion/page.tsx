@@ -1,55 +1,44 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import {
-  FRH_SITIO,
-  SEDE_DIRECCION,
-  UTN_SITIO,
-} from '@/lib/landing/datos'
-import { FotoOpcional } from '@/components/landing/foto-opcional'
+import { FOTOS_SEDE, FRH_SITIO, SEDE_DIRECCION, UTN_SITIO } from '@/lib/landing/datos'
+import { CarruselSede } from '@/components/landing/carrusel-sede'
+import { PortadaSede } from '@/components/landing/portada-sede'
 import { Revelado } from '@/components/landing/revelado'
 
 export const metadata: Metadata = {
   title: 'Institución',
 }
 
-const FOTOS_SEDE = [
-  { archivo: '/landing/img/facultad-1.jpg', clase: 'foto--grande' },
-  { archivo: '/landing/img/facultad-2.jpg', clase: '' },
-  { archivo: '/landing/img/facultad-3.jpg', clase: '' },
-]
-
 export default function Institucion() {
   return (
     <>
       <Revelado />
-      <div className="banda-azul cabecera-vista">
-        <div className="container">
-          <h1 id="institucion-titulo" tabIndex={-1}>
-            La institución
-          </h1>
-          <p className="cabecera-vista__bajada">
-            Este sistema nace dentro de la UTN Facultad Regional Haedo y está pensado para que lo
-            use la propia Facultad.
-          </p>
-        </div>
-      </div>
+      <PortadaSede>
+        <h1 id="institucion-titulo" tabIndex={-1}>
+          La institución
+        </h1>
+        <p className="cabecera-vista__bajada">
+          Este sistema nace dentro de la UTN Facultad Regional Haedo y está pensado para que lo
+          use <strong>la propia Facultad</strong>.
+        </p>
+      </PortadaSede>
 
       <section className="section" aria-labelledby="utn-titulo">
         <div className="container split">
-          <div className="split__intro reveal">
+          <div className="split__intro reveal reveal--izq">
             <h2 id="utn-titulo">Una universidad nacional dedicada a la tecnología</h2>
             <p>
-              La Universidad Tecnológica Nacional (UTN) se creó el 14 de octubre de 1959 por la ley
-              14.855. Su antecedente es la Universidad Obrera, que ya funcionaba con estructura
-              universitaria desde 1953.
+              La Universidad Tecnológica Nacional (UTN) se creó el{' '}
+              <strong>14 de octubre de 1959</strong> por la ley 14.855. Su antecedente es la
+              Universidad Obrera, que ya funcionaba con estructura universitaria desde 1953.
             </p>
           </div>
           <div className="texto-largo reveal">
             <p>
-              Es la única universidad nacional del país cuya estructura académica tiene a las
-              ingenierías como eje central, y tiene carácter federal: sus facultades regionales
-              están repartidas en distintas ciudades de la Argentina, y cada una responde a las
-              necesidades productivas de su zona.
+              Es <strong>la única universidad nacional del país</strong> cuya estructura académica
+              tiene a las ingenierías como eje central, y tiene <strong>carácter federal</strong>:
+              sus facultades regionales están repartidas en distintas ciudades de la Argentina, y
+              cada una responde a las necesidades productivas de su zona.
             </p>
             <p>
               <a className="enlace" href={UTN_SITIO} target="_blank" rel="noopener">
@@ -62,18 +51,19 @@ export default function Institucion() {
 
       <section className="section section--tinte" aria-labelledby="frh-titulo">
         <div className="container split">
-          <div className="split__intro reveal">
+          <div className="split__intro reveal reveal--izq">
             <h2 id="frh-titulo">Facultad Regional Haedo</h2>
             <p>
-              Es parte de la comunidad de Haedo y fue reconocida como Facultad Regional en 1972. En
-              1983 inauguró su sede actual en París 532.
+              Es parte de la comunidad de Haedo y fue reconocida como Facultad Regional en{' '}
+              <strong>1972</strong>. En <strong>1983</strong> inauguró su sede actual en París 532.
             </p>
           </div>
           <div className="texto-largo reveal">
             <p>
-              Además de formar profesionales en ingeniería, la Facultad ofrece carreras de grado y
-              posgrado y cursos, y trabaja con empresas e instituciones de la zona: brinda
-              consultoría y arma propuestas de capacitación a medida.
+              Además de formar profesionales en ingeniería, la Facultad ofrece{' '}
+              <strong>carreras de grado y posgrado y cursos</strong>, y trabaja con empresas e
+              instituciones de la zona: brinda consultoría y arma propuestas de capacitación a
+              medida.
             </p>
             <p>La oferta completa de carreras y cursos se consulta en el sitio de la Facultad.</p>
             <p>
@@ -87,19 +77,19 @@ export default function Institucion() {
 
       <section className="section" aria-labelledby="tup-titulo">
         <div className="container split">
-          <div className="split__intro reveal">
+          <div className="split__intro reveal reveal--izq">
             <h2 id="tup-titulo">La Tecnicatura y este proyecto</h2>
             <p>
-              El ingreso a la Tecnicatura Universitaria en Programación (TUP) hoy se gestiona con
-              formularios, carpetas compartidas y planillas.
+              El ingreso a la Tecnicatura Universitaria en Programación (TUP) hoy se gestiona con{' '}
+              <strong>formularios, carpetas compartidas y planillas</strong>.
             </p>
           </div>
           <div className="texto-largo reveal">
             <p>
               Para entender el problema, el Equipo 5 habló con la Dirección de la carrera, con
               Secretaría y con el área de Sistemas y Administración. De esas entrevistas salió la
-              regla central del sistema: el pago acreditado confirma la vacante, y la documentación
-              se revisa después.
+              regla central del sistema: <strong>el pago acreditado confirma la vacante</strong>, y
+              la documentación se revisa después.
             </p>
             <p>
               <Link className="enlace" href="/#problema">
@@ -115,16 +105,8 @@ export default function Institucion() {
           <h2 id="sede-titulo" className="reveal">
             La sede
           </h2>
-          <div className="galeria reveal">
-            {FOTOS_SEDE.map(({ archivo, clase }) => (
-              <FotoOpcional
-                key={archivo}
-                className={clase}
-                src={archivo}
-                alt="UTN Facultad Regional Haedo"
-                marcador="Foto de la Facultad"
-              />
-            ))}
+          <div className="reveal reveal--zoom">
+            <CarruselSede fotos={FOTOS_SEDE} alt="UTN Facultad Regional Haedo" />
           </div>
           <dl className="datos reveal">
             <div className="datos__item">

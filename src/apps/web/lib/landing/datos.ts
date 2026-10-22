@@ -30,7 +30,72 @@ export const UTN_SITIO = 'https://www.utn.edu.ar'
 /** Imágenes oficiales: van en public/landing/img/ con estos nombres (si no están, se ve un marcador). */
 export const IMG_LOGO = '/landing/img/logo-utn-frh.png'
 
+/** Imagen del encabezado de Institución (se ve del lado derecho, con degradado hacia el azul). */
+export const IMG_SEDE_PORTADA = '/landing/img/sede-portada.jpg'
+
+/** Fotos del carrusel de la sede: se muestran solo las que existan, en este orden (hasta 6). */
+export const FOTOS_SEDE: readonly string[] = [
+  '/landing/img/facultad-1.jpg',
+  '/landing/img/facultad-2.jpg',
+  '/landing/img/facultad-3.jpg',
+  '/landing/img/facultad-4.jpg',
+  '/landing/img/facultad-5.jpg',
+  '/landing/img/facultad-6.jpg',
+]
+
 export const DOCENTE = 'Lic. Leila Coronel'
+
+/** Pasos del flujo propuesto (Home). El que tiene `hito` es el que confirma la vacante. */
+export const PASOS_PROPUESTOS = [
+  { titulo: 'Preinscripción ligera', detalle: 'Datos mínimos y aceptación de las condiciones.', hito: false },
+  { titulo: 'Paga la matrícula', detalle: 'Online o en la ventanilla de Tesorería.', hito: false },
+  { titulo: 'Vacante confirmada', detalle: 'El pago acreditado asegura el lugar.', hito: true },
+  { titulo: 'Carga la documentación', detalle: 'Recién ahora, y Secretaría la revisa.', hito: false },
+] as const
+
+export type ClaveDeRol = 'postulante' | 'secretario' | 'tesoreria' | 'director'
+
+/** Roles del sistema (Home). */
+export const ROLES: readonly { clave: ClaveDeRol; nombre: string; funcion: string }[] = [
+  { clave: 'postulante', nombre: 'Postulante', funcion: 'Maneja su postulación y gestiona sus documentos.' },
+  {
+    clave: 'secretario',
+    nombre: 'Secretario',
+    funcion: 'Puede gestionar y ayudar a los postulantes en los pasos de los ingresos.',
+  },
+  { clave: 'tesoreria', nombre: 'Tesorería', funcion: 'Puede gestionar la confirmación de los pagos.' },
+  {
+    clave: 'director',
+    nombre: 'Director',
+    funcion: 'Puede ver las estadísticas generales y gestionar el ingreso en general.',
+  },
+]
+
+/** Tecnología del sistema, agrupada en capas (Home). */
+export const CAPAS_TECNOLOGICAS = [
+  {
+    nombre: 'Lo que ve la persona',
+    piezas: [
+      { nombre: 'Next.js', uso: 'las páginas y el servidor' },
+      { nombre: 'React', uso: 'la interfaz' },
+      { nombre: 'TypeScript', uso: 'código más seguro' },
+      { nombre: 'Tailwind CSS y shadcn/ui', uso: 'el diseño' },
+    ],
+  },
+  {
+    nombre: 'Lo que guarda y protege',
+    piezas: [
+      { nombre: 'Supabase', uso: 'base de datos PostgreSQL, usuarios y archivos' },
+    ],
+  },
+  {
+    nombre: 'Lo que verifica',
+    piezas: [
+      { nombre: 'Zod', uso: 'valida los datos que llegan' },
+      { nombre: 'Vitest', uso: 'pruebas automáticas' },
+    ],
+  },
+] as const
 
 /** Claves válidas de motivo de consulta. La usan la vista y el endpoint. */
 export const CLAVES_DE_ASUNTOS = ['inscripcion', 'proyecto', 'equipo', 'otro'] as const

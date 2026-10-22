@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { DOCENTE, EQUIPO } from '@/lib/landing/datos'
+import { cn } from '@/lib/utils'
 import { AvatarPersona } from '@/components/landing/avatar-persona'
 import { Revelado } from '@/components/landing/revelado'
 
@@ -12,7 +13,7 @@ export default function Nosotros() {
   return (
     <>
       <Revelado />
-      <div className="banda-azul cabecera-vista">
+      <div className="banda-azul cabecera-vista" data-parallax="0.06">
         <div className="container">
           <h1 id="nosotros-titulo" tabIndex={-1}>
             Sobre nosotros
@@ -31,8 +32,14 @@ export default function Nosotros() {
             Quiénes somos
           </h2>
           <ul className="equipo">
-            {EQUIPO.map((persona) => (
-              <li className="persona reveal" key={persona.nombre}>
+            {EQUIPO.map((persona, i) => (
+              <li
+                className={cn(
+                  'persona reveal',
+                  i % 2 === 0 ? 'reveal--izq' : 'persona--invertida reveal--der',
+                )}
+                key={persona.nombre}
+              >
                 <AvatarPersona nombre={persona.nombre} foto={persona.foto} />
                 <div className="persona__cuerpo">
                   <h3>{persona.nombre}</h3>
@@ -75,7 +82,7 @@ export default function Nosotros() {
 
       <section className="section section--tinte" aria-labelledby="contexto-titulo">
         <div className="container split">
-          <div className="split__intro reveal">
+          <div className="split__intro reveal reveal--izq">
             <h2 id="contexto-titulo">Un proyecto real</h2>
             <p>
               Este es el Trabajo Final Integrador de la Práctica Profesional Supervisada 2026 de la
