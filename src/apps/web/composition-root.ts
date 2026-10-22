@@ -19,6 +19,7 @@ import {
   ConsultarPostulacionUseCase,
   CrearPeriodoUseCase,
   ListarPeriodosAbiertosUseCase,
+  ModificarPeriodoUseCase,
 } from '@tfi/application'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
@@ -52,6 +53,7 @@ export function crearDependencias(supabase: SupabaseClient) {
     iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),
     consultarPostulacion: new ConsultarPostulacionUseCase(repoPostulaciones, reloj),
     crearPeriodo: new CrearPeriodoUseCase(repoPeriodos, generadorDeIds),
+    modificarPeriodo: new ModificarPeriodoUseCase(repoPeriodos),
     listarPeriodosAbiertos: new ListarPeriodosAbiertosUseCase(repoPeriodos, reloj),
   }
 }

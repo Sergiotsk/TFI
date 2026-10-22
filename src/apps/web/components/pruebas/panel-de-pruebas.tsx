@@ -1,12 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import Link from 'next/link'
+import { ROLES_DEL_PERSONAL } from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
 import { Button } from '@/components/ui/button'
 import { CLASE_CAMPO, CLASE_ETIQUETA } from '@/components/auth/clases'
 import { ETIQUETAS_DE_ROL, INSTITUCION } from '@/config/institucion'
+
+const ROLES: Rol[] = ['ASPIRANTE', 'SECRETARIA', 'DIRECCION', 'TESORERIA']
+const DIRECTIVOS: Rol[] = ['SECRETARIA', 'DIRECCION']
 
 interface Sesion {
   perfilId: string
@@ -40,6 +44,10 @@ interface NuevoPeriodo {
   montoArs: string
 }
 
+interface PeriodoEnEdicion extends NuevoPeriodo {
+  id: string
+}
+
 const NUEVO_PERIODO_INICIAL: NuevoPeriodo = {
   nombre: 'Período de prueba',
   totalCupos: '50',
@@ -54,10 +62,18 @@ export function PanelDePruebas() {
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [mensaje, setMensaje] = useState<string | null>(null)
+
+  const [rolFiltro, setRolFiltro] = useState('')
+  const [perfilId, setPerfilId] = useState('')
+
   const [periodoId, setPeriodoId] = useState('')
   const [periodos, setPeriodos] = useState<Periodo[]>([])
   const [nuevoPeriodo, setNuevoPeriodo] = useState<NuevoPeriodo>(NUEVO_PERIODO_INICIAL)
+  const [periodoEnEdicion, setPeriodoEnEdicion] = useState<PeriodoEnEdicion | null>(null)
+
   const [postulacionId, setPostulacionId] = useState('')
+  const [documentoId, setDocumentoId] = useState('')
+
   const [historial, setHistorial] = useState<Llamada[]>([])
   const [ocupado, setOcupado] = useState(false)
   const secuencia = useRef(0)
@@ -84,8 +100,12 @@ export function PanelDePruebas() {
       const datos = datosDe(cuerpo)
       const sesionNueva = esSesion(datos) ? datos : null
       setSesion(sesionNueva)
-      if (sesionNueva) await cargarPeriodos()
-      else setPeriodos([])
+      if (sesionNueva) {
+        setPerfilId((actual) => actual || sesionNueva.perfilId)
+        await cargarPeriodos()
+      } else {
+        setPeriodos([])
+      }
     } finally {
       setCargandoSesion(false)
     }
@@ -95,7 +115,7 @@ export function PanelDePruebas() {
     void cargarSesion()
   }, [cargarSesion])
 
-  async function llamar(metodo: 'GET' | 'POST', url: string, cuerpo?: unknown) {
+  async function llamar(metodo: 'GET' | 'POST' | 'PATCH', url: string, cuerpo?: unknown) {
     setOcupado(true)
     try {
       const respuesta = await fetch(url, {
@@ -118,7 +138,7 @@ export function PanelDePruebas() {
         ...previas,
       ])
 
-      // Ayuda: completar el id con la Postulación recién creada o la primera propia.
+      // Atajos para encadenar las pruebas sin copiar ids a mano.
       if (respuesta.ok && metodo === 'POST' && url === '/api/postulaciones') {
         const id = idDe(json)
         if (id) setPostulacionId(id)
@@ -135,26 +155,13 @@ export function PanelDePruebas() {
         if (id) setPeriodoId(id)
         await cargarPeriodos()
       }
+      if (respuesta.ok && metodo === 'PATCH' && url.startsWith('/api/periodos/')) {
+        await cargarPeriodos()
+        setPeriodoEnEdicion(null)
+      }
     } finally {
       setOcupado(false)
     }
-  }
-
-  async function crearPeriodo(evento: FormEvent<HTMLFormElement>) {
-    evento.preventDefault()
-    if (nuevoPeriodo.cierraEl === '') return
-
-    await llamar('POST', '/api/periodos', {
-      nombre: nuevoPeriodo.nombre.trim(),
-      totalCupos: Number(nuevoPeriodo.totalCupos),
-      diasPlazoPago: Number(nuevoPeriodo.diasPlazoPago),
-      montoMatriculaCentavos: Math.round(Number(nuevoPeriodo.montoArs) * 100),
-      cierraEl: new Date(nuevoPeriodo.cierraEl).toISOString(),
-    })
-  }
-
-  function editarNuevoPeriodo(campo: keyof NuevoPeriodo, valor: string) {
-    setNuevoPeriodo((actual) => ({ ...actual, [campo]: valor }))
   }
 
   async function ingresar(evento: FormEvent<HTMLFormElement>) {
@@ -186,14 +193,61 @@ export function PanelDePruebas() {
       await fetch('/api/auth/cierre-de-sesion', { method: 'POST' })
       setSesion(null)
       setPeriodos([])
+      setPeriodoEnEdicion(null)
     } finally {
       setOcupado(false)
     }
   }
 
+  async function crearPeriodo(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault()
+    if (nuevoPeriodo.cierraEl === '') return
+
+    await llamar('POST', '/api/periodos', {
+      nombre: nuevoPeriodo.nombre.trim(),
+      totalCupos: Number(nuevoPeriodo.totalCupos),
+      diasPlazoPago: Number(nuevoPeriodo.diasPlazoPago),
+      montoMatriculaCentavos: Math.round(Number(nuevoPeriodo.montoArs) * 100),
+      cierraEl: new Date(nuevoPeriodo.cierraEl).toISOString(),
+    })
+  }
+
+  async function modificarPeriodo(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault()
+    if (!periodoEnEdicion || periodoEnEdicion.cierraEl === '') return
+
+    await llamar('PATCH', `/api/periodos/${periodoEnEdicion.id}`, {
+      nombre: periodoEnEdicion.nombre.trim(),
+      totalCupos: Number(periodoEnEdicion.totalCupos),
+      diasPlazoPago: Number(periodoEnEdicion.diasPlazoPago),
+      montoMatriculaCentavos: Math.round(Number(periodoEnEdicion.montoArs) * 100),
+      cierraEl: new Date(periodoEnEdicion.cierraEl).toISOString(),
+    })
+  }
+
+  function editarNuevoPeriodo(campo: keyof NuevoPeriodo, valor: string) {
+    setNuevoPeriodo((actual) => ({ ...actual, [campo]: valor }))
+  }
+
+  function editarPeriodoEnEdicion(campo: keyof NuevoPeriodo, valor: string) {
+    setPeriodoEnEdicion((actual) => (actual ? { ...actual, [campo]: valor } : actual))
+  }
+
+  function empezarEdicion(periodo: Periodo) {
+    setPeriodoId(periodo.id)
+    setPeriodoEnEdicion({
+      id: periodo.id,
+      nombre: periodo.nombre,
+      totalCupos: String(periodo.totalCupos),
+      cierraEl: aDatetimeLocal(periodo.cierraEl),
+      diasPlazoPago: String(periodo.diasPlazoPago),
+      montoArs: String(periodo.montoMatriculaCentavos / 100),
+    })
+  }
+
   const sinSesion = sesion === null
   const deshabilitado = sinSesion || ocupado
-  const puedeCrearPeriodos = sesion?.rol === 'SECRETARIA' || sesion?.rol === 'DIRECCION'
+  const puedeCrearPeriodos = sesion !== null && DIRECTIVOS.includes(sesion.rol)
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background px-4 py-10">
@@ -206,7 +260,8 @@ export function PanelDePruebas() {
             Laboratorio de endpoints
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Para probar la API a mano, sin la UI definitiva. Cada botón muestra la respuesta cruda.
+            Un apartado por recurso. Cada botón muestra la respuesta cruda y los permisos de cada
+            rol.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             <Link
@@ -239,8 +294,8 @@ export function PanelDePruebas() {
               </dl>
               <p className="text-sm text-muted-foreground">
                 {sesion.rol === 'ASPIRANTE'
-                  ? 'Como aspirante podés crear tu Postulación, ver las tuyas e iniciar el pago.'
-                  : 'Como personal podés ver cualquier Postulación por id. Crear e iniciar pago responden 403.'}
+                  ? 'Como aspirante podés crear tu Postulación, ver las tuyas e iniciar el pago. Perfiles y documentos te responden 403.'
+                  : 'Como personal podés ver cualquier Postulación y los perfiles/documentos. Crear Postulación e iniciar pago responden 403.'}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -249,6 +304,13 @@ export function PanelDePruebas() {
                   onClick={() => void llamar('GET', '/api/auth/yo')}
                 >
                   GET /api/auth/yo
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={ocupado}
+                  onClick={() => void llamar('GET', '/api/health')}
+                >
+                  GET /api/health
                 </Button>
                 <Button variant="ghost" disabled={ocupado} onClick={() => void salir()}>
                   Cerrar sesión
@@ -305,14 +367,135 @@ export function PanelDePruebas() {
           )}
         </section>
 
-        <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-foreground">Períodos</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Cualquier usuario autenticado ve los períodos abiertos de su institución. Los crea
-            Secretaría o Dirección.
+        <details className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <summary className="cursor-pointer text-base font-semibold text-foreground">
+            Permisos por rol (para chequear los 403)
+          </summary>
+          <p className="mt-2 text-sm text-muted-foreground">
+            La autorización se decide en los casos de uso y RLS es la segunda barrera. Probá con
+            cada cuenta y fijate el status de la respuesta.
           </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="py-1 pr-4 font-medium">Endpoint</th>
+                  <th className="py-1 font-medium">Quién</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border text-muted-foreground">
+                <FilaPermiso endpoint="GET /api/health" quien="Público" />
+                <FilaPermiso endpoint="POST /api/auth/registro" quien="Público (crea ASPIRANTE)" />
+                <FilaPermiso endpoint="POST /api/auth/inicio-de-sesion" quien="Público" />
+                <FilaPermiso endpoint="GET /api/auth/yo" quien="Autenticado" />
+                <FilaPermiso endpoint="GET /api/perfiles" quien={rolesDe(ROLES_DEL_PERSONAL)} />
+                <FilaPermiso endpoint="GET /api/perfiles/:id" quien="El propio o personal" />
+                <FilaPermiso endpoint="GET /api/periodos" quien="Autenticado" />
+                <FilaPermiso endpoint="POST /api/periodos" quien={rolesDe(DIRECTIVOS)} />
+                <FilaPermiso endpoint="PATCH /api/periodos/:id" quien={rolesDe(DIRECTIVOS)} />
+                <FilaPermiso endpoint="POST /api/postulaciones" quien="Aspirante" />
+                <FilaPermiso endpoint="GET /api/postulaciones/mias" quien="Aspirante" />
+                <FilaPermiso endpoint="GET /api/postulaciones/:id" quien="El propio o personal" />
+                <FilaPermiso
+                  endpoint="POST /api/postulaciones/:id/iniciar-pago"
+                  quien="Aspirante dueño"
+                />
+                <FilaPermiso endpoint="GET /api/document" quien={rolesDe(ROLES_DEL_PERSONAL)} />
+                <FilaPermiso endpoint="GET /api/document/:id" quien={rolesDe(ROLES_DEL_PERSONAL)} />
+              </tbody>
+            </table>
+          </div>
+        </details>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+        <Tarjeta
+          titulo="Perfiles"
+          descripcion={
+            <>
+              <code>GET /api/perfiles</code> lista (solo personal, con filtro opcional por rol);{' '}
+              <code>GET /api/perfiles/:id</code> devuelve uno (el propio o personal). No hay alta,
+              edición ni baja: el perfil lo crea el trigger de registro.
+            </>
+          }
+        >
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="w-52">
+              <label htmlFor="perfiles-rol" className={CLASE_ETIQUETA}>
+                Filtrar por rol
+              </label>
+              <select
+                id="perfiles-rol"
+                value={rolFiltro}
+                onChange={(evento) => setRolFiltro(evento.target.value)}
+                className={CLASE_CAMPO}
+              >
+                <option value="">Todos</option>
+                {ROLES.map((rol) => (
+                  <option key={rol} value={rol}>
+                    {ETIQUETAS_DE_ROL[rol]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button
+              variant="outline"
+              disabled={deshabilitado}
+              onClick={() =>
+                void llamar(
+                  'GET',
+                  rolFiltro === '' ? '/api/perfiles' : `/api/perfiles?rol=${rolFiltro}`,
+                )
+              }
+            >
+              GET /api/perfiles
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="perfil-id" className={CLASE_ETIQUETA}>
+              Perfil por id
+            </label>
+            <input
+              id="perfil-id"
+              placeholder="perfilId (UUID)"
+              value={perfilId}
+              onChange={(evento) => setPerfilId(evento.target.value)}
+              className={CLASE_CAMPO}
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                disabled={deshabilitado || perfilId.trim() === ''}
+                onClick={() => void llamar('GET', `/api/perfiles/${perfilId.trim()}`)}
+              >
+                GET /api/perfiles/:id
+              </Button>
+              {sesion ? (
+                <Button
+                  variant="ghost"
+                  disabled={ocupado}
+                  onClick={() => {
+                    setPerfilId(sesion.perfilId)
+                    void llamar('GET', `/api/perfiles/${sesion.perfilId}`)
+                  }}
+                >
+                  Mi perfil
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </Tarjeta>
+
+        <Tarjeta
+          titulo="Períodos"
+          descripcion={
+            <>
+              <code>GET</code> lo ve cualquier usuario autenticado (solo los abiertos);{' '}
+              <code>POST</code> y <code>PATCH</code> son de Secretaría o Dirección. No hay DELETE:
+              el período se cierra cambiando la fecha.
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               disabled={deshabilitado}
@@ -323,11 +506,11 @@ export function PanelDePruebas() {
           </div>
 
           <div className="mt-4">
-            <label htmlFor="periodo" className={CLASE_ETIQUETA}>
+            <label htmlFor="periodo-id" className={CLASE_ETIQUETA}>
               Período elegido (se completa al tocar “Usar”)
             </label>
             <input
-              id="periodo"
+              id="periodo-id"
               placeholder="periodoId (UUID)"
               value={periodoId}
               onChange={(evento) => setPeriodoId(evento.target.value)}
@@ -360,187 +543,217 @@ export function PanelDePruebas() {
                       {periodo.id}
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={ocupado || periodoId === periodo.id}
-                    onClick={() => setPeriodoId(periodo.id)}
-                  >
-                    {periodoId === periodo.id ? 'Elegido' : 'Usar'}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={ocupado || periodoId === periodo.id}
+                      onClick={() => setPeriodoId(periodo.id)}
+                    >
+                      {periodoId === periodo.id ? 'Elegido' : 'Usar'}
+                    </Button>
+                    {puedeCrearPeriodos ? (
+                      <Button variant="ghost" size="sm" onClick={() => empezarEdicion(periodo)}>
+                        Editar
+                      </Button>
+                    ) : null}
+                  </div>
                 </li>
               ))}
             </ul>
           )}
 
           {puedeCrearPeriodos ? (
-            <form
-              onSubmit={crearPeriodo}
-              className="mt-5 space-y-3 border-t border-border pt-5"
-            >
+            <form onSubmit={crearPeriodo} className="mt-5 space-y-3 border-t border-border pt-5">
               <p className="text-sm font-medium text-foreground">
-                Crear período (SECRETARIA / DIRECCION)
+                Crear período ({rolesDe(DIRECTIVOS)})
               </p>
 
-              <div>
-                <label htmlFor="periodo-nombre" className={CLASE_ETIQUETA}>
-                  Nombre
-                </label>
-                <input
-                  id="periodo-nombre"
-                  value={nuevoPeriodo.nombre}
-                  onChange={(evento) => editarNuevoPeriodo('nombre', evento.target.value)}
-                  className={CLASE_CAMPO}
-                />
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <label htmlFor="periodo-cupos" className={CLASE_ETIQUETA}>
-                    Total de cupos
-                  </label>
-                  <input
-                    id="periodo-cupos"
-                    type="number"
-                    min={0}
-                    value={nuevoPeriodo.totalCupos}
-                    onChange={(evento) => editarNuevoPeriodo('totalCupos', evento.target.value)}
-                    className={CLASE_CAMPO}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="periodo-plazo" className={CLASE_ETIQUETA}>
-                    Días de plazo
-                  </label>
-                  <input
-                    id="periodo-plazo"
-                    type="number"
-                    min={1}
-                    value={nuevoPeriodo.diasPlazoPago}
-                    onChange={(evento) => editarNuevoPeriodo('diasPlazoPago', evento.target.value)}
-                    className={CLASE_CAMPO}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="periodo-monto" className={CLASE_ETIQUETA}>
-                    Matrícula (ARS)
-                  </label>
-                  <input
-                    id="periodo-monto"
-                    type="number"
-                    min={1}
-                    value={nuevoPeriodo.montoArs}
-                    onChange={(evento) => editarNuevoPeriodo('montoArs', evento.target.value)}
-                    className={CLASE_CAMPO}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="periodo-cierre" className={CLASE_ETIQUETA}>
-                  Cierra el
-                </label>
-                <input
-                  id="periodo-cierre"
-                  type="datetime-local"
-                  value={nuevoPeriodo.cierraEl}
-                  onChange={(evento) => editarNuevoPeriodo('cierraEl', evento.target.value)}
-                  className={CLASE_CAMPO}
-                />
-              </div>
+              <CamposDePeriodo
+                idPrefijo="nuevo"
+                valores={nuevoPeriodo}
+                alCambiar={editarNuevoPeriodo}
+              />
 
               <p className="text-xs text-muted-foreground">
                 El nombre no se puede repetir dentro de la institución.
               </p>
 
-              <Button
-                type="submit"
-                disabled={deshabilitado || nuevoPeriodo.cierraEl === ''}
-              >
+              <Button type="submit" disabled={deshabilitado || nuevoPeriodo.cierraEl === ''}>
                 POST /api/periodos
               </Button>
             </form>
           ) : null}
-        </section>
 
-        <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-foreground">Postulaciones</h2>
-          {sinSesion ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Iniciá sesión para habilitar los botones.
-            </p>
-          ) : null}
-
-          <div className="mt-4 space-y-5">
-            <div>
-              <Button
-                variant="outline"
-                disabled={deshabilitado}
-                onClick={() => void llamar('GET', '/api/postulaciones/mias')}
-              >
-                GET /api/postulaciones/mias
-              </Button>
-            </div>
-
-            <div>
-              <p className={CLASE_ETIQUETA}>Crear Postulación (solo ASPIRANTE)</p>
-              <p className="text-sm text-muted-foreground">
-                {periodoId.trim() === '' ? (
-                  'Elegí un período en la tarjeta de arriba.'
-                ) : (
-                  <>
-                    Período:{' '}
-                    <span className="break-all font-mono text-xs">{periodoId.trim()}</span>
-                  </>
-                )}
+          {puedeCrearPeriodos && periodoEnEdicion ? (
+            <form
+              onSubmit={modificarPeriodo}
+              className="mt-5 space-y-3 border-t border-border pt-5"
+            >
+              <p className="text-sm font-medium text-foreground">
+                Modificar período{' '}
+                <span className="break-all font-mono text-xs">{periodoEnEdicion.id}</span>
               </p>
-              <Button
-                className="mt-2"
-                disabled={deshabilitado || periodoId.trim() === ''}
-                onClick={() => void llamar('POST', '/api/postulaciones', { periodoId: periodoId.trim() })}
-              >
-                POST /api/postulaciones
-              </Button>
-            </div>
 
-            <div>
-              <label htmlFor="postulacion" className={CLASE_ETIQUETA}>
-                Postulación (se completa sola al crear o listar)
-              </label>
-              <input
-                id="postulacion"
-                placeholder="postulacionId (UUID)"
-                value={postulacionId}
-                onChange={(evento) => setPostulacionId(evento.target.value)}
-                className={CLASE_CAMPO}
+              <CamposDePeriodo
+                idPrefijo="editar"
+                valores={periodoEnEdicion}
+                alCambiar={editarPeriodoEnEdicion}
               />
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  disabled={deshabilitado || postulacionId.trim() === ''}
-                  onClick={() =>
-                    void llamar('GET', `/api/postulaciones/${postulacionId.trim()}`)
-                  }
-                >
-                  GET /api/postulaciones/:id
+
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" disabled={deshabilitado || periodoEnEdicion.cierraEl === ''}>
+                  PATCH /api/periodos/:id
                 </Button>
                 <Button
-                  disabled={deshabilitado || postulacionId.trim() === ''}
-                  onClick={() =>
-                    void llamar('POST', `/api/postulaciones/${postulacionId.trim()}/iniciar-pago`)
-                  }
+                  type="button"
+                  variant="ghost"
+                  disabled={ocupado}
+                  onClick={() => setPeriodoEnEdicion(null)}
                 >
-                  POST /:id/iniciar-pago
+                  Cancelar
                 </Button>
               </div>
+            </form>
+          ) : null}
+        </Tarjeta>
+
+        <Tarjeta
+          titulo="Postulaciones"
+          descripcion={
+            <>
+              Crear, listar las propias e iniciar el pago son de <strong>Aspirante</strong>. Ver una
+              por id lo puede hacer el dueño o cualquier rol del personal. No hay PATCH ni DELETE: el
+              estado lo mueve la máquina de estados.
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={deshabilitado}
+              onClick={() => void llamar('GET', '/api/postulaciones/mias')}
+            >
+              GET /api/postulaciones/mias
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <p className={CLASE_ETIQUETA}>Crear Postulación (solo Aspirante)</p>
+            <p className="text-sm text-muted-foreground">
+              {periodoId.trim() === '' ? (
+                'Elegí un período en el apartado anterior.'
+              ) : (
+                <>
+                  Período: <span className="break-all font-mono text-xs">{periodoId.trim()}</span>
+                </>
+              )}
+            </p>
+            <Button
+              className="mt-2"
+              disabled={deshabilitado || periodoId.trim() === ''}
+              onClick={() =>
+                void llamar('POST', '/api/postulaciones', { periodoId: periodoId.trim() })
+              }
+            >
+              POST /api/postulaciones
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="postulacion-id" className={CLASE_ETIQUETA}>
+              Postulación por id (se completa al crear o listar)
+            </label>
+            <input
+              id="postulacion-id"
+              placeholder="postulacionId (UUID)"
+              value={postulacionId}
+              onChange={(evento) => setPostulacionId(evento.target.value)}
+              className={CLASE_CAMPO}
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                disabled={deshabilitado || postulacionId.trim() === ''}
+                onClick={() => void llamar('GET', `/api/postulaciones/${postulacionId.trim()}`)}
+              >
+                GET /api/postulaciones/:id
+              </Button>
+              <Button
+                disabled={deshabilitado || postulacionId.trim() === ''}
+                onClick={() =>
+                  void llamar('POST', `/api/postulaciones/${postulacionId.trim()}/iniciar-pago`)
+                }
+              >
+                POST /:id/iniciar-pago
+              </Button>
             </div>
           </div>
-        </section>
+        </Tarjeta>
+
+        <Tarjeta
+          titulo="Documentos"
+          descripcion={
+            <>
+              Solo lectura y solo personal. <strong>Ojo:</strong> el repositorio todavía es un fake:
+              devuelve datos de prueba, no la tabla real de documentos.
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={deshabilitado}
+              onClick={() => void llamar('GET', '/api/document')}
+            >
+              GET /api/document
+            </Button>
+            <Button
+              variant="outline"
+              disabled={deshabilitado || postulacionId.trim() === ''}
+              onClick={() =>
+                void llamar(
+                  'GET',
+                  `/api/document?postulacionId=${encodeURIComponent(postulacionId.trim())}`,
+                )
+              }
+            >
+              GET /api/document?postulacionId=…
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="documento-id" className={CLASE_ETIQUETA}>
+              Documento por id
+            </label>
+            <input
+              id="documento-id"
+              placeholder="documentoId (UUID)"
+              value={documentoId}
+              onChange={(evento) => setDocumentoId(evento.target.value)}
+              className={CLASE_CAMPO}
+            />
+            <Button
+              className="mt-2"
+              variant="outline"
+              disabled={deshabilitado || documentoId.trim() === ''}
+              onClick={() => void llamar('GET', `/api/document/${documentoId.trim()}`)}
+            >
+              GET /api/document/:id
+            </Button>
+          </div>
+
+          <p className="mt-4 text-xs text-muted-foreground">
+            El filtro por Postulación usa el id del apartado de arriba.
+          </p>
+        </Tarjeta>
 
         <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h2 className="text-base font-semibold text-foreground">Respuestas</h2>
           {historial.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">Todavía no llamaste a ningún endpoint.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Todavía no llamaste a ningún endpoint.
+            </p>
           ) : (
             <div className="mt-3 space-y-3">
               <div className="flex justify-end">
@@ -549,7 +762,10 @@ export function PanelDePruebas() {
                 </Button>
               </div>
               {historial.map((llamada) => (
-                <article key={llamada.id} className="rounded-lg border border-border bg-background p-3">
+                <article
+                  key={llamada.id}
+                  className="rounded-lg border border-border bg-background p-3"
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-mono text-xs text-foreground">
                       {llamada.metodo} {llamada.url}
@@ -598,8 +814,8 @@ where email = 'tu@email.com';`}</pre>
             <div>
               <p className="font-medium text-foreground">2. Creá el período</p>
               <p className="mt-1">
-                Con la cuenta <code>SECRETARIA</code> (o <code>DIRECCION</code>) aparece el alta en la
-                tarjeta de Períodos. Al crearlo queda abierto y lo ve cualquier usuario de la
+                Con la cuenta <code>SECRETARIA</code> (o <code>DIRECCION</code>) aparece el alta en
+                el apartado de Períodos. Al crearlo queda abierto y lo ve cualquier usuario de la
                 institución.
               </p>
             </div>
@@ -619,13 +835,41 @@ where email = 'tu@email.com';`}</pre>
               <p className="mt-1">
                 Con <code>SECRETARIA</code>, <code>DIRECCION</code> o <code>TESORERIA</code>,{' '}
                 <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200. Crear e
-                iniciar pago responden 403.
+                iniciar pago responden 403. En Perfiles podés listar y filtrar por rol; en
+                Documentos, leer (datos de prueba).
               </p>
             </div>
           </div>
         </details>
       </div>
     </main>
+  )
+}
+
+function Tarjeta({
+  titulo,
+  descripcion,
+  children,
+}: {
+  titulo: string
+  descripcion: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <h2 className="text-base font-semibold text-foreground">{titulo}</h2>
+      <div className="mt-1 text-sm text-muted-foreground">{descripcion}</div>
+      <div className="mt-4">{children}</div>
+    </section>
+  )
+}
+
+function FilaPermiso({ endpoint, quien }: { endpoint: string; quien: string }) {
+  return (
+    <tr>
+      <td className="py-1 pr-4 font-mono text-xs text-foreground">{endpoint}</td>
+      <td className="py-1">{quien}</td>
+    </tr>
   )
 }
 
@@ -638,6 +882,91 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
       <dd className="mt-1 break-all text-sm text-foreground">{valor}</dd>
     </div>
   )
+}
+
+function CamposDePeriodo({
+  idPrefijo,
+  valores,
+  alCambiar,
+}: {
+  idPrefijo: string
+  valores: NuevoPeriodo
+  alCambiar: (campo: keyof NuevoPeriodo, valor: string) => void
+}) {
+  return (
+    <>
+      <div>
+        <label htmlFor={`${idPrefijo}-nombre`} className={CLASE_ETIQUETA}>
+          Nombre
+        </label>
+        <input
+          id={`${idPrefijo}-nombre`}
+          value={valores.nombre}
+          onChange={(evento) => alCambiar('nombre', evento.target.value)}
+          className={CLASE_CAMPO}
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div>
+          <label htmlFor={`${idPrefijo}-cupos`} className={CLASE_ETIQUETA}>
+            Total de cupos
+          </label>
+          <input
+            id={`${idPrefijo}-cupos`}
+            type="number"
+            min={0}
+            value={valores.totalCupos}
+            onChange={(evento) => alCambiar('totalCupos', evento.target.value)}
+            className={CLASE_CAMPO}
+          />
+        </div>
+        <div>
+          <label htmlFor={`${idPrefijo}-plazo`} className={CLASE_ETIQUETA}>
+            Días de plazo
+          </label>
+          <input
+            id={`${idPrefijo}-plazo`}
+            type="number"
+            min={1}
+            value={valores.diasPlazoPago}
+            onChange={(evento) => alCambiar('diasPlazoPago', evento.target.value)}
+            className={CLASE_CAMPO}
+          />
+        </div>
+        <div>
+          <label htmlFor={`${idPrefijo}-monto`} className={CLASE_ETIQUETA}>
+            Matrícula (ARS)
+          </label>
+          <input
+            id={`${idPrefijo}-monto`}
+            type="number"
+            min={1}
+            value={valores.montoArs}
+            onChange={(evento) => alCambiar('montoArs', evento.target.value)}
+            className={CLASE_CAMPO}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor={`${idPrefijo}-cierre`} className={CLASE_ETIQUETA}>
+          Cierra el
+        </label>
+        <input
+          id={`${idPrefijo}-cierre`}
+          type="datetime-local"
+          value={valores.cierraEl}
+          onChange={(evento) => alCambiar('cierraEl', evento.target.value)}
+          className={CLASE_CAMPO}
+        />
+      </div>
+    </>
+  )
+}
+
+function rolesDe(roles: readonly Rol[]): string {
+  return roles.map((rol) => ETIQUETAS_DE_ROL[rol]).join(' o ')
 }
 
 async function interpretarJson(texto: string): Promise<unknown> {
@@ -665,10 +994,6 @@ function esSesion(valor: unknown): valor is Sesion {
   )
 }
 
-function datosDe(cuerpo: unknown): unknown {
-  return esObjeto(cuerpo) ? cuerpo.data : undefined
-}
-
 function esPeriodo(valor: unknown): valor is Periodo {
   return (
     esObjeto(valor) &&
@@ -681,29 +1006,19 @@ function esPeriodo(valor: unknown): valor is Periodo {
   )
 }
 
+function datosDe(cuerpo: unknown): unknown {
+  return esObjeto(cuerpo) ? cuerpo.data : undefined
+}
+
 function periodosDe(cuerpo: unknown): Periodo[] {
   const datos = datosDe(cuerpo)
 
   return Array.isArray(datos) ? datos.filter(esPeriodo) : []
 }
 
-function fechaCorta(iso: string): string {
-  const fecha = new Date(iso)
-  if (Number.isNaN(fecha.getTime())) return iso
-
-  return fecha.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
-function formatearPesos(centavos: number): string {
-  return (centavos / 100).toLocaleString('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
-  })
-}
-
 function idDe(cuerpo: unknown): string | null {
   const datos = datosDe(cuerpo)
+
   return esObjeto(datos) && typeof datos.id === 'string' ? datos.id : null
 }
 
@@ -722,4 +1037,38 @@ function mensajeDeError(cuerpo: unknown): string | null {
   if (!esObjeto(error) || typeof error.mensaje !== 'string') return null
 
   return error.mensaje
+}
+
+function fechaCorta(iso: string): string {
+  const fecha = new Date(iso)
+  if (Number.isNaN(fecha.getTime())) return iso
+
+  return fecha.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function formatearPesos(centavos: number): string {
+  return (centavos / 100).toLocaleString('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  })
+}
+
+function aDatetimeLocal(iso: string): string {
+  const fecha = new Date(iso)
+  if (Number.isNaN(fecha.getTime())) return ''
+
+  const dosDigitos = (numero: number) => String(numero).padStart(2, '0')
+
+  return [
+    fecha.getFullYear(),
+    '-',
+    dosDigitos(fecha.getMonth() + 1),
+    '-',
+    dosDigitos(fecha.getDate()),
+    'T',
+    dosDigitos(fecha.getHours()),
+    ':',
+    dosDigitos(fecha.getMinutes()),
+  ].join('')
 }
