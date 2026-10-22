@@ -66,3 +66,15 @@ Después: commit, push y PR hacia `develop`. Al terminar el día: `supabase stop
 - **Si otra persona mergeó una migración antes que la tuya**, la tuya tiene que quedar después: creá una nueva con
   `supabase migration new`, pasale tu SQL, borrá la vieja y corré `supabase db reset`.
 - **Sin datos personales reales** en migraciones ni en seeds (Ley 25.326).
+
+## Un toggle que no es una migración
+
+En el proyecto remoto hay que **desactivar "Confirm email"** (Authentication → Sign In / Providers →
+Email). Local ya viene desactivado (`enable_confirmations = false` en `config.toml`).
+
+Si queda activado, cada registro dispara un email de confirmación: con el SMTP incluido en el plan
+gratuito el límite de envío se agota enseguida y **el registro empieza a fallar con 429**, y además
+el usuario queda sin sesión hasta confirmar. Es el mismo error que vería un compañero con la base
+local si no se aplica la migración: por eso el "te enviamos un email" del registro solo aparece con
+la confirmación desactivada.
+

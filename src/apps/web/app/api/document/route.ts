@@ -1,28 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { repositorioDeDocument } from '@/composition-root'
-import { Document } from '@tfi/domain'
+import { ROLES_DEL_PERSONAL } from '@tfi/domain'
+import { crearCliente } from '@/lib/supabase/servidor'
+import { crearDependencias } from '@/composition-root'
+import { jsonError, jsonOk } from '@/http/respuesta'
 
-export const GET = async (req: NextRequest) => {
-  const procedure = req.nextUrl.searchParams.get('procedureId')
+/**
+ * Lista los documentos de las postulaciones.
+ *
+ * Solo el personal de la facultad (secretaría, dirección, tesorería) puede
+ * leerlos: un aspirante solo ve su propio perfil, y los documentos se revisan
+ * desde la secretaría.
+ *
+ * Deuda conocida: la tabla public.documentos todavía no tiene adaptador, así
+ * que el repositorio es el fake de @tfi/application. La ruta ya pide sesión y
+ * rol; el caso de uso llega con la feature de documentación.
+ */
+export async function GET(request: Request) {
+  const supabase = await crearCliente()
+  const { obtenerActorUseCase, repoDocumentos } = crearDependencias(supabase)
 
-  const documents = procedure
-    ? await repositorioDeDocument.obtenerPorProcedure(procedure)
-    : await repositorioDeDocument.obtenerTodos()
+  const actor = await obtenerActorUseCase.ejecutar()
 
-  return NextResponse.json({ success: true, data: documents })
+  if (actor.resultado === 'SIN_SESION') {
+    return jsonError('NO_AUTENTICADO', 'No autenticado', 401)
+  }
+
+  if (actor.resultado === 'SIN_PERFIL') {
+    return jsonError('SIN_PERFIL', 'Perfil no encontrado', 403)
+  }
+
+  if (!ROLES_DEL_PERSONAL.includes(actor.actor.rol)) {
+    return jsonError('NO_AUTORIZADO', 'No tenés permisos para ver los documentos', 403)
+  }
+
+  const postulacionId = new URL(request.url).searchParams.get('postulacionId')
+
+  const documentos = postulacionId
+    ? await repoDocumentos.obtenerPorPostulacion(postulacionId)
+    : await repoDocumentos.obtenerTodos()
+
+  return jsonOk(documentos)
 }
 
-export const POST = async (request: Request) => {
-  const body = await request.json()
-  const newDocument = new Document(
-    String(Date.now()),
-    body.procedureId,
-    body.rute,
-    body.validity,
-  )
-  await repositorioDeDocument.guardar(newDocument)
-  return NextResponse.json(
-    { success: true, data: newDocument },
-    { status: 201 },
-  )
-}
+// No hay POST: el alta de documentos llega con la feature de documentación
+// (y su caso de uso). Escribir a mano en el fake no guardaría nada.
