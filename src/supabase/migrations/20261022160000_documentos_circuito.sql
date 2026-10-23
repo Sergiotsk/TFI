@@ -65,9 +65,6 @@ GRANT UPDATE (
 
 GRANT DELETE ON public.documentos TO authenticated;
 
-GRANT UPDATE ON public.documentos TO authenticated;
-GRANT INSERT ON public.documentos TO authenticated;
-
 -- ============================================================================
 -- 3. Policies de public.documentos
 -- ============================================================================
