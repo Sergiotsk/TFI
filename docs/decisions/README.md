@@ -24,6 +24,7 @@ qué consecuencias trae.
 | [0007](0007-renombrar-procedure-a-postulacion.md) | Renombrar Procedure a Postulación y alinear los roles | Aceptado |
 | [0008](0008-consultar-postulaciones.md) | Consultar Postulaciones: filtros, vencimiento perezoso y concurrencia | Aceptado |
 | [0009](0009-acciones-manuales-del-personal.md) | Acciones manuales del personal sobre Postulaciones y perfiles | Aceptado |
+| [0010](0010-documentacion-en-bucket-privado.md) | Circuito de documentación sobre un bucket privado | Aceptado |
 
 ## Plantilla
 
