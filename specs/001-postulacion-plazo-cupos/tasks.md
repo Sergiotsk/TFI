@@ -187,17 +187,17 @@ consulta da `VENCIDO` con la misma ocupación; el reintento da un `vence_el` nue
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T074 [P] [US2] Escribir src/packages/application/casos-de-uso/crear-postulacion.test.ts (solo `ASPIRANTE` y para sí mismo; período cerrado → `PeriodoCerrado`; duplicada activa → error)
-- [ ] T075 [P] [US2] Escribir src/packages/application/casos-de-uso/iniciar-pago.test.ts (`vence_el = min(ahora + plazo, cierre)`; sin cupos → `SinCuposParaIniciar`, FR-011; reintento desde `VENCIDO`; `conflicto` en `guardarTransicion`)
-- [ ] T076 [P] [US2] Escribir src/packages/application/casos-de-uso/consultar-postulacion.test.ts (estado efectivo perezoso, aviso "tu lugar no está reservado" en `PAGO_PENDIENTE`, "tu pago está en revisión" en `PAGO_EN_REVISION`, número formateado, solo la propia o el personal)
+- [x] T074 [P] [US2] Escribir src/packages/application/casos-de-uso/crear-postulacion.test.ts (solo `ASPIRANTE` y para sí mismo; período cerrado → `PeriodoCerrado`; duplicada activa → error)
+- [x] T075 [P] [US2] Escribir src/packages/application/casos-de-uso/iniciar-pago.test.ts (`vence_el = min(ahora + plazo, cierre)`; sin cupos → `SinCuposParaIniciar`, FR-011; reintento desde `VENCIDO`; `conflicto` en `guardarTransicion`)
+- [x] T076 [P] [US2] Escribir src/packages/application/casos-de-uso/consultar-postulacion.test.ts (estado efectivo perezoso, aviso "tu lugar no está reservado" en `PAGO_PENDIENTE`, "tu pago está en revisión" en `PAGO_EN_REVISION`, número formateado, solo la propia o el personal)
 
 ### Implementation for User Story 2
 
-- [ ] T077 [US2] Implementar src/packages/application/casos-de-uso/crear-postulacion.ts (hasta que pase T074)
-- [ ] T078 [US2] Implementar src/packages/application/casos-de-uso/iniciar-pago.ts (persiste `VENCIDO` si corresponde antes del reintento; hasta que pase T075)
-- [ ] T079 [US2] Implementar src/packages/application/casos-de-uso/consultar-postulacion.ts (devuelve un DTO con el estado efectivo, `venceEl`, el número y el aviso; hasta que pase T076)
-- [ ] T080 [US2] Crear src/apps/web/http/esquemas/postulaciones.ts (Zod de `{ periodoId }` y de los parámetros de ruta)
-- [ ] T081 [US2] Crear src/apps/web/app/api/postulaciones/route.ts (POST), src/apps/web/app/api/postulaciones/mias/route.ts, src/apps/web/app/api/postulaciones/[id]/route.ts y src/apps/web/app/api/postulaciones/[id]/iniciar-pago/route.ts, según contracts/api-http.md
+- [x] T077 [US2] Implementar src/packages/application/casos-de-uso/crear-postulacion.ts (hasta que pase T074)
+- [x] T078 [US2] Implementar src/packages/application/casos-de-uso/iniciar-pago.ts (persiste `VENCIDO` si corresponde antes del reintento; hasta que pase T075)
+- [x] T079 [US2] Implementar src/packages/application/casos-de-uso/consultar-postulacion.ts (devuelve un DTO con el estado efectivo, `venceEl`, el número y el aviso; hasta que pase T076)
+- [x] T080 [US2] Crear src/apps/web/http/esquemas/postulaciones.ts (Zod de `{ periodoId }` y de los parámetros de ruta)
+- [x] T081 [US2] Crear src/apps/web/app/api/postulaciones/route.ts (POST), src/apps/web/app/api/postulaciones/mias/route.ts, src/apps/web/app/api/postulaciones/[id]/route.ts y src/apps/web/app/api/postulaciones/[id]/iniciar-pago/route.ts, según contracts/api-http.md
 - [ ] T082 [US2] Crear la vista del aspirante en src/apps/web/app/aspirante/postulacion/page.tsx (número de Postulación, estado, fecha límite y aviso; FR-007 y SC-005)
 
 **Checkpoint**: US1 y US2 funcionan juntas: el recorrido "crear → iniciar pago → acreditar" de punta a punta.
@@ -241,16 +241,16 @@ M y N − K; bajar el total por debajo de K falla.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T092 [P] [US3] Escribir src/packages/application/casos-de-uso/crear-periodo.test.ts y src/packages/application/casos-de-uso/modificar-periodo.test.ts (roles; `CuposPorDebajoDeConfirmadas`)
-- [ ] T093 [P] [US3] Escribir src/packages/application/casos-de-uso/consultar-ocupacion.test.ts (ocupados, pendientes vigentes sin las vencidas, libres, y exceso mostrado como "52 / 50")
-- [ ] T093b [P] [US3] Escribir src/packages/application/casos-de-uso/listar-periodos-abiertos.test.ts (solo los de la institución del actor y abiertos según el reloj; sin actor → `NoAutorizado`)
+- [x] T092 [P] [US3] Escribir src/packages/application/casos-de-uso/crear-periodo.test.ts y src/packages/application/casos-de-uso/modificar-periodo.test.ts (roles; `CuposPorDebajoDeConfirmadas`)
+- [x] T093 [P] [US3] Escribir src/packages/application/casos-de-uso/periodos-consulta.test.ts (ocupados, pendientes vigentes sin las vencidas, libres y exceso con libres negativos)
+- [x] T093b [P] [US3] Escribir src/packages/application/casos-de-uso/listar-periodos-abiertos.test.ts (solo los de la institución del actor y abiertos según el reloj; sin actor → `NoAutorizado`)
 
 ### Implementation for User Story 3
 
-- [ ] T094 [US3] Implementar src/packages/application/casos-de-uso/crear-periodo.ts y src/packages/application/casos-de-uso/modificar-periodo.ts (hasta que pase T092)
-- [ ] T095 [US3] Implementar src/packages/application/casos-de-uso/consultar-ocupacion.ts (hasta que pase T093)
-- [ ] T095b [US3] Implementar src/packages/application/casos-de-uso/listar-periodos-abiertos.ts (hasta que pase T093b)
-- [ ] T096 [US3] Crear src/apps/web/http/esquemas/periodos.ts, src/apps/web/app/api/periodos/route.ts (GET con `ListarPeriodosAbiertos` y POST), src/apps/web/app/api/periodos/[id]/route.ts (PATCH) y src/apps/web/app/api/periodos/[id]/ocupacion/route.ts
+- [x] T094 [US3] Implementar src/packages/application/casos-de-uso/crear-periodo.ts y src/packages/application/casos-de-uso/modificar-periodo.ts (hasta que pase T092)
+- [x] T095 [US3] Implementar src/packages/application/casos-de-uso/consultar-ocupacion.ts (hasta que pase T093)
+- [x] T095b [US3] Implementar src/packages/application/casos-de-uso/listar-periodos-abiertos.ts (hasta que pase T093b)
+- [x] T096 [US3] Crear src/apps/web/http/esquemas/periodos.ts, src/apps/web/app/api/periodos/route.ts (GET con `ListarPeriodosAbiertos` y POST), src/apps/web/app/api/periodos/[id]/route.ts (PATCH) y src/apps/web/app/api/periodos/[id]/ocupacion/route.ts
 - [ ] T097 [US3] Crear la gestión de períodos en src/apps/web/app/personal/periodos/page.tsx (alta y edición, más la ocupación por período)
 
 **Checkpoint**: los períodos se gestionan desde la app y ya no dependen del seed.

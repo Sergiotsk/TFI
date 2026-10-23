@@ -130,6 +130,35 @@ describe('ConsultarOcupacion', () => {
     expect(resultado.nombre).toBe('Primero')
   })
 
+  it('muestra el exceso cuando las confirmadas superan los cupos', async () => {
+    const { periodos, postulaciones, ocupacion } = armar()
+    await periodos.guardar(
+      new PeriodoDeIngreso(
+        'periodo-chico',
+        INSTITUCION,
+        'Chico',
+        2,
+        new Date('2027-03-01T00:00:00.000Z'),
+        3,
+        1_000,
+      ),
+    )
+
+    for (const indice of [1, 2, 3]) {
+      postulaciones.sembrar({
+        aspiranteId: `aspirante-${indice}`,
+        periodoId: 'periodo-chico',
+        estado: 'VACANTE_CONFIRMADA',
+      })
+    }
+
+    const resultado = await ocupacion.ejecutar(secretaria, 'periodo-chico')
+
+    expect(resultado.totalCupos).toBe(2)
+    expect(resultado.ocupados).toBe(3)
+    expect(resultado.libres).toBe(-1)
+  })
+
   it('un aspirante no puede ver la ocupación', async () => {
     const { periodos, ocupacion } = armar()
     await periodos.guardar(periodo('periodo-1', 'Primero', new Date('2027-03-01T00:00:00.000Z')))
