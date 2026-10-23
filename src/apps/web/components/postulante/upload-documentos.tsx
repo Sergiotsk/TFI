@@ -52,8 +52,8 @@ export function UploadDocumentos() {
     setEnviando(true)
     setTimeout(() => {
       setEnviando(false)
-      // Paso 4 (Estado Final): el panel del aspirante (tasks.md, app/aspirante/postulacion)
-      router.push('/aspirante/postulacion')
+      // Redirige a la pantalla de estado y seguimiento del trámite
+      router.push('/aspirante/postulacion/estado')
     }, 1200)
   }
 
