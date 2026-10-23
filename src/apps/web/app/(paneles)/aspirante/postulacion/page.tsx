@@ -71,9 +71,14 @@ export default async function PostulacionDelAspirantePage() {
               <InsigniaDePostulacion estado={postulacion.estado} />
             </div>
 
-            {postulacion.venceEl ? (
+            {/* El vencimiento se conserva después del pago (auditoría), pero al aspirante solo le sirve mientras
+                tiene que pagar o si el plazo ya se le pasó. */}
+            {postulacion.venceEl &&
+            (postulacion.estado === 'PAGO_PENDIENTE' || postulacion.estado === 'VENCIDO') ? (
               <div>
-                <span className="block text-xs font-medium text-muted-foreground">Fecha límite para pagar</span>
+                <span className="block text-xs font-medium text-muted-foreground">
+                  {postulacion.estado === 'VENCIDO' ? 'El plazo para pagar venció el' : 'Fecha límite para pagar'}
+                </span>
                 <span className="text-base font-semibold">{formatearFecha(postulacion.venceEl)}</span>
               </div>
             ) : null}
