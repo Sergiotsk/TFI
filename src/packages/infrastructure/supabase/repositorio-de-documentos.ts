@@ -63,9 +63,14 @@ export class RepositorioDeDocumentosSupabase implements RepositorioDeDocumentos 
     return data.map(mapearDocumento)
   }
 
+  /**
+   * Sin `upsert`: PostgREST lo arma como `ON CONFLICT DO UPDATE SET id = ...` y
+   * `authenticated` no tiene UPDATE sobre `id` (los grants son por columna).
+   * Primero actualiza sin tocar el id; si no hubo fila (documento nuevo, o RLS
+   * no deja actualizarlo), lo da de alta.
+   */
   async guardar(documento: Documento): Promise<void> {
-    const { error } = await this.supabase.from('documentos').upsert({
-      id: documento.id,
+    const columnas = {
       postulacion_id: documento.postulacionId,
       tipo: documento.tipo,
       ruta: documento.ruta,
@@ -78,7 +83,21 @@ export class RepositorioDeDocumentosSupabase implements RepositorioDeDocumentos 
       revisado_por: documento.revisadoPor,
       revisado_el: documento.revisadoEl?.toISOString() ?? null,
       observaciones: documento.observaciones,
-    })
+    }
+
+    const actualizacion = await this.supabase
+      .from('documentos')
+      .update(columnas)
+      .eq('id', documento.id)
+      .select('id')
+    if (actualizacion.error) {
+      throw new Error(`No se pudo guardar el documento: ${actualizacion.error.message}`)
+    }
+    if (actualizacion.data.length > 0) return
+
+    const { error } = await this.supabase
+      .from('documentos')
+      .insert({ id: documento.id, ...columnas })
     if (error) throw new Error(`No se pudo guardar el documento: ${error.message}`)
   }
 

@@ -9,7 +9,12 @@ import type {
   EntornoDePostulaciones,
   EntornoDePeriodos,
 } from '@tfi/application/contratos'
-import { claveDeServicioDePrueba, emailDePrueba, urlDePrueba } from '../entorno-de-prueba'
+import {
+  claveDeServicioDePrueba,
+  clavePublicaDePrueba,
+  emailDePrueba,
+  urlDePrueba,
+} from '../entorno-de-prueba'
 import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
 import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
@@ -83,10 +88,21 @@ async function crearInstitucionInactiva(cliente: SupabaseClient): Promise<string
   return data.id as string
 }
 
+const CLAVE_DE_PRUEBA = 'solo-local-123'
+
 async function crearAspirante(cliente: SupabaseClient, dni: string): Promise<string> {
+  const { id } = await crearUsuario(cliente, dni)
+  return id
+}
+
+async function crearUsuario(
+  cliente: SupabaseClient,
+  dni: string,
+): Promise<{ id: string; email: string }> {
+  const email = emailDePrueba('aspirante')
   const { data, error } = await cliente.auth.admin.createUser({
-    email: emailDePrueba('aspirante'),
-    password: 'solo-local-123',
+    email,
+    password: CLAVE_DE_PRUEBA,
     email_confirm: true,
     user_metadata: {
       nombre: 'Aspirante',
@@ -102,7 +118,18 @@ async function crearAspirante(cliente: SupabaseClient, dni: string): Promise<str
   }
 
   // El perfil lo crea el trigger `crear_perfil_al_registrarse`.
-  return data.user.id
+  return { id: data.user.id, email }
+}
+
+/** Cliente con la sesión del usuario: pasa por los grants y RLS de `authenticated`. */
+async function clienteConSesion(email: string): Promise<SupabaseClient> {
+  const cliente = createClient(urlDePrueba(), clavePublicaDePrueba(), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  const { error } = await cliente.auth.signInWithPassword({ email, password: CLAVE_DE_PRUEBA })
+  if (error) throw new Error(`No se pudo iniciar sesión: ${error.message}`)
+
+  return cliente
 }
 
 async function crearPeriodo(
@@ -216,5 +243,48 @@ export async function prepararEntornoDeDocumentos(): Promise<EntornoDeDocumentos
     repositorio: new RepositorioDeDocumentosSupabase(cliente),
     crearPostulacion: () => crearPostulacionDeDocumentos(cliente, institucionId),
     crearIdDocumento: () => randomUUID(),
+  }
+}
+
+export interface EntornoDeDocumentosConSesion {
+  postulacionId: string
+  /** Adaptador con la sesión del aspirante dueño de la Postulación. */
+  delAspirante: RepositorioDeDocumentosSupabase
+  aspiranteId: string
+  /** Adaptador con la sesión de Secretaría de la misma institución. */
+  delPersonal: RepositorioDeDocumentosSupabase
+  personalId: string
+}
+
+/**
+ * Entorno para verificar los grants y RLS de `documentos`: a diferencia de
+ * `prepararEntornoDeDocumentos`, el adaptador usa sesiones reales y no la clave
+ * de servicio, que se saltea los permisos.
+ */
+export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeDocumentosConSesion> {
+  const servicio = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(servicio)
+
+  const periodo = await crearPeriodo(servicio, institucionId)
+  const aspirante = await crearUsuario(servicio, dniUnico())
+  const postulacion = await sembrarPostulacion(servicio, {
+    aspiranteId: aspirante.id,
+    periodoId: periodo.id,
+    estado: 'ESPERANDO_DOCUMENTACION',
+  })
+
+  const personal = await crearUsuario(servicio, dniUnico())
+  const { error } = await servicio
+    .from('perfiles')
+    .update({ rol: 'SECRETARIA', institucion_id: institucionId })
+    .eq('id', personal.id)
+  if (error) throw new Error(`No se pudo dar el rol de Secretaría: ${error.message}`)
+
+  return {
+    postulacionId: postulacion.id,
+    delAspirante: new RepositorioDeDocumentosSupabase(await clienteConSesion(aspirante.email)),
+    aspiranteId: aspirante.id,
+    delPersonal: new RepositorioDeDocumentosSupabase(await clienteConSesion(personal.email)),
+    personalId: personal.id,
   }
 }
