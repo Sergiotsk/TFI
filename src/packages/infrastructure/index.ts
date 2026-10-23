@@ -10,3 +10,7 @@ export { AlmacenDeArchivosSupabase } from './supabase/almacen-de-archivos'
 export { AccionesDeDocumentacionSupabase } from './supabase/acciones-de-documentacion'
 export { RelojDeSistema } from './reloj/reloj-de-sistema'
 export { GeneradorDeIdsCrypto } from './generador-de-ids/generador-de-ids-crypto'
+export * from './pasarela'
+
+export { RepositorioDeIntencionesDePagoSupabase } from './supabase/repositorio-de-intenciones-de-pago'
+

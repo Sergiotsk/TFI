@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
+  MercadoPagoAdapter,
   ServicioDeAutenticacionSupabase,
   RepositorioDePerfilesSupabase,
   RepositorioDePostulacionesSupabase,
@@ -10,6 +11,7 @@ import {
   AccionesDelPersonalSupabase,
   RelojDeSistema,
   GeneradorDeIdsCrypto,
+  RepositorioDeIntencionesDePagoSupabase,
 } from '@tfi/infrastructure'
 import {
   RegistrarAspiranteUseCase,
@@ -40,6 +42,7 @@ import {
   ActualizarDocumentoUseCase,
   EliminarDocumentoUseCase,
 } from '@tfi/application'
+import { IniciarPagoConPasarelaUseCase } from '@tfi/application'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
 // usa para cada puerto. Se arma por request porque el cliente de Supabase
@@ -55,6 +58,31 @@ export function crearDependencias(supabase: SupabaseClient) {
   const accionesDeDocumentacion = new AccionesDeDocumentacionSupabase(supabase)
   const reloj = new RelojDeSistema()
   const generadorDeIds = new GeneradorDeIdsCrypto()
+
+  let iniciarPagoConPasarela: any | undefined
+
+  const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
+  if (habilitarPasarela && process.env.MP_ACCESS_TOKEN) {
+    const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
+    iniciarPagoConPasarela = new (IniciarPagoConPasarelaUseCase as any)(
+      repoPostulaciones,
+      repoPeriodos,
+      pasarela,
+      reloj,
+      () => `int_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+      () => ({
+        backUrls: {
+          success: `${appUrl}/pagos/retorno?status=success`,
+          pending: `${appUrl}/pagos/retorno?status=pending`,
+          failure: `${appUrl}/pagos/retorno?status=failure`,
+        },
+        notificationUrl: `${appUrl}/api/pagos/webhook/mercadopago`,
+      }),
+      intenciones,
+    )
+  }
 
   return {
     supabase,
@@ -73,6 +101,7 @@ export function crearDependencias(supabase: SupabaseClient) {
     listarPerfiles: new ListarPerfilesUseCase(repoPerfiles),
     crearPostulacion: new CrearPostulacionUseCase(repoPostulaciones, repoPeriodos, reloj),
     iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),
+    iniciarPagoConPasarela,
     consultarPostulacion: new ConsultarPostulacionUseCase(repoPostulaciones, reloj),
     listarPostulaciones: new ListarPostulacionesUseCase(repoPostulaciones, reloj),
     buscarPostulacionesPorDni: new BuscarPostulacionesPorDniUseCase(repoPostulaciones, reloj),
@@ -135,7 +164,15 @@ export function crearDependencias(supabase: SupabaseClient) {
       almacen,
       reloj,
     ),
+  } as any
+}
+
+export function crearDependenciasSinSesion() {
+  const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
+  if (!habilitarPasarela || !process.env.MP_ACCESS_TOKEN) {
+    return { procesarWebhookMercadoPago: undefined as any }
   }
+  return { procesarWebhookMercadoPago: undefined as any }
 }
 
 export type Dependencias = ReturnType<typeof crearDependencias>
