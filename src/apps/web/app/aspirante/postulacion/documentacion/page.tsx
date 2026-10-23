@@ -2,8 +2,22 @@ import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { UploadDocumentos } from '@/components/postulante/upload-documentos'
 import { Clock, ShieldAlert, FileText } from 'lucide-react'
+import { conActorDePanel } from '@/app/(paneles)/sesion-de-panel'
 
-export default function DocumentacionPage() {
+// Demo: los mismos estados que SubirDocumento acepta (ESTADOS_QUE_ADMITEN_DOCUMENTOS).
+const ADMITEN_DOCUMENTOS = [
+  'VACANTE_CONFIRMADA',
+  'ESPERANDO_DOCUMENTACION',
+  'DOCUMENTACION_EN_REVISION',
+  'OBSERVADO',
+]
+
+export default async function DocumentacionPage() {
+  const postulacionId = await conActorDePanel(async ({ consultarPostulacion }, actor) => {
+    const propias = await consultarPostulacion.listarMias(actor)
+    return propias.find((postulacion) => ADMITEN_DOCUMENTOS.includes(postulacion.estado))?.id ?? null
+  })
+
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
       <HeaderInstitucional pasoActual={3} dniPostulante="**.***.***" />
@@ -42,7 +56,7 @@ export default function DocumentacionPage() {
               </p>
             </div>
 
-            <UploadDocumentos />
+            <UploadDocumentos postulacionId={postulacionId} />
           </div>
 
           {/* Columna Derecha: Reglas y Recomendaciones */}

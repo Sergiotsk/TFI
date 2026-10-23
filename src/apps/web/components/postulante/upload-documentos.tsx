@@ -3,32 +3,38 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileCheck, AlertCircle, ArrowRight, X } from 'lucide-react'
+import type { TipoDeDocumento } from '@tfi/domain'
 import { Button } from '@/components/ui/button'
 
 interface DocumentoItem {
   id: string
+  tipo: TipoDeDocumento
   titulo: string
   descripcion: string
   archivo: File | null
 }
 
-export function UploadDocumentos() {
+// Demo: sube cada archivo a POST /api/documentos (multipart). La Postulación la resuelve la página.
+export function UploadDocumentos({ postulacionId }: { postulacionId: string | null }) {
   const router = useRouter()
   const [documentos, setDocumentos] = useState<DocumentoItem[]>([
     {
       id: 'dni',
+      tipo: 'DNI',
       titulo: 'DNI (Frente y Dorso)',
       descripcion: 'Copia legible del Documento Nacional de Identidad en un único archivo.',
       archivo: null,
     },
     {
       id: 'titulo',
+      tipo: 'TITULO',
       titulo: 'Título Secundario / Constancia de Trámite',
       descripcion: 'Analítico legalizado o constancia original de título en trámite sin adeudar materias.',
       archivo: null,
     },
     {
       id: 'comprobante',
+      tipo: 'OTRO',
       titulo: 'Comprobante de Pago de Reserva',
       descripcion: 'Comprobante de transferencia bancaria o recibo oficial de Mercado Pago.',
       archivo: null,
@@ -36,6 +42,7 @@ export function UploadDocumentos() {
   ])
 
   const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = (id: string, file: File | null) => {
     setDocumentos((prev) =>
@@ -45,16 +52,36 @@ export function UploadDocumentos() {
 
   const todosCargados = documentos.every((doc) => doc.archivo !== null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!todosCargados) return
+    if (!todosCargados || !postulacionId) return
 
     setEnviando(true)
-    setTimeout(() => {
-      setEnviando(false)
+    setError(null)
+    try {
+      for (const doc of documentos) {
+        if (!doc.archivo) continue
+        const formulario = new FormData()
+        formulario.set('postulacionId', postulacionId)
+        formulario.set('tipo', doc.tipo)
+        formulario.set('archivo', doc.archivo)
+
+        const respuesta = await fetch('/api/documentos', { method: 'POST', body: formulario })
+        if (!respuesta.ok) {
+          const cuerpo = (await respuesta.json().catch(() => null)) as {
+            error?: { mensaje?: string }
+          } | null
+          setError(`${doc.titulo}: ${cuerpo?.error?.mensaje ?? 'no se pudo subir'}`)
+          return
+        }
+      }
       // Redirige a la pantalla de estado y seguimiento del trámite
       router.push('/aspirante/postulacion/estado')
-    }, 1200)
+    } catch {
+      setError('No se pudo conectar con el servidor. Probá de nuevo.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -125,6 +152,17 @@ export function UploadDocumentos() {
         ))}
       </div>
 
+      {!postulacionId ? (
+        <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          Tu postulación todavía no está en la etapa de documentación.
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-xs text-rose-800">
+          {error}
+        </p>
+      ) : null}
+
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
         <span className="text-xs text-muted-foreground font-medium">
           {documentos.filter((d) => d.archivo !== null).length} de 3 documentos cargados
@@ -132,7 +170,7 @@ export function UploadDocumentos() {
 
         <Button
           type="submit"
-          disabled={!todosCargados || enviando}
+          disabled={!todosCargados || enviando || !postulacionId}
           className="w-full sm:w-auto"
         >
           <span>{enviando ? 'Subiendo documentación...' : 'Confirmar y Finalizar Trámite'}</span>
