@@ -2,7 +2,13 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { Perfil } from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
 import { DatosDuplicados } from '@tfi/application'
-import type { RepositorioDePerfiles } from '@tfi/application'
+import { armarPagina, rangoDe } from '@tfi/application'
+import type {
+  FiltrosDePerfil,
+  Pagina,
+  Paginacion,
+  RepositorioDePerfiles,
+} from '@tfi/application'
 
 interface FilaPerfil {
   id: string
@@ -45,10 +51,24 @@ function mapearPerfil(fila: FilaPerfil): Perfil {
 export class RepositorioDePerfilesSupabase implements RepositorioDePerfiles {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  async obtenerTodos(): Promise<Perfil[]> {
-    const { data, error } = await this.supabase.from('perfiles').select('*')
-    if (error || !data) return []
-    return (data as FilaPerfil[]).map(mapearPerfil)
+  async listar(
+    filtros: FiltrosDePerfil,
+    paginacion: Paginacion,
+  ): Promise<Pagina<Perfil>> {
+    let consulta = this.supabase.from('perfiles').select('*', { count: 'exact' })
+
+    if (filtros.rol !== undefined) consulta = consulta.eq('rol', filtros.rol)
+    if (filtros.dni !== undefined) consulta = consulta.eq('dni', filtros.dni)
+
+    const { desde, hasta } = rangoDe(paginacion)
+    const { data, error, count } = await consulta
+      .order('apellido', { ascending: true })
+      .order('nombre', { ascending: true })
+      .range(desde, hasta)
+
+    if (error || !data) return armarPagina([], 0, paginacion)
+
+    return armarPagina((data as FilaPerfil[]).map(mapearPerfil), count ?? 0, paginacion)
   }
 
   async obtenerPorId(id: string): Promise<Perfil | null> {
@@ -57,10 +77,14 @@ export class RepositorioDePerfilesSupabase implements RepositorioDePerfiles {
     return mapearPerfil(data as FilaPerfil)
   }
 
-  async obtenerPorRol(rol: Rol): Promise<Perfil[] | null> {
-    const { data, error } = await this.supabase.from('perfiles').select('*').eq('rol', rol)
-    if (error || !data) return []
-    return (data as FilaPerfil[]).map(mapearPerfil)
+  async buscarPorDni(dni: string): Promise<Perfil | null> {
+    const { data, error } = await this.supabase
+      .from('perfiles')
+      .select('*')
+      .eq('dni', dni)
+      .maybeSingle()
+    if (error || !data) return null
+    return mapearPerfil(data as FilaPerfil)
   }
 
   async guardar(perfil: Perfil): Promise<void> {

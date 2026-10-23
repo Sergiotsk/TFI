@@ -1,7 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { NumeroDePostulacion, PostulacionDuplicada } from '@tfi/domain'
 import type { Postulacion } from '@tfi/domain'
-import type { FiltrosDePostulacion, RepositorioDePostulaciones } from '@tfi/application'
+import { armarPagina, rangoDe } from '@tfi/application'
+import type {
+  FiltrosDePostulacion,
+  Pagina,
+  Paginacion,
+  RepositorioDePostulaciones,
+} from '@tfi/application'
 import { mapearPostulacion } from './mapeadores/postulacion'
 
 /**
@@ -36,8 +42,11 @@ export class RepositorioDePostulacionesSupabase implements RepositorioDePostulac
     return mapearPostulacion(data)
   }
 
-  async listar(filtros: FiltrosDePostulacion): Promise<Postulacion[]> {
-    let consulta = this.supabase.from('postulaciones').select('*')
+  async listar(
+    filtros: FiltrosDePostulacion,
+    paginacion: Paginacion,
+  ): Promise<Pagina<Postulacion>> {
+    let consulta = this.supabase.from('postulaciones').select('*', { count: 'exact' })
 
     if (filtros.aspiranteId !== undefined) {
       consulta = consulta.eq('aspirante_id', filtros.aspiranteId)
@@ -52,22 +61,30 @@ export class RepositorioDePostulacionesSupabase implements RepositorioDePostulac
       consulta = consulta.eq('motivo_revision', filtros.motivoRevision)
     }
 
-    const { data, error } = await consulta.order('numero', { ascending: true })
-    if (error || !data) return []
+    const { desde, hasta } = rangoDe(paginacion)
+    const { data, error, count } = await consulta
+      .order('numero', { ascending: true })
+      .range(desde, hasta)
 
-    return data.map(mapearPostulacion)
+    if (error || !data) return armarPagina([], 0, paginacion)
+
+    return armarPagina(data.map(mapearPostulacion), count ?? 0, paginacion)
   }
 
-  async buscarPorDni(dni: string, periodoId?: string): Promise<Postulacion[]> {
+  async buscarPorDni(
+    dni: string,
+    paginacion: Paginacion,
+    periodoId?: string,
+  ): Promise<Pagina<Postulacion>> {
     // El DNI no vive en la Postulación sino en el perfil del aspirante.
     const { data, error } = await this.supabase
       .from('perfiles')
       .select('id')
       .eq('dni', dni)
       .maybeSingle()
-    if (error || !data) return []
+    if (error || !data) return armarPagina([], 0, paginacion)
 
-    return this.listar({ aspiranteId: data.id as string, periodoId })
+    return this.listar({ aspiranteId: data.id as string, periodoId }, paginacion)
   }
 
   async crear(aspiranteId: string, periodoId: string): Promise<Postulacion> {

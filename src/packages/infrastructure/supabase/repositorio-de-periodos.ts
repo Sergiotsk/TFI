@@ -1,7 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { ESTADOS_QUE_OCUPAN_CUPO } from '@tfi/domain'
+import { ESTADOS_QUE_OCUPAN_CUPO, PeriodoDuplicado } from '@tfi/domain'
 import type { PeriodoDeIngreso } from '@tfi/domain'
-import type { RepositorioDePeriodos } from '@tfi/application'
+import { armarPagina, rangoDe } from '@tfi/application'
+import type { Pagina, Paginacion, RepositorioDePeriodos } from '@tfi/application'
 import { mapearPeriodo } from './mapeadores/periodo'
 
 /**
@@ -38,6 +39,23 @@ export class RepositorioDePeriodosSupabase implements RepositorioDePeriodos {
     return data.map(mapearPeriodo)
   }
 
+  async listarTodos(
+    institucionId: string,
+    paginacion: Paginacion,
+  ): Promise<Pagina<PeriodoDeIngreso>> {
+    const { desde, hasta } = rangoDe(paginacion)
+    const { data, error, count } = await this.supabase
+      .from('periodos_de_ingreso')
+      .select('*', { count: 'exact' })
+      .eq('institucion_id', institucionId)
+      .order('cierra_el', { ascending: false })
+      .range(desde, hasta)
+
+    if (error || !data) return armarPagina([], 0, paginacion)
+
+    return armarPagina(data.map(mapearPeriodo), count ?? 0, paginacion)
+  }
+
   async contarOcupados(periodoId: string): Promise<number> {
     const { count, error } = await this.supabase
       .from('postulaciones')
@@ -71,6 +89,7 @@ export class RepositorioDePeriodosSupabase implements RepositorioDePeriodos {
       dias_plazo_pago: periodo.diasPlazoPago,
       monto_matricula_centavos: periodo.montoMatriculaCentavos,
     })
+    if (error?.code === '23505') throw new PeriodoDuplicado(periodo.nombre)
     if (error) throw new Error(`No se pudo guardar el período: ${error.message}`)
   }
 }
