@@ -93,3 +93,7 @@ export { RepositorioDePostulacionesFake } from './puertos/repositorio-de-postula
 export type { DatosDePostulacionSembrada } from './puertos/repositorio-de-postulaciones/fake'
 export type { RepositorioDePeriodos } from './puertos/repositorio-de-periodos/puerto'
 export { RepositorioDePeriodosFake } from './puertos/repositorio-de-periodos/fake'
+export type { RegistroDePagos, ResultadoDeAcreditacion } from './puertos/registro-de-pagos/puerto'
+export { RegistroDePagosFake } from './puertos/registro-de-pagos/fake'
+export type { RegistroDeCargas } from './puertos/registro-de-cargas/puerto'
+export { RegistroDeCargasFake } from './puertos/registro-de-cargas/fake'
