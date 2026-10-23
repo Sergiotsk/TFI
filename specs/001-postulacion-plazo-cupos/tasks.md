@@ -171,7 +171,7 @@ base); al acreditar su pago queda `VACANTE_CONFIRMADA` y la ocupación da 1; si 
 - [ ] T070 [US1] Crear src/packages/infrastructure/supabase/registro-de-pagos.contrato.test.ts y src/packages/infrastructure/supabase/registro-de-cargas.contrato.test.ts (corren los contratos de T055 y T056 contra Supabase local)
 - [ ] T071 [US1] Crear src/apps/web/http/esquemas/pagos.ts (Zod de `PagoInformado[]`: DNI, número, monto en centavos, fecha de pago y referencia)
 - [ ] T072 [US1] Crear src/apps/web/app/api/pagos/acreditaciones/route.ts (POST) y src/apps/web/app/api/pagos/route.ts (GET `?estado=`), según contracts/api-http.md
-- [ ] T073 [US1] Crear la bandeja de pagos de Tesorería y Secretaría en src/apps/web/app/(paneles)/personal/pagos/page.tsx (listados `NO_IMPUTADO` con su motivo y `DEVUELTO`, más las cargas de informe)
+- [ ] T073 [US1] Crear la bandeja de pagos de Tesorería y Secretaría en src/apps/web/app/(paneles)/(personal)/personal/pagos/page.tsx (listados `NO_IMPUTADO` con su motivo y `DEVUELTO`, más las cargas de informe)
 
 **Checkpoint**: US1 funciona sola: importar, acreditar, idempotencia y bandeja.
 
@@ -225,7 +225,7 @@ lo acepta, la ocupación supera el total y queda la decisión registrada; una se
 - [ ] T088 [US5] Crear src/supabase/migrations/20261021000700_rpc_decidir_pago_excepcional.sql según contracts/rpc.md (`FOR UPDATE` sobre el pago y la Postulación, exige `rol_actual() = 'DIRECCION'`, inserta en `decisiones_de_direccion`, sin comparar contra el total al aceptar), con `REVOKE` y `GRANT`
 - [ ] T089 [US5] Implementar `registrarDecision` en src/packages/infrastructure/supabase/registro-de-pagos.ts y verificar que src/packages/infrastructure/supabase/registro-de-pagos.contrato.test.ts pasa con los casos nuevos
 - [ ] T090 [US5] Crear src/apps/web/app/api/pagos/[id]/decision/route.ts, con su Zod en src/apps/web/http/esquemas/pagos.ts
-- [ ] T091 [US5] Crear el panel de Dirección en src/apps/web/app/(paneles)/direccion/casos/page.tsx (casos `A_DECIDIR` con motivo, fecha de pago, vencimiento y ocupación actual del período, más los botones aceptar y rechazar con comentario)
+- [ ] T091 [US5] Crear el panel de Dirección en src/apps/web/app/(paneles)/(personal)/direccion/casos/page.tsx (casos `A_DECIDIR` con motivo, fecha de pago, vencimiento y ocupación actual del período, más los botones aceptar y rechazar con comentario)
 
 **Checkpoint**: las tres historias P1 funcionan; se puede recorrer la sección 5 de quickstart.md hasta el paso 7.
 
@@ -251,7 +251,7 @@ M y N − K; bajar el total por debajo de K falla.
 - [ ] T095 [US3] Implementar src/packages/application/casos-de-uso/consultar-ocupacion.ts (hasta que pase T093)
 - [ ] T095b [US3] Implementar src/packages/application/casos-de-uso/listar-periodos-abiertos.ts (hasta que pase T093b)
 - [ ] T096 [US3] Crear src/apps/web/http/esquemas/periodos.ts, src/apps/web/app/api/periodos/route.ts (GET con `ListarPeriodosAbiertos` y POST), src/apps/web/app/api/periodos/[id]/route.ts (PATCH) y src/apps/web/app/api/periodos/[id]/ocupacion/route.ts
-- [ ] T097 [US3] Crear la gestión de períodos en src/apps/web/app/(paneles)/personal/periodos/page.tsx (alta y edición, más la ocupación por período)
+- [ ] T097 [US3] Crear la gestión de períodos en src/apps/web/app/(paneles)/(personal)/personal/periodos/page.tsx (alta y edición, más la ocupación por período)
 
 **Checkpoint**: los períodos se gestionan desde la app y ya no dependen del seed.
 

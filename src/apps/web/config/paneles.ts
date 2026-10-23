@@ -9,7 +9,13 @@ export const PANEL_DE_ROL: Record<Rol, string> = {
   DIRECCION: '/direccion/casos',
 }
 
-export type IconoDeMenu = 'postulacion' | 'periodos' | 'pagos' | 'casos'
+export type RolDelPersonal = Exclude<Rol, 'ASPIRANTE'>
+
+export function esDelPersonal(rol: Rol): rol is RolDelPersonal {
+  return rol !== 'ASPIRANTE'
+}
+
+export type IconoDeMenu = 'periodos' | 'pagos' | 'casos'
 
 export interface ItemDeMenu {
   href: string
@@ -17,15 +23,15 @@ export interface ItemDeMenu {
   icono: IconoDeMenu
 }
 
-const POSTULACION: ItemDeMenu = { href: '/aspirante/postulacion', etiqueta: 'Mi postulación', icono: 'postulacion' }
 const PERIODOS: ItemDeMenu = { href: '/personal/periodos', etiqueta: 'Períodos', icono: 'periodos' }
 const PAGOS: ItemDeMenu = { href: '/personal/pagos', etiqueta: 'Pagos', icono: 'pagos' }
 const CASOS: ItemDeMenu = { href: '/direccion/casos', etiqueta: 'Casos a decidir', icono: 'casos' }
 
-// Lo que muestra la barra lateral de cada rol; el primero es su panel. Ocultar un ítem tampoco autoriza nada:
-// solo evita mostrar pantallas cuyo caso de uso le va a responder NoAutorizado.
-export const MENU_DE_ROL: Record<Rol, readonly ItemDeMenu[]> = {
-  ASPIRANTE: [POSTULACION],
+// La barra lateral es del personal: trabaja en varias áreas y va y viene entre ellas. El aspirante no tiene menú,
+// porque su panel es un recorrido lineal (inscripción, pago, documentación, estado).
+// El primer ítem es el panel de cada rol. Ocultar un ítem tampoco autoriza nada: solo evita mostrar pantallas cuyo
+// caso de uso le va a responder NoAutorizado.
+export const MENU_DE_ROL: Record<RolDelPersonal, readonly ItemDeMenu[]> = {
   TESORERIA: [PAGOS],
   SECRETARIA: [PERIODOS, PAGOS],
   DIRECCION: [CASOS, PERIODOS],

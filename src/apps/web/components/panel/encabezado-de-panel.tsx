@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { SidebarTrigger } from '@/components/ui/sidebar'
 
-// La navegación entre paneles y el cierre de sesión viven en la barra lateral (components/panel/barra-lateral.tsx).
+// Título de cada panel. La navegación y el cierre de sesión los pone el layout: la barra lateral en el personal y
+// el encabezado en el aspirante.
 interface EncabezadoDePanelProps {
   area: string
   titulo: string
@@ -13,7 +13,6 @@ export function EncabezadoDePanel({ area, titulo, descripcion, acciones }: Encab
   return (
     <header className="border-b border-border bg-card">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
-        <SidebarTrigger className="-ml-1" />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
             <span className="block text-xs font-bold tracking-widest text-primary uppercase">{area}</span>

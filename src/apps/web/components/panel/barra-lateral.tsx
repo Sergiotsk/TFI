@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarRange, ClipboardList, Gavel, LogOut, Wallet, type LucideIcon } from 'lucide-react'
-import type { Rol } from '@tfi/domain'
+import { CalendarRange, Gavel, LogOut, Wallet, type LucideIcon } from 'lucide-react'
 import { cerrarSesion } from '@/app/panel/actions'
 import {
   Sidebar,
@@ -19,17 +18,16 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { ETIQUETAS_DE_ROL, INSTITUCION } from '@/config/institucion'
-import { MENU_DE_ROL, type IconoDeMenu } from '@/config/paneles'
+import { MENU_DE_ROL, type IconoDeMenu, type RolDelPersonal } from '@/config/paneles'
 
 const ICONOS: Record<IconoDeMenu, LucideIcon> = {
-  postulacion: ClipboardList,
   periodos: CalendarRange,
   pagos: Wallet,
   casos: Gavel,
 }
 
 interface BarraLateralProps {
-  rol: Rol
+  rol: RolDelPersonal
   nombre: string
 }
 

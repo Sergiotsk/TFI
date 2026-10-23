@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import type { Rol } from '@tfi/domain'
 import { esRutaProtegida } from '../lib/rutas-protegidas'
-import { MENU_DE_ROL, PANEL_DE_ROL } from './paneles'
+import { MENU_DE_ROL, PANEL_DE_ROL, type ItemDeMenu, type RolDelPersonal } from './paneles'
 
 describe('PANEL_DE_ROL', () => {
   test.each<[Rol, string]>([
@@ -23,8 +23,7 @@ describe('PANEL_DE_ROL', () => {
 describe('MENU_DE_ROL', () => {
   // Según quién puede usar cada pantalla en contracts/api-http.md y puertos.md (ListarBandeja): la bandeja de pagos
   // es de Tesorería y Secretaría, los períodos de Secretaría y Dirección, y los casos A_DECIDIR solo de Dirección.
-  test.each<[Rol, string[]]>([
-    ['ASPIRANTE', ['/aspirante/postulacion']],
+  test.each<[RolDelPersonal, string[]]>([
     ['TESORERIA', ['/personal/pagos']],
     ['SECRETARIA', ['/personal/periodos', '/personal/pagos']],
     ['DIRECCION', ['/direccion/casos', '/personal/periodos']],
@@ -32,8 +31,12 @@ describe('MENU_DE_ROL', () => {
     expect(MENU_DE_ROL[rol].map((item) => item.href)).toEqual(rutas)
   })
 
+  test('el aspirante no tiene menú: su panel es un recorrido lineal, sin barra lateral', () => {
+    expect(Object.keys(MENU_DE_ROL)).not.toContain('ASPIRANTE')
+  })
+
   test('el primer ítem de cada menú es el panel al que lo manda /panel', () => {
-    for (const [rol, items] of Object.entries(MENU_DE_ROL) as [Rol, (typeof MENU_DE_ROL)[Rol]][]) {
+    for (const [rol, items] of Object.entries(MENU_DE_ROL) as [RolDelPersonal, readonly ItemDeMenu[]][]) {
       expect(items[0]?.href).toBe(PANEL_DE_ROL[rol])
     }
   })
