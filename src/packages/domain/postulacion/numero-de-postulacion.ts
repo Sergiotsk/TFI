@@ -8,13 +8,13 @@ const CANTIDAD_DE_DIGITOS = 6
  * número ya es más largo, se muestra completo.
  */
 export class NumeroDePostulacion {
-  private constructor(readonly valor: number) {}
-
-  static desde(valor: number): NumeroDePostulacion {
-    if (!Number.isInteger(valor) || valor <= 0) {
+  constructor(readonly valor: number) {
+    if (!Number.isSafeInteger(valor) || valor <= 0) {
       throw new Error(`Número de Postulación inválido: ${valor}`)
     }
+  }
 
+  static desde(valor: number): NumeroDePostulacion {
     return new NumeroDePostulacion(valor)
   }
 
@@ -24,5 +24,10 @@ export class NumeroDePostulacion {
 
   equals(otro: NumeroDePostulacion): boolean {
     return this.valor === otro.valor
+  }
+
+  /** Alias usado por el dominio de pagos. */
+  igualA(otro: NumeroDePostulacion): boolean {
+    return this.equals(otro)
   }
 }

@@ -1,1 +1,1 @@
-export type MotivoRevision = 'FUERA_DE_PLAZO' | 'SIN_CUPO'
+export type { MotivoDeRevision as MotivoRevision } from './estados'

@@ -1,3 +1,6 @@
+import { Monto } from '../pago/monto'
+import { CuposPorDebajoDeConfirmadas } from '../postulacion/errores'
+
 const MILISEGUNDOS_POR_DIA = 24 * 60 * 60 * 1000
 
 /**
@@ -8,6 +11,8 @@ const MILISEGUNDOS_POR_DIA = 24 * 60 * 60 * 1000
  * solo aporta el total y las fechas.
  */
 export class PeriodoDeIngreso {
+  readonly montoMatriculaCentavos: number
+
   constructor(
     readonly id: string,
     readonly institucionId: string,
@@ -15,8 +20,30 @@ export class PeriodoDeIngreso {
     readonly totalCupos: number,
     readonly cierraEl: Date,
     readonly diasPlazoPago: number,
-    readonly montoMatriculaCentavos: number,
-  ) {}
+    montoMatricula: number | Monto,
+  ) {
+    const montoMatriculaCentavos =
+      montoMatricula instanceof Monto ? montoMatricula.centavos : montoMatricula
+
+    if (!Number.isSafeInteger(totalCupos) || totalCupos < 0) {
+      throw new Error(`Total de cupos inválido: ${totalCupos}`)
+    }
+
+    if (!Number.isSafeInteger(diasPlazoPago) || diasPlazoPago <= 0) {
+      throw new Error(`Días de plazo de pago inválidos: ${diasPlazoPago}`)
+    }
+
+    if (!Number.isSafeInteger(montoMatriculaCentavos) || montoMatriculaCentavos <= 0) {
+      throw new Error(`Monto de matrícula inválido: ${montoMatriculaCentavos}`)
+    }
+
+    this.montoMatriculaCentavos = montoMatriculaCentavos
+  }
+
+  /** El dominio de pagos usa el value object `Monto`. */
+  get montoMatricula(): Monto {
+    return new Monto(this.montoMatriculaCentavos)
+  }
 
   /** El período está abierto hasta el cierre, inclusive. */
   estaAbierto(ahora: Date): boolean {
@@ -32,5 +59,22 @@ export class PeriodoDeIngreso {
   /** Cupos que todavía se pueden ofrecer: libres de confirmadas y de pendientes vigentes. */
   cuposLibres(ocupados: number, pendientesVigentes: number): number {
     return this.totalCupos - ocupados - pendientesVigentes
+  }
+
+  /** Cambia el total de cupos sin permitir quedar por debajo de las vacantes confirmadas. */
+  conTotalCupos(totalCupos: number, confirmadas: number): PeriodoDeIngreso {
+    if (totalCupos < confirmadas) {
+      throw new CuposPorDebajoDeConfirmadas(totalCupos, confirmadas)
+    }
+
+    return new PeriodoDeIngreso(
+      this.id,
+      this.institucionId,
+      this.nombre,
+      totalCupos,
+      this.cierraEl,
+      this.diasPlazoPago,
+      this.montoMatriculaCentavos,
+    )
   }
 }

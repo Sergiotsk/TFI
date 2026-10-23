@@ -21,7 +21,7 @@ detrás del adaptador). El adaptador mapea uno a otro, y los tipos generados por
 
 **PeriodoDeIngreso**
 - `id`, `institucionId`, `nombre`, `totalCupos` (entero ≥ 0), `cierraEl` (fecha), `diasPlazoPago` (entero > 0),
-  `montoMatricula: Monto`.
+  `montoMatricula: Monto` (> 0).
 - `estaAbierto(ahora)`: `ahora <= cierraEl`.
 - `calcularVencimiento(ahora)`: `min(ahora + diasPlazoPago, cierraEl)`.
 - Regla: `totalCupos` no puede bajar por debajo de las vacantes ya confirmadas (lo verifica el caso de uso
@@ -33,9 +33,12 @@ detrás del adaptador). El adaptador mapea uno a otro, y los tipos generados por
 - Es inmutable: cada transición devuelve una Postulación nueva o lanza `TransicionInvalida`.
 
 **Pago**
-- `id`, `referencia: ReferenciaDePago`, `monto: Monto`, `pagadoEl`, `registradoEl`, `estado`,
-  `motivoRevision?` (si está `A_DECIDIR`), `motivoNoImputado?` (si está `NO_IMPUTADO`), `postulacionId?`,
-  `cargaId?`, `dniInformado?`, `numeroInformado?`.
+- `id`, `referencia: ReferenciaDePago`, `monto: Monto` (> 0), `pagadoEl`, `registradoEl`, `estado`,
+  `motivoRevision?` (obligatorio en `A_DECIDIR`; `ACREDITADO` y `DEVUELTO` lo conservan después de la decisión, para
+  auditoría), `motivoNoImputado?` (si está `NO_IMPUTADO`), `postulacionId?`, `cargaId?`, `dniInformado?`,
+  `numeroInformado?`.
+- Decisión de Dirección: `aceptar()` (`A_DECIDIR → ACREDITADO`) y `devolver()` (`A_DECIDIR → DEVUELTO`). Desde
+  cualquier otro estado lanzan `TransicionInvalida`.
 
 **CargaDeInforme**
 - `id`, `institucionId`, `cargadaPor` (perfil `TESORERIA`), `cargadaEl`, `nombreArchivo`, y el resumen:
@@ -60,7 +63,7 @@ stateDiagram-v2
     VENCIDO --> VACANTE_CONFIRMADA: confirmar (pagadoEl <= venceEl: pagó a tiempo, se informó tarde)
     PAGO_PENDIENTE --> VENCIDO: estadoEn(ahora) con ahora > venceEl (perezoso)
     PAGO_PENDIENTE --> PAGO_EN_REVISION: pasarARevision(SIN_CUPO | FUERA_DE_PLAZO)
-    VENCIDO --> PAGO_EN_REVISION: pasarARevision(FUERA_DE_PLAZO)
+    VENCIDO --> PAGO_EN_REVISION: pasarARevision(FUERA_DE_PLAZO | SIN_CUPO)
     VENCIDO --> PAGO_PENDIENTE: iniciarPago (reintento, plazo nuevo)
     PAGO_EN_REVISION --> VACANTE_CONFIRMADA: aceptarExcepcion (DIRECCION)
     PAGO_EN_REVISION --> VENCIDO: rechazarExcepcion (DIRECCION)
@@ -75,8 +78,10 @@ Para la ocupación cuentan `VACANTE_CONFIRMADA` **y todos los posteriores**.
 
 ### Evaluación de un pago informado (regla del dominio)
 
-`evaluarPago(pagoInformado, candidata?, periodo, ocupados)` devuelve **una** de estas decisiones. Las reglas se
-evalúan en este orden:
+`evaluarPago(pagoInformado, imputacion, periodo, ocupados)` devuelve **una** de estas decisiones. `imputacion` es
+`{ via: 'NUMERO' | 'DNI', candidatas }`: por dónde buscó el caso de uso y **todas** las Postulaciones que encontró,
+cada una con el DNI de su aspirante (la Postulación no lo guarda). Hacen falta las dos cosas: la lista, para la regla
+1 ("más de una"), y la vía con el DNI, para la regla 2. Las reglas se evalúan en este orden:
 
 | # | Condición | Decisión | Pago queda |
 |---|---|---|---|
@@ -84,12 +89,16 @@ evalúan en este orden:
 | 2 | Vino por número y el DNI informado no coincide | `NO_IMPUTAR(DNI_NO_COINCIDE)` | `NO_IMPUTADO` |
 | 3 | `monto < periodo.montoMatricula` | `NO_IMPUTAR(MONTO_INSUFICIENTE)` | `NO_IMPUTADO` |
 | 4 | La Postulación ya está en `VACANTE_CONFIRMADA` o posterior, o en `PAGO_EN_REVISION` | `NO_IMPUTAR(YA_TIENE_PAGO)` | `NO_IMPUTADO` (pago doble, para que Tesorería lo devuelva) |
-| 5 | La Postulación está en `PREINSCRIPTO` (nunca inició el pago) | `NO_IMPUTAR(SIN_PAGO_INICIADO)` | `NO_IMPUTADO` |
+| 5 | La Postulación está en `PREINSCRIPTO` (nunca inició el pago), o en `VENCIDO` sin `venceEl` (migrada de `RECHAZADO`, research R8) | `NO_IMPUTAR(SIN_PAGO_INICIADO)` | `NO_IMPUTADO` |
 | 6 | `pagadoEl > venceEl` | `REVISION(FUERA_DE_PLAZO)` | `A_DECIDIR` |
 | 7 | `ocupados >= totalCupos` | `REVISION(SIN_CUPO)` | `A_DECIDIR` |
 | 8 | Si no se cumple ninguna de las anteriores | `CONFIRMAR` | `ACREDITADO` |
 
 El orden de 6 antes que 7 cubre el caso borde "tardío **y** sin cupo" (se registra `FUERA_DE_PLAZO`).
+
+La regla 7 también alcanza a una Postulación persistida en `VENCIDO` que pagó dentro del plazo y se informó tarde:
+la regla 6 no corta, y si ya no hay cupo queda `REVISION(SIN_CUPO)`. Por eso `VENCIDO → PAGO_EN_REVISION` admite
+los dos motivos (es lo que ya aceptan `contracts/puertos.md` y `contracts/rpc.md`).
 
 El estado **efectivo** (`estadoEn(ahora)`) no participa de la regla 6: lo único que cuenta es `pagadoEl` contra
 `venceEl`. Una Postulación que hoy se ve `VENCIDO`, pero cuyo pago tiene fecha dentro del plazo, se **confirma**

@@ -97,8 +97,8 @@ stateDiagram-v2
     PAGO_PENDIENTE --> VENCIDO: vence el plazo (sin retener cupo)
     VENCIDO --> PAGO_PENDIENTE: reintenta, con un plazo nuevo
     VENCIDO --> VACANTE_CONFIRMADA: pagó a tiempo, pero se informó después
-    PAGO_PENDIENTE --> PAGO_EN_REVISION: pago sin cupo
-    VENCIDO --> PAGO_EN_REVISION: pago fuera de plazo
+    PAGO_PENDIENTE --> PAGO_EN_REVISION: pago sin cupo o fuera de plazo
+    VENCIDO --> PAGO_EN_REVISION: pago fuera de plazo, o en plazo y sin cupo
     PAGO_EN_REVISION --> VACANTE_CONFIRMADA: Dirección acepta
     PAGO_EN_REVISION --> VENCIDO: Dirección rechaza (se devuelve el pago)
     VACANTE_CONFIRMADA --> ESPERANDO_DOCUMENTACION: se habilita el panel de carga

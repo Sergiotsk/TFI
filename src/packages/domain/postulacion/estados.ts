@@ -20,6 +20,14 @@ export const ESTADOS_DE_POSTULACION = [
 
 export type EstadoPostulacion = (typeof ESTADOS_DE_POSTULACION)[number]
 
+/** Alias usado por el dominio de pagos. */
+export type EstadoDePostulacion = EstadoPostulacion
+
+/** Motivos de revisión que puede tener una Postulación o un Pago. */
+export const MOTIVOS_DE_REVISION = ['FUERA_DE_PLAZO', 'SIN_CUPO'] as const
+
+export type MotivoDeRevision = (typeof MOTIVOS_DE_REVISION)[number]
+
 /**
  * Estados que ocupan una vacante (data-model.md, "Ocupación derivada"):
  * `VACANTE_CONFIRMADA` y todos los posteriores.

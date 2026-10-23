@@ -1,13 +1,29 @@
 import type { EstadoPostulacion } from './estados'
 
-/** Una transición que la máquina de estados no permite. */
+/**
+ * Una transición que la máquina de estados no permite.
+ *
+ * Acepta el formato del dominio de la Postulación (`desde`, `hacia`) y el
+ * formato con mensaje que usan los pagos.
+ */
 export class TransicionInvalida extends Error {
-  constructor(
-    readonly desde: EstadoPostulacion,
-    readonly hacia: EstadoPostulacion,
-  ) {
-    super(`Transición inválida de ${desde} a ${hacia}`)
+  readonly desde?: EstadoPostulacion
+  readonly hacia?: EstadoPostulacion
+
+  constructor(mensaje: string)
+  constructor(desde: EstadoPostulacion, hacia: EstadoPostulacion)
+  constructor(desdeOMensaje: EstadoPostulacion | string, hacia?: EstadoPostulacion) {
+    super(
+      hacia === undefined
+        ? desdeOMensaje
+        : `Transición inválida de ${desdeOMensaje} a ${hacia}`,
+    )
     this.name = 'TransicionInvalida'
+
+    if (hacia !== undefined) {
+      this.desde = desdeOMensaje as EstadoPostulacion
+      this.hacia = hacia
+    }
   }
 }
 
