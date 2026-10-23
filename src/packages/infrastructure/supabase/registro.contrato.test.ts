@@ -10,13 +10,37 @@ import {
 
 const CONTRASENA = 'contrasenaSegura123'
 
-const METADATA_COMPLETA = {
+const METADATA_BASE = {
   nombre: 'Ana',
   apellido: 'García',
   dni: '30123456',
   cuil: '27301234569',
   fecha_nacimiento: '2000-05-15',
   sexo: 'F',
+}
+
+let contador = 0
+
+/**
+ * DNI y CUIL únicos por test: contra una base real, el perfil tiene ambos
+ * campos únicos y reusar los mismos datos entre tests hace fallar el segundo
+ * registro.
+ */
+function metadataUnica() {
+  contador += 1
+  const dni = String(20_000_000 + ((Date.now() + contador * 7919) % 79_000_000))
+
+  return { ...METADATA_BASE, dni, cuil: `27${dni}9` }
+}
+
+function metadataSinDni() {
+  return {
+    nombre: METADATA_BASE.nombre,
+    apellido: METADATA_BASE.apellido,
+    cuil: '27000000009',
+    fecha_nacimiento: METADATA_BASE.fecha_nacimiento,
+    sexo: METADATA_BASE.sexo,
+  }
 }
 
 // Estos tests hablan con la base de verdad: verifican el trigger
@@ -37,7 +61,7 @@ describe.skipIf(!hayEntornoDePruebaConServicio())('contrato: registro con Supaba
       password: CONTRASENA,
       options: {
         data: {
-          ...METADATA_COMPLETA,
+          ...metadataUnica(),
           // El usuario intenta autoasignarse un rol de la facultad.
           rol: 'SECRETARIA',
         },
@@ -65,13 +89,7 @@ describe.skipIf(!hayEntornoDePruebaConServicio())('contrato: registro con Supaba
       email,
       password: CONTRASENA,
       options: {
-        data: {
-          nombre: METADATA_COMPLETA.nombre,
-          apellido: METADATA_COMPLETA.apellido,
-          cuil: METADATA_COMPLETA.cuil,
-          fecha_nacimiento: METADATA_COMPLETA.fecha_nacimiento,
-          sexo: METADATA_COMPLETA.sexo,
-        },
+        data: metadataSinDni(),
       },
     })
 
@@ -90,13 +108,7 @@ describe.skipIf(!hayEntornoDePruebaConServicio())('contrato: registro con Supaba
         email: emailDePrueba(`sin-dni-${sufijo}`),
         password: CONTRASENA,
         options: {
-          data: {
-            nombre: METADATA_COMPLETA.nombre,
-            apellido: METADATA_COMPLETA.apellido,
-            cuil: METADATA_COMPLETA.cuil,
-            fecha_nacimiento: METADATA_COMPLETA.fecha_nacimiento,
-            sexo: METADATA_COMPLETA.sexo,
-          },
+          data: metadataSinDni(),
         },
       })
 
@@ -115,7 +127,7 @@ describe.skipIf(!hayEntornoDePruebaConServicio())('contrato: registro con Supaba
     const { data } = await anon.auth.signUp({
       email,
       password: CONTRASENA,
-      options: { data: METADATA_COMPLETA },
+      options: { data: metadataUnica() },
     })
     if (!data?.user) throw new Error('el registro debería haber creado el usuario')
 
