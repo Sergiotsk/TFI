@@ -4,6 +4,7 @@ import {
   esquemaCrearPostulacion,
   esquemaFiltrosDePostulacion,
 } from '@/http/esquemas/postulaciones'
+import { esquemaPaginacion } from '@/http/esquemas/paginacion'
 import { detallesDeZod } from '@/http/esquemas/errores'
 import { respuestaDeErrorDePostulacion } from '@/http/errores'
 import { jsonError, jsonOk } from '@/http/respuesta'
@@ -13,7 +14,8 @@ import { jsonError, jsonOk } from '@/http/respuesta'
  *
  * Solo roles que no son `ASPIRANTE`. Filtros opcionales: `aspiranteId` (el id
  * de perfil), `periodoId` y `estado` (persistido). Sin filtros devuelve todas
- * las de la institución; RLS acota el alcance.
+ * las de la institución; RLS acota el alcance. La respuesta está paginada con
+ * `pagina` (empieza en 1) y `porPagina` (máximo 100).
  */
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -22,6 +24,10 @@ export async function GET(request: Request) {
     periodoId: url.searchParams.get('periodoId') ?? undefined,
     estado: url.searchParams.get('estado') ?? undefined,
   })
+  const paginacion = esquemaPaginacion.safeParse({
+    pagina: url.searchParams.get('pagina') ?? undefined,
+    porPagina: url.searchParams.get('porPagina') ?? undefined,
+  })
 
   if (!parsed.success) {
     return jsonError(
@@ -29,6 +35,15 @@ export async function GET(request: Request) {
       'Los datos ingresados no son válidos',
       400,
       detallesDeZod(parsed.error),
+    )
+  }
+
+  if (!paginacion.success) {
+    return jsonError(
+      'DATOS_INVALIDOS',
+      'Los datos ingresados no son válidos',
+      400,
+      detallesDeZod(paginacion.error),
     )
   }
 
@@ -46,7 +61,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const postulaciones = await listarPostulaciones.ejecutar(actor.actor, parsed.data)
+    const postulaciones = await listarPostulaciones.ejecutar(
+      actor.actor,
+      parsed.data,
+      paginacion.data,
+    )
 
     return jsonOk(postulaciones)
   } catch (error) {

@@ -9,6 +9,46 @@ import { respuestaDeErrorDePostulacion } from '@/http/errores'
 import { jsonError, jsonOk } from '@/http/respuesta'
 
 /**
+ * `GET /api/periodos/:id` → `ConsultarPeriodo` (US3).
+ *
+ * Cualquier usuario autenticado de la institución ve el detalle del período,
+ * incluido el monto y el plazo. Un período de otra institución responde 404.
+ */
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const parametros = esquemaParametrosDePeriodo.safeParse(await params)
+
+  if (!parametros.success) {
+    return jsonError('DATOS_INVALIDOS', 'Los datos ingresados no son válidos', 400, {
+      id: parametros.error.issues[0]?.message ?? 'Dato inválido',
+    })
+  }
+
+  const supabase = await crearCliente()
+  const { obtenerActorUseCase, consultarPeriodo } = crearDependencias(supabase)
+
+  const actor = await obtenerActorUseCase.ejecutar()
+
+  if (actor.resultado === 'SIN_SESION') {
+    return jsonError('NO_AUTENTICADO', 'No autenticado', 401)
+  }
+
+  if (actor.resultado === 'SIN_PERFIL') {
+    return jsonError('SIN_PERFIL', 'Perfil no encontrado', 403)
+  }
+
+  try {
+    const periodo = await consultarPeriodo.ejecutar(actor.actor, parametros.data.id)
+
+    return jsonOk(periodo)
+  } catch (error) {
+    return respuestaDeErrorDePostulacion(error)
+  }
+}
+
+/**
  * `PATCH /api/periodos/:id` → `ModificarPeriodo` (US3).
  *
  * Solo `DIRECCION`: el Director es el único que crea y modifica períodos.
