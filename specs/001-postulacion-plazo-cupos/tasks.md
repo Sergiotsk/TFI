@@ -115,8 +115,8 @@ Postulaciones y Períodos con sus adaptadores. Todas las historias dependen de e
 - [ ] T044 Implementar src/packages/infrastructure/supabase/repositorio-de-postulaciones.ts (recibe un `SupabaseClient` por constructor; `guardarTransicion` es un `update` condicionado a `.eq('estado', antes.estado)`, y si actualiza 0 filas devuelve `conflicto`)
 - [ ] T045 Implementar src/packages/infrastructure/supabase/repositorio-de-periodos.ts
 - [x] T045b Implementar src/packages/infrastructure/supabase/repositorio-de-perfiles.ts con al menos `obtenerPorId` y `obtenerPorRol` (lectura; el alta la hace el trigger de T018). Lo usa T051 para armar el `Actor`: la autorización de los casos de uso **no** puede correr contra un fake (Principio VII, primera barrera)
-- [ ] T046 Crear src/packages/infrastructure/supabase/repositorio-de-postulaciones.contrato.test.ts, src/packages/infrastructure/supabase/repositorio-de-periodos.contrato.test.ts y src/packages/infrastructure/supabase/repositorio-de-perfiles.contrato.test.ts (corren los contratos de T035, T036 y T039c contra los adaptadores, con `describe.skipIf(!process.env.SUPABASE_TEST_URL)`)
-> Hecho el de perfiles (`repositorio-de-perfiles.contrato.test.ts`). Faltan el de postulaciones y el de períodos: sus adaptadores todavía no existen.
+- [x] T046 Crear src/packages/infrastructure/supabase/repositorio-de-postulaciones.contrato.test.ts, src/packages/infrastructure/supabase/repositorio-de-periodos.contrato.test.ts y src/packages/infrastructure/supabase/repositorio-de-perfiles.contrato.test.ts (corren los contratos de T035, T036 y T039c contra los adaptadores, con `describe.skipIf(!process.env.SUPABASE_TEST_URL)`)
+> Hechos los tres, más `repositorio-de-documentos.contrato.test.ts` y `almacen-de-archivos.contrato.test.ts`. Los fixtures generan DNI, CUIL, períodos e instituciones únicos por corrida; los documentos se asocian a Postulaciones reales.
 - [ ] T047 Actualizar los exports de src/packages/infrastructure/index.ts (incluido `RelojDeSistema`)
 > Los exports actuales están al día. Falta `RelojDeSistema`, que viene con T034b (el reloj sale de esta feature).
 
@@ -281,7 +281,7 @@ un `signUp` sin DNI falla.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T101 [P] Actualizar src/supabase/README.md (las migraciones nuevas, cómo correr `pnpm test:contratos` contra la base local, y el seed con las cuentas de personal)
+- [x] T101 [P] Actualizar src/supabase/README.md (las migraciones nuevas, cómo correr `pnpm test:contratos` contra la base local, y el seed con las cuentas de personal)
 - [ ] T102 [P] Actualizar src/packages/domain/postulacion/README.md, src/packages/domain/pago/README.md y src/packages/infrastructure/supabase/README.md con el modelo final
 - [ ] T103 Verificar que las puertas de calidad de la CI (las de la tarjeta "Config de Vitest y CI") pasan en el PR: `pnpm lint`, `pnpm typecheck` y `pnpm test` (Principio IV: sin `any`; la regla de límites entre capas)
 - [ ] T104 Recorrer specs/001-postulacion-plazo-cupos/quickstart.md completo (secciones 1 a 5), medir que importar un informe de unas 200 filas tarda menos de 30 s (meta de plan.md) y adjuntar la salida de la sección 3 (contratos contra Supabase local) al PR del adaptador
