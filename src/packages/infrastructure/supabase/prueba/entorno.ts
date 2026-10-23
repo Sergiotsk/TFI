@@ -3,11 +3,14 @@ import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PeriodoDeIngreso, Postulacion } from '@tfi/domain'
 import type { DatosDePostulacionSembrada } from '@tfi/application'
-import type {
-  DatosDePeriodoDePrueba,
-  EntornoDeDocumentos,
-  EntornoDePostulaciones,
-  EntornoDePeriodos,
+import {
+  MATRICULA_DE_PRUEBA_CENTAVOS,
+  type DatosDePeriodoDePrueba,
+  type EntornoDeDocumentos,
+  type EntornoDePostulaciones,
+  type EntornoDePeriodos,
+  type EntornoDeRegistroDeCargas,
+  type EntornoDeRegistroDePagos,
 } from '@tfi/application/contratos'
 import {
   claveDeServicioDePrueba,
@@ -19,6 +22,8 @@ import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
 import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
 import { RepositorioDePeriodosSupabase } from '../repositorio-de-periodos'
+import { RegistroDeCargasSupabase } from '../registro-de-cargas'
+import { RegistroDePagosSupabase } from '../registro-de-pagos'
 import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulaciones'
 
 /**
@@ -286,5 +291,90 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
     aspiranteId: aspirante.id,
     delPersonal: new RepositorioDeDocumentosSupabase(await clienteConSesion(personal.email)),
     personalId: personal.id,
+  }
+}
+
+let tesoreriaDeLaCorrida: Promise<{ id: string; cliente: SupabaseClient }> | undefined
+
+/** Un usuario de Tesorería de FRH con su sesión, uno por corrida. */
+function tesoreriaConSesion(
+  servicio: SupabaseClient,
+  institucionId: string,
+): Promise<{ id: string; cliente: SupabaseClient }> {
+  tesoreriaDeLaCorrida ??= (async () => {
+    const usuario = await crearUsuario(servicio, dniUnico())
+    const { error } = await servicio
+      .from('perfiles')
+      .update({ rol: 'TESORERIA', institucion_id: institucionId })
+      .eq('id', usuario.id)
+    if (error) throw new Error(`No se pudo dar el rol de Tesorería: ${error.message}`)
+
+    return { id: usuario.id, cliente: await clienteConSesion(usuario.email) }
+  })()
+
+  return tesoreriaDeLaCorrida
+}
+
+/**
+ * Entorno del contrato de `RegistroDePagos`: el adaptador usa la sesión de
+ * Tesorería, así pasa por la verificación de rol e institución de la RPC.
+ * Los períodos se siembran ya cerrados (la RPC no mira el cierre) para no
+ * llenar de períodos abiertos la lista que ve el aspirante.
+ */
+export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegistroDePagos> {
+  const servicio = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(servicio)
+  const tesoreria = await tesoreriaConSesion(servicio, institucionId)
+  const periodos = new RepositorioDePeriodosSupabase(servicio)
+  const cargas = new RegistroDeCargasSupabase(tesoreria.cliente)
+
+  return {
+    registro: new RegistroDePagosSupabase(tesoreria.cliente),
+    institucionId,
+    ahora: () => new Date(),
+    sembrar: async (datos) => {
+      const periodoId =
+        datos.periodoId ??
+        (
+          await crearPeriodo(servicio, institucionId, {
+            totalCupos: datos.totalCupos ?? 10,
+            cierraEl: new Date(Date.now() - UN_DIA),
+            montoMatriculaCentavos: MATRICULA_DE_PRUEBA_CENTAVOS,
+          })
+        ).id
+      const aspiranteId = await crearAspirante(servicio, dniUnico())
+      const postulacion = await sembrarPostulacion(servicio, {
+        aspiranteId,
+        periodoId,
+        estado: datos.estado,
+        venceEl: datos.venceEl,
+      })
+
+      return { postulacionId: postulacion.id, periodoId }
+    },
+    sembrarCarga: async () => (await cargas.iniciar(institucionId, tesoreria.id, 'contrato.csv')).id,
+    estadoDe: async (postulacionId) => {
+      const { data, error } = await servicio
+        .from('postulaciones')
+        .select('*')
+        .eq('id', postulacionId)
+        .single()
+      if (error) throw new Error(`No se pudo leer la Postulación: ${error.message}`)
+      return mapearPostulacion(data).estado
+    },
+    contarOcupados: (periodoId) => periodos.contarOcupados(periodoId),
+  }
+}
+
+/** Entorno del contrato de `RegistroDeCargas`, con la sesión de Tesorería. */
+export async function prepararEntornoDeRegistroDeCargas(): Promise<EntornoDeRegistroDeCargas> {
+  const servicio = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(servicio)
+  const tesoreria = await tesoreriaConSesion(servicio, institucionId)
+
+  return {
+    cargas: new RegistroDeCargasSupabase(tesoreria.cliente),
+    institucionId,
+    cargadaPor: tesoreria.id,
   }
 }
