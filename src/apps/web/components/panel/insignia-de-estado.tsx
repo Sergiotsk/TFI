@@ -1,10 +1,6 @@
 import { cn } from '@/lib/utils'
-import type {
-  EstadoPago,
-  EstadoPostulacion,
-  MotivoNoImputado,
-  MotivoRevision,
-} from '@/maquetas/datos'
+import type { EstadoPostulacion } from '@tfi/domain'
+import type { EstadoPago, MotivoNoImputado, MotivoRevision } from '@/maquetas/datos'
 
 type Tono = 'neutro' | 'aviso' | 'exito' | 'error'
 
@@ -21,6 +17,11 @@ const estadosDePostulacion: Record<EstadoPostulacion, { etiqueta: string; tono: 
   PAGO_EN_REVISION: { etiqueta: 'Pago en revisión', tono: 'aviso' },
   VACANTE_CONFIRMADA: { etiqueta: 'Vacante confirmada', tono: 'exito' },
   VENCIDO: { etiqueta: 'Vencido', tono: 'error' },
+  ESPERANDO_DOCUMENTACION: { etiqueta: 'Esperando documentación', tono: 'neutro' },
+  DOCUMENTACION_EN_REVISION: { etiqueta: 'Documentación en revisión', tono: 'aviso' },
+  OBSERVADO: { etiqueta: 'Observado', tono: 'error' },
+  DOCUMENTACION_VALIDADA: { etiqueta: 'Documentación validada', tono: 'exito' },
+  CONFIRMADO_PARA_EXPORTAR: { etiqueta: 'Confirmado', tono: 'exito' },
 }
 
 const estadosDePago: Record<EstadoPago, { etiqueta: string; tono: Tono }> = {
