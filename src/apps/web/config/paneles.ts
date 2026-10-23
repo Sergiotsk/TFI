@@ -15,16 +15,38 @@ export function esDelPersonal(rol: Rol): rol is RolDelPersonal {
   return rol !== 'ASPIRANTE'
 }
 
-export type IconoDeMenu = 'periodos' | 'pagos' | 'casos' | 'postulaciones'
+export type IconoDeMenu =
+  | 'periodos'
+  | 'informes'
+  | 'no-imputados'
+  | 'devoluciones'
+  | 'casos'
+  | 'postulaciones'
 
 export interface ItemDeMenu {
   href: string
   etiqueta: string
   icono: IconoDeMenu
+  /** Bandeja de pagos cuyo total de pendientes se muestra al lado del ítem. */
+  contador?: 'NO_IMPUTADO' | 'DEVUELTO'
 }
 
 const PERIODOS: ItemDeMenu = { href: '/personal/periodos', etiqueta: 'Períodos', icono: 'periodos' }
-const PAGOS: ItemDeMenu = { href: '/personal/pagos', etiqueta: 'Pagos', icono: 'pagos' }
+// Los pagos se parten por tarea de Tesorería: importar el informe del día, resolver los pagos que no se pudieron
+// imputar y devolver los que rechazó Dirección.
+const INFORMES: ItemDeMenu = { href: '/personal/pagos', etiqueta: 'Informes de pagos', icono: 'informes' }
+const NO_IMPUTADOS: ItemDeMenu = {
+  href: '/personal/pagos/no-imputados',
+  etiqueta: 'No imputados',
+  icono: 'no-imputados',
+  contador: 'NO_IMPUTADO',
+}
+const DEVOLUCIONES: ItemDeMenu = {
+  href: '/personal/pagos/devoluciones',
+  etiqueta: 'Devoluciones',
+  icono: 'devoluciones',
+  contador: 'DEVUELTO',
+}
 const POSTULACIONES: ItemDeMenu = {
   href: '/personal/postulaciones',
   etiqueta: 'Postulaciones',
@@ -37,7 +59,7 @@ const CASOS: ItemDeMenu = { href: '/direccion/casos', etiqueta: 'Casos a decidir
 // El primer ítem es el panel de cada rol. Ocultar un ítem tampoco autoriza nada: solo evita mostrar pantallas cuyo
 // caso de uso le va a responder NoAutorizado.
 export const MENU_DE_ROL: Record<RolDelPersonal, readonly ItemDeMenu[]> = {
-  TESORERIA: [PAGOS, POSTULACIONES],
-  SECRETARIA: [PERIODOS, POSTULACIONES, PAGOS],
+  TESORERIA: [INFORMES, NO_IMPUTADOS, DEVOLUCIONES, POSTULACIONES],
+  SECRETARIA: [PERIODOS, POSTULACIONES, INFORMES, NO_IMPUTADOS, DEVOLUCIONES],
   DIRECCION: [CASOS, PERIODOS, POSTULACIONES],
 }
