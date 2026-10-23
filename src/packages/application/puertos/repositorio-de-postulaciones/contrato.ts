@@ -57,7 +57,7 @@ export function probarContratoDeRepositorioDePostulaciones(
     it('obtenerPorNumero() devuelve null cuando la Postulación no existe', async () => {
       const { repositorio } = await crearEntorno()
 
-      expect(await repositorio.obtenerPorNumero(NumeroDePostulacion.desde(1))).toBeNull()
+      expect(await repositorio.obtenerPorNumero(NumeroDePostulacion.desde(1_000_000_000))).toBeNull()
     })
 
     it('crear() deja la Postulación en PREINSCRIPTO, con número y sin vencimiento', async () => {

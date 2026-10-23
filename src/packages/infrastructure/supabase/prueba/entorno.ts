@@ -1,15 +1,18 @@
+import { randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PeriodoDeIngreso, Postulacion } from '@tfi/domain'
 import type { DatosDePostulacionSembrada } from '@tfi/application'
 import type {
   DatosDePeriodoDePrueba,
+  EntornoDeDocumentos,
   EntornoDePostulaciones,
   EntornoDePeriodos,
 } from '@tfi/application/contratos'
 import { claveDeServicioDePrueba, emailDePrueba, urlDePrueba } from '../entorno-de-prueba'
 import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
+import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
 import { RepositorioDePeriodosSupabase } from '../repositorio-de-periodos'
 import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulaciones'
 
@@ -29,6 +32,13 @@ let contador = 0
 function marcaUnica(): string {
   contador += 1
   return `${Date.now().toString(36)}${contador.toString(36)}`
+}
+
+let contadorDni = 0
+
+function dniUnico(): string {
+  contadorDni += 1
+  return String(10_000_000 + ((Date.now() + contadorDni * 7919) % 89_000_000))
 }
 
 export function clienteDeServicio(): SupabaseClient {
@@ -168,7 +178,9 @@ export async function prepararEntornoDePostulaciones(): Promise<EntornoDePostula
 
 export async function prepararEntornoDePeriodos(): Promise<EntornoDePeriodos> {
   const cliente = clienteDeServicio()
-  const institucionId = await idDeLaInstitucionFrh(cliente)
+  // La suite de períodos necesita una institución propia: si usa FRH, el seed y
+  // las corridas anteriores dejan períodos abiertos que rompen `listarAbiertos`.
+  const institucionId = await crearInstitucionInactiva(cliente)
   const otraInstitucionId = await crearInstitucionInactiva(cliente)
 
   return {
@@ -178,5 +190,31 @@ export async function prepararEntornoDePeriodos(): Promise<EntornoDePeriodos> {
     crearAspirante: (dni) => crearAspirante(cliente, dni),
     crearPeriodo: (datos) => crearPeriodo(cliente, institucionId, datos),
     sembrarPostulacion: (datos) => sembrarPostulacion(cliente, datos),
+  }
+}
+
+async function crearPostulacionDeDocumentos(
+  cliente: SupabaseClient,
+  institucionId: string,
+): Promise<string> {
+  const periodo = await crearPeriodo(cliente, institucionId)
+  const aspiranteId = await crearAspirante(cliente, dniUnico())
+  const postulacion = await sembrarPostulacion(cliente, {
+    aspiranteId,
+    periodoId: periodo.id,
+    estado: 'ESPERANDO_DOCUMENTACION',
+  })
+
+  return postulacion.id
+}
+
+export async function prepararEntornoDeDocumentos(): Promise<EntornoDeDocumentos> {
+  const cliente = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(cliente)
+
+  return {
+    repositorio: new RepositorioDeDocumentosSupabase(cliente),
+    crearPostulacion: () => crearPostulacionDeDocumentos(cliente, institucionId),
+    crearIdDocumento: () => randomUUID(),
   }
 }

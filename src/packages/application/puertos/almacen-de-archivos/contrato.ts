@@ -24,9 +24,10 @@ export function probarContratoDeAlmacenDeArchivos(
       })
 
       const url = await almacen.urlFirmada(ruta, 60)
-      expect(url).toContain('almacen.fake')
-      expect(url).toContain('expira=60')
+      expect(url).toMatch(/^https?:\/\//)
       expect(url.length).toBeGreaterThan(0)
+
+      await almacen.eliminar(ruta)
     })
 
     it('eliminar() borra el archivo y luego urlFirmada() falla', async () => {

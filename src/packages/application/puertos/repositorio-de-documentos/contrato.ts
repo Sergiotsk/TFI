@@ -3,13 +3,14 @@ import { Documento } from '@tfi/domain'
 import { PAGINACION_POR_DEFECTO } from '../../paginacion'
 import type { RepositorioDeDocumentos } from './puerto'
 
-// Los ids tienen que ser únicos por corrida: contra una base real, guardar dos
-// veces el mismo id choca contra la clave primaria.
-let contador = 0
-
-function idUnico(prefijo: string): string {
-  contador += 1
-  return `${prefijo}-${Date.now().toString(36)}-${contador}`
+// El entorno provee ids únicos: contra una base real el documento necesita un
+// UUID nuevo y la Postulación tiene que existir por la FK.
+export interface EntornoDeDocumentos {
+  repositorio: RepositorioDeDocumentos
+  /** Crea una Postulación real o un id único para la suite. */
+  crearPostulacion: () => Promise<string>
+  /** Id único de documento; contra Supabase tiene que ser un UUID. */
+  crearIdDocumento: () => string
 }
 
 function documentoDePrueba(
@@ -38,12 +39,12 @@ function documentoDePrueba(
 
 /** Contrato de `RepositorioDeDocumentos`. */
 export function probarContratoRepositorioDeDocumentos(
-  crearRepositorio: () => RepositorioDeDocumentos,
+  crearEntorno: () => EntornoDeDocumentos | Promise<EntornoDeDocumentos>,
 ) {
   describe('contrato: RepositorioDeDocumentos', () => {
     it('guardar() y obtenerPorId() devuelven el mismo documento', async () => {
-      const repositorio = crearRepositorio()
-      const documento = documentoDePrueba(idUnico('doc'), idUnico('postulacion'))
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const documento = documentoDePrueba(crearIdDocumento(), await crearPostulacion())
 
       await repositorio.guardar(documento)
 
@@ -59,19 +60,19 @@ export function probarContratoRepositorioDeDocumentos(
     })
 
     it('obtenerPorId() devuelve null cuando el documento no existe', async () => {
-      const repositorio = crearRepositorio()
-      const documento = await repositorio.obtenerPorId(idUnico('inexistente'))
+      const { repositorio, crearIdDocumento } = await crearEntorno()
+      const documento = await repositorio.obtenerPorId(crearIdDocumento())
       expect(documento).toBeNull()
     })
 
     it('obtenerPorPostulacion() devuelve solo los documentos de esa postulación', async () => {
-      const repositorio = crearRepositorio()
-      const postulacionA = idUnico('postulacion')
-      const postulacionB = idUnico('postulacion')
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const postulacionA = await crearPostulacion()
+      const postulacionB = await crearPostulacion()
 
-      await repositorio.guardar(documentoDePrueba(idUnico('doc'), postulacionA))
-      await repositorio.guardar(documentoDePrueba(idUnico('doc'), postulacionA))
-      await repositorio.guardar(documentoDePrueba(idUnico('doc'), postulacionB))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacionA))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacionA))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacionB))
 
       const deA = await repositorio.obtenerPorPostulacion(postulacionA)
       expect(deA.length).toBe(2)
@@ -83,12 +84,12 @@ export function probarContratoRepositorioDeDocumentos(
     })
 
     it('listar() filtra por postulación, estado y tipo, y pagina', async () => {
-      const repositorio = crearRepositorio()
-      const postulacion = idUnico('postulacion')
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const postulacion = await crearPostulacion()
 
-      await repositorio.guardar(documentoDePrueba(idUnico('doc'), postulacion, 'PENDIENTE'))
-      await repositorio.guardar(documentoDePrueba(idUnico('doc'), postulacion, 'APROBADO'))
-      await repositorio.guardar(documentoDePrueba(idUnico('doc'), postulacion, 'OBSERVADO'))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'PENDIENTE'))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'APROBADO'))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'OBSERVADO'))
 
       const deLaPostulacion = await repositorio.listar(
         { postulacionId: postulacion },
@@ -117,8 +118,8 @@ export function probarContratoRepositorioDeDocumentos(
     })
 
     it('eliminar() borra el documento', async () => {
-      const repositorio = crearRepositorio()
-      const documento = documentoDePrueba(idUnico('doc'), idUnico('postulacion'))
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const documento = documentoDePrueba(crearIdDocumento(), await crearPostulacion())
 
       await repositorio.guardar(documento)
       await repositorio.eliminar(documento.id)
