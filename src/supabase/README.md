@@ -66,3 +66,48 @@ Después: commit, push y PR hacia `develop`. Al terminar el día: `supabase stop
 - **Si otra persona mergeó una migración antes que la tuya**, la tuya tiene que quedar después: creá una nueva con
   `supabase migration new`, pasale tu SQL, borrá la vieja y corré `supabase db reset`.
 - **Sin datos personales reales** en migraciones ni en seeds (Ley 25.326).
+
+## Tests de contrato contra Supabase
+
+`pnpm test` corre solo la suite de unidad, sin red ni base de datos. Los contratos de los adaptadores
+de Supabase se ejecutan aparte contra un proyecto **descartable** de staging o una base local:
+
+```bash
+# Desde src/. Las claves salen de `supabase status` (local) o del proyecto de prueba.
+export SUPABASE_TEST_URL="https://<proyecto-de-prueba>.supabase.co"
+export SUPABASE_TEST_PUBLISHABLE_KEY="<publishable-key>"
+export SUPABASE_TEST_SERVICE_ROLE_KEY="<service-role-key>"
+
+pnpm test:contratos
+```
+
+En PowerShell se usa `$env:SUPABASE_TEST_URL = "..."`, etc. Si faltan las variables, las suites de
+contrato se saltan solas: nunca apuntan a producción por defecto.
+
+Antes de correrlos conviene dejar la base de prueba en un estado conocido:
+
+```bash
+# Desde src/, solo si el proyecto enlazado es el de prueba.
+npx supabase db reset --linked --yes
+```
+
+Ese comando aplica todas las migraciones y el `seed.sql`. El seed usa la institución `FRH` que crean
+las migraciones, agrega un período abierto de ejemplo y una cuenta por rol de personal con contraseña
+`solo-local-123`; no crea postulaciones ni documentos. Los contratos generan sus propios datos con DNI,
+CUIL, períodos e instituciones únicos por corrida y, para documentación, crean Postulaciones reales
+porque la tabla tiene claves foráneas.
+
+El bucket `documentos` es privado. La subida y la URL firmada se prueban con la clave de servicio;
+las policies de Storage por rol se verifican a mano desde `/pruebas` o con el smoke de la API.
+
+## Un toggle que no es una migración
+
+En el proyecto remoto hay que **desactivar "Confirm email"** (Authentication → Sign In / Providers →
+Email). Local ya viene desactivado (`enable_confirmations = false` en `config.toml`).
+
+Si queda activado, cada registro dispara un email de confirmación: con el SMTP incluido en el plan
+gratuito el límite de envío se agota enseguida y **el registro empieza a fallar con 429**, y además
+el usuario queda sin sesión hasta confirmar. Es el mismo error que vería un compañero con la base
+local si no se aplica la migración: por eso el "te enviamos un email" del registro solo aparece con
+la confirmación desactivada.
+
