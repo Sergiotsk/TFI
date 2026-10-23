@@ -104,3 +104,8 @@ export type { FilaImportada, ResultadoDeImportacion } from './casos-de-uso/impor
 export { ListarBandejaUseCase } from './casos-de-uso/listar-bandeja'
 export type { EstadoDeBandeja } from './casos-de-uso/listar-bandeja'
 export { ListarCargasDeInformeUseCase } from './casos-de-uso/listar-cargas-de-informe'
+export type {
+  ErrorDeLectura,
+  LectorDeInformeDePagos,
+  ResultadoDeLectura,
+} from './puertos/lector-de-informe-de-pagos/puerto'
