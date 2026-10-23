@@ -21,9 +21,19 @@ function periodo(totalCupos = 50) {
 }
 
 function postulacion(estado: EstadoDePostulacion, id = 'p-1') {
-  const venceEl = estado === 'PREINSCRIPTO' ? undefined : VENCE
-  const motivo = estado === 'PAGO_EN_REVISION' ? 'SIN_CUPO' : undefined
-  return new Postulacion(id, new NumeroDePostulacion(1), 'asp-1', 'per-1', estado, venceEl, motivo)
+  const venceEl = estado === 'PREINSCRIPTO' ? null : VENCE
+  const motivo = estado === 'PAGO_EN_REVISION' ? 'SIN_CUPO' : null
+  return new Postulacion(
+    id,
+    new NumeroDePostulacion(1),
+    'asp-1',
+    'per-1',
+    estado,
+    venceEl,
+    motivo,
+    new Date(0),
+    new Date(0),
+  )
 }
 
 function candidata(estado: EstadoDePostulacion, id = 'p-1'): Candidata {
@@ -180,7 +190,17 @@ describe('evaluarPago', () => {
     })
 
     test('VENCIDO sin venceEl (migrado de RECHAZADO, research R8): NO_IMPUTAR SIN_PAGO_INICIADO', () => {
-      const legacy = new Postulacion('p-1', new NumeroDePostulacion(1), 'asp-1', 'per-1', 'VENCIDO')
+      const legacy = new Postulacion(
+        'p-1',
+        new NumeroDePostulacion(1),
+        'asp-1',
+        'per-1',
+        'VENCIDO',
+        null,
+        null,
+        new Date(0),
+        new Date(0),
+      )
       const imputacion = { via: 'DNI' as const, candidatas: [{ postulacion: legacy, dniDelAspirante: DNI }] }
       expect(evaluarPago(pago(), imputacion, periodo(), 0)).toEqual({
         tipo: 'NO_IMPUTAR',

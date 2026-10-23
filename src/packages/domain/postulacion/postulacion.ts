@@ -1,120 +1,167 @@
-import type { PeriodoDeIngreso } from '../periodo/periodo-de-ingreso'
-import { PeriodoCerrado, SinCuposParaIniciar, TransicionInvalida } from './errores'
-import { type EstadoDePostulacion, type MotivoDeRevision, ocupaCupo } from './estados'
-import type { NumeroDePostulacion } from './numero-de-postulacion'
+import type { EstadoPostulacion } from './estados'
+import { TRANSICIONES } from './estados'
+import type { MotivoRevision } from './motivoRevision'
+import { NumeroDePostulacion } from './numero-de-postulacion'
+import { TransicionInvalida } from './errores'
 
-// Raíz de agregado. Es inmutable: cada transición devuelve una Postulación nueva o lanza TransicionInvalida.
-// Las transiciones que dependen del pago (`confirmar`, `pasarARevision`) miran el estado PERSISTIDO (`estado`),
-// no el efectivo: quien decide con el estado efectivo (`estadoEn`) es `iniciarPago`.
+interface CambiosDePostulacion {
+  estado?: EstadoPostulacion
+  venceEl?: Date | null
+  motivoRevision?: MotivoRevision | null
+}
+
+/**
+ * Postulación: raíz de agregado y máquina de estados.
+ *
+ * Es inmutable: cada transición devuelve una Postulación nueva con el mismo id.
+ * Las transiciones inválidas son imposibles: `exigirTransicion` las rechaza con
+ * `TransicionInvalida` (constitución, Principio II).
+ *
+ * `estado` es el estado **persistido**. El estado efectivo se pide con
+ * `estadoEn(ahora)`: una Postulación guardada como `PAGO_PENDIENTE` cuyo plazo
+ * pasó se lee como `VENCIDO` sin que nadie escriba la fila.
+ */
 export class Postulacion {
   constructor(
     readonly id: string,
     readonly numero: NumeroDePostulacion,
     readonly aspiranteId: string,
     readonly periodoId: string,
-    readonly estado: EstadoDePostulacion,
-    /** Obligatorio en PAGO_PENDIENTE. Se conserva después (VENCIDO, confirmada) para auditoría. */
-    readonly venceEl?: Date,
-    /** Solo en PAGO_EN_REVISION. */
-    readonly motivoRevision?: MotivoDeRevision,
+    readonly estado: EstadoPostulacion,
+    readonly venceEl: Date | null,
+    readonly motivoRevision: MotivoRevision | null,
+    readonly creadoEl: Date,
+    readonly actualizadoEl: Date,
   ) {
-    if (estado === 'PAGO_PENDIENTE' && venceEl === undefined) {
-      throw new Error('Una Postulación en PAGO_PENDIENTE debe tener venceEl.')
-    }
-    if ((estado === 'PAGO_EN_REVISION') !== (motivoRevision !== undefined)) {
-      throw new Error('motivoRevision es obligatorio en PAGO_EN_REVISION y solo se admite en ese estado.')
-    }
+    this.validarInvariantes()
   }
 
-  static crear(id: string, numero: NumeroDePostulacion, aspiranteId: string, periodoId: string): Postulacion {
-    return new Postulacion(id, numero, aspiranteId, periodoId, 'PREINSCRIPTO')
-  }
-
-  /** `true` si cuenta para la ocupación del período (VACANTE_CONFIRMADA o posterior). */
-  get ocupaCupo(): boolean {
-    return ocupaCupo(this.estado)
-  }
-
-  /** Estado efectivo: un PAGO_PENDIENTE con el plazo vencido se ve VENCIDO (vencimiento perezoso). */
-  estadoEn(ahora: Date): EstadoDePostulacion {
-    if (this.estado === 'PAGO_PENDIENTE' && this.haVencido(ahora)) {
+  /** Estado efectivo a una fecha dada. `PAGO_EN_REVISION` no vence (FR-013). */
+  estadoEn(ahora: Date): EstadoPostulacion {
+    if (this.estado === 'PAGO_PENDIENTE' && this.venceEl !== null && ahora > this.venceEl) {
       return 'VENCIDO'
     }
+
     return this.estado
   }
 
-  /** Persiste el vencimiento perezoso: PAGO_PENDIENTE → VENCIDO, solo si ya pasó `venceEl`. */
-  registrarVencimiento(ahora: Date): Postulacion {
-    if (this.estado !== 'PAGO_PENDIENTE' || !this.haVencido(ahora)) {
-      throw new TransicionInvalida(`No se puede registrar el vencimiento desde ${this.estado} en ese momento.`)
-    }
-    return this.con('VENCIDO')
+  /** Elige medio de pago: arranca (o reinicia) el plazo. */
+  iniciarPago(venceEl: Date, ahora: Date): Postulacion {
+    this.exigirTransicion('PAGO_PENDIENTE', ahora)
+
+    return this.con({ estado: 'PAGO_PENDIENTE', venceEl, motivoRevision: null })
+  }
+
+  /** Pago acreditado dentro del plazo y con cupo: la vacante queda confirmada. */
+  confirmar(ahora: Date): Postulacion {
+    this.exigirTransicion('VACANTE_CONFIRMADA', ahora, ['PAGO_PENDIENTE', 'VENCIDO'])
+
+    return this.con({ estado: 'VACANTE_CONFIRMADA', motivoRevision: null })
+  }
+
+  /** Pago fuera de plazo o sin cupo: lo decide Dirección. */
+  pasarARevision(motivo: MotivoRevision, ahora: Date): Postulacion {
+    this.exigirTransicion('PAGO_EN_REVISION', ahora)
+
+    return this.con({ estado: 'PAGO_EN_REVISION', motivoRevision: motivo })
   }
 
   /**
-   * PREINSCRIPTO | VENCIDO → PAGO_PENDIENTE, con período abierto y cupos libres (FR-011).
-   * `ocupados` son las vacantes ya confirmadas del período.
+   * Persiste el vencimiento perezoso: solo si el plazo ya pasó. Lo usa
+   * `IniciarPago` antes de un reintento, porque el trigger guardián no acepta
+   * `PAGO_PENDIENTE -> PAGO_PENDIENTE`.
    */
-  iniciarPago(periodo: PeriodoDeIngreso, ocupados: number, ahora: Date): Postulacion {
-    const efectivo = this.estadoEn(ahora)
-    if (efectivo !== 'PREINSCRIPTO' && efectivo !== 'VENCIDO') {
-      throw new TransicionInvalida(`No se puede iniciar el pago desde ${efectivo}.`)
+  vencer(ahora: Date): Postulacion {
+    if (this.estado !== 'PAGO_PENDIENTE' || this.estadoEn(ahora) !== 'VENCIDO') {
+      throw new TransicionInvalida(this.estado, 'VENCIDO')
     }
-    if (!periodo.estaAbierto(ahora)) {
-      throw new PeriodoCerrado()
-    }
-    if (ocupados >= periodo.totalCupos) {
-      throw new SinCuposParaIniciar()
-    }
-    return this.con('PAGO_PENDIENTE', periodo.calcularVencimiento(ahora))
-  }
 
-  /** PAGO_PENDIENTE | VENCIDO → VACANTE_CONFIRMADA, solo si el pago fue en plazo (`pagadoEl <= venceEl`). */
-  confirmar(pagadoEl: Date): Postulacion {
-    this.exigirEstado(['PAGO_PENDIENTE', 'VENCIDO'], 'confirmar')
-    if (!this.pagoEnPlazo(pagadoEl)) {
-      throw new TransicionInvalida('No se puede confirmar: el pago fue posterior al vencimiento.')
-    }
-    return this.con('VACANTE_CONFIRMADA')
+    return this.con({ estado: 'VENCIDO' })
   }
 
   /**
-   * PAGO_PENDIENTE | VENCIDO → PAGO_EN_REVISION con el motivo (SIN_CUPO | FUERA_DE_PLAZO).
-   * Desde VENCIDO también se admite SIN_CUPO: la regla 7 de `evaluarPago` lo da para un pago en plazo informado
-   * tarde (data-model.md).
+   * Acción del personal: extiende (o reinicia) el plazo de pago.
+   *
+   * Sirve tanto para una `PAGO_PENDIENTE` vigente como para una `VENCIDO` a la
+   * que se le quiere dar otra oportunidad. No es una transición del grafo: el
+   * estado destino siempre es `PAGO_PENDIENTE`; lo que cambia es el vencimiento.
+   * El caso de uso valida que el nuevo plazo no pase del cierre del período.
    */
-  pasarARevision(motivo: MotivoDeRevision): Postulacion {
-    this.exigirEstado(['PAGO_PENDIENTE', 'VENCIDO'], 'pasar a revisión')
-    return this.con('PAGO_EN_REVISION', this.venceEl, motivo)
+  prorrogar(venceEl: Date, ahora: Date): Postulacion {
+    const desde = this.estadoEn(ahora)
+
+    if (desde !== 'PAGO_PENDIENTE' && desde !== 'VENCIDO') {
+      throw new TransicionInvalida(desde, 'PAGO_PENDIENTE')
+    }
+
+    return this.con({ estado: 'PAGO_PENDIENTE', venceEl, motivoRevision: null })
   }
 
-  /** PAGO_EN_REVISION → VACANTE_CONFIRMADA (decisión de Dirección). */
-  aceptarExcepcion(): Postulacion {
-    this.exigirEstado(['PAGO_EN_REVISION'], 'aceptar la excepción')
-    return this.con('VACANTE_CONFIRMADA')
+  /** Dirección acepta la excepción: la vacante se confirma aunque el período esté lleno. */
+  aceptarExcepcion(ahora: Date): Postulacion {
+    this.exigirTransicion('VACANTE_CONFIRMADA', ahora, ['PAGO_EN_REVISION'])
+
+    return this.con({ estado: 'VACANTE_CONFIRMADA', motivoRevision: null })
   }
 
-  /** PAGO_EN_REVISION → VENCIDO (decisión de Dirección). Después puede reintentar con `iniciarPago`. */
-  rechazarExcepcion(): Postulacion {
-    this.exigirEstado(['PAGO_EN_REVISION'], 'rechazar la excepción')
-    return this.con('VENCIDO')
+  /** Dirección rechaza la excepción: la Postulación vuelve a `VENCIDO`. */
+  rechazarExcepcion(ahora: Date): Postulacion {
+    this.exigirTransicion('VENCIDO', ahora, ['PAGO_EN_REVISION'])
+
+    return this.con({ estado: 'VENCIDO', motivoRevision: null })
   }
 
-  private haVencido(ahora: Date): boolean {
-    return this.venceEl !== undefined && ahora.getTime() > this.venceEl.getTime()
+  /**
+   * Avance del circuito de documentación (posterior a la vacante confirmada).
+   *
+   * Es genérico a propósito: el caso de uso decide si corresponde
+   * `DOCUMENTACION_EN_REVISION`, `OBSERVADO` o `DOCUMENTACION_VALIDADA` y el
+   * dominio valida el grafo. El vencimiento de pago ya no aplica.
+   */
+  avanzarDocumentacion(hacia: EstadoPostulacion, ahora: Date): Postulacion {
+    this.exigirTransicion(hacia, ahora)
+
+    return this.con({ estado: hacia, venceEl: null, motivoRevision: null })
   }
 
-  private pagoEnPlazo(pagadoEl: Date): boolean {
-    return this.venceEl !== undefined && pagadoEl.getTime() <= this.venceEl.getTime()
-  }
+  private exigirTransicion(
+    hacia: EstadoPostulacion,
+    ahora: Date,
+    origenes?: readonly EstadoPostulacion[],
+  ): void {
+    const desde = this.estadoEn(ahora)
+    const permitidas = TRANSICIONES[desde]
 
-  private exigirEstado(permitidos: readonly EstadoDePostulacion[], accion: string): void {
-    if (!permitidos.includes(this.estado)) {
-      throw new TransicionInvalida(`No se puede ${accion} desde ${this.estado}.`)
+    if (!permitidas.includes(hacia) || (origenes !== undefined && !origenes.includes(desde))) {
+      throw new TransicionInvalida(desde, hacia)
     }
   }
 
-  private con(estado: EstadoDePostulacion, venceEl: Date | undefined = this.venceEl, motivo?: MotivoDeRevision) {
-    return new Postulacion(this.id, this.numero, this.aspiranteId, this.periodoId, estado, venceEl, motivo)
+  private con(cambios: CambiosDePostulacion): Postulacion {
+    return new Postulacion(
+      this.id,
+      this.numero,
+      this.aspiranteId,
+      this.periodoId,
+      cambios.estado ?? this.estado,
+      cambios.venceEl !== undefined ? cambios.venceEl : this.venceEl,
+      cambios.motivoRevision !== undefined ? cambios.motivoRevision : this.motivoRevision,
+      this.creadoEl,
+      this.actualizadoEl,
+    )
+  }
+
+  /** Espeja los CHECK de la base: si la fila es inconsistente, se nota acá y no en la UI. */
+  private validarInvariantes(): void {
+    if (this.estado === 'PAGO_PENDIENTE' && this.venceEl === null) {
+      throw new Error('Una Postulación en PAGO_PENDIENTE necesita vencimiento')
+    }
+
+    const enRevision = this.estado === 'PAGO_EN_REVISION'
+    if (enRevision !== (this.motivoRevision !== null)) {
+      throw new Error(
+        'El motivo de revisión existe si y solo si la Postulación está en PAGO_EN_REVISION',
+      )
+    }
   }
 }

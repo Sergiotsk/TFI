@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { crearCliente } from '@/lib/supabase/servidor'
 import { crearDependencias } from '@/composition-root'
 import { BotonCerrarSesion } from '@/components/auth/boton-cerrar-sesion'
@@ -64,7 +65,13 @@ export default async function PaginaPanel() {
           </dl>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <Link
+            href="/pruebas"
+            className="text-sm font-medium text-primary underline underline-offset-4 hover:no-underline"
+          >
+            Probar la API
+          </Link>
           <BotonCerrarSesion />
         </div>
       </div>
