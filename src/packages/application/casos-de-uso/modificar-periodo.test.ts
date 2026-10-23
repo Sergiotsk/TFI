@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { CuposPorDebajoDeConfirmadas, PeriodoDeIngreso } from '@tfi/domain'
+import { RelojFijo } from '../puertos/reloj/fake'
 import { RepositorioDePeriodosFake } from '../puertos/repositorio-de-periodos/fake'
 import { RepositorioDePostulacionesFake } from '../puertos/repositorio-de-postulaciones/fake'
 import type { Actor } from './actor'
 import { NoAutorizado, NoEncontrado } from './errores'
 import { ModificarPeriodoUseCase } from './modificar-periodo'
+
+const AHORA = new Date('2026-10-20T00:00:00.000Z')
 
 const director: Actor = {
   perfilId: 'perfil-director',
@@ -29,7 +32,7 @@ async function armarMundo() {
   )
 
   return {
-    caso: new ModificarPeriodoUseCase(periodos),
+    caso: new ModificarPeriodoUseCase(periodos, new RelojFijo(AHORA)),
     periodos,
     postulaciones,
   }

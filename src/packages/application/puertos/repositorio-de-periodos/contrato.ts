@@ -70,6 +70,34 @@ export function probarContratoDeRepositorioDePeriodos(
       expect(abiertos.map((p) => p.id)).not.toContain(otraInstitucion.id)
     })
 
+    it('listarTodos() incluye los cerrados, pagina y no mezcla instituciones', async () => {
+      const { repositorio, institucionId, otraInstitucionId, crearPeriodo } = await crearEntorno()
+      const abierto = await crearPeriodo({ institucionId })
+      const cerrado = await crearPeriodo({
+        institucionId,
+        cierraEl: new Date(Date.now() - UN_DIA),
+      })
+      await crearPeriodo({ institucionId: otraInstitucionId })
+
+      const pagina = await repositorio.listarTodos(institucionId, {
+        pagina: 1,
+        porPagina: 1,
+      })
+
+      expect(pagina.total).toBeGreaterThanOrEqual(2)
+      expect(pagina.totalPaginas).toBeGreaterThanOrEqual(2)
+      expect(pagina.items).toHaveLength(1)
+      expect(pagina.items[0]?.institucionId).toBe(institucionId)
+
+      const todos = await repositorio.listarTodos(institucionId, {
+        pagina: 1,
+        porPagina: 100,
+      })
+      expect(todos.items.map((p) => p.id)).toEqual(
+        expect.arrayContaining([abierto.id, cerrado.id]),
+      )
+    })
+
     it('contarOcupados() cuenta las vacantes confirmadas y posteriores', async () => {
       const { repositorio, crearPeriodo, crearAspirante, sembrarPostulacion } = await crearEntorno()
       const periodo = await crearPeriodo()

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Perfil, type Rol } from '@tfi/domain'
+import { PAGINACION_POR_DEFECTO } from '../../paginacion'
 import type { RepositorioDePerfiles } from './puerto'
 
 // Los ids tienen que ser unicos por corrida: contra una base real, guardar dos
@@ -51,10 +52,20 @@ export function probarContratoRepositorioDePerfiles(
   const escritura = opciones.escritura ?? true
 
   describe('contrato: RepositorioDePerfiles', () => {
-    it('obtenerTodos() devuelve una lista', async () => {
+    it('listar() devuelve una página de perfiles', async () => {
       const repositorio = crearRepositorio()
-      const perfiles = await repositorio.obtenerTodos()
-      expect(Array.isArray(perfiles)).toBe(true)
+      const pagina = await repositorio.listar({}, PAGINACION_POR_DEFECTO)
+      expect(Array.isArray(pagina.items)).toBe(true)
+      expect(pagina.total).toBeGreaterThanOrEqual(pagina.items.length)
+    })
+
+    it('listar() filtra por rol', async () => {
+      const repositorio = crearRepositorio()
+      const pagina = await repositorio.listar(
+        { rol: 'SECRETARIA' },
+        PAGINACION_POR_DEFECTO,
+      )
+      expect(pagina.items.every((p) => p.rol === 'SECRETARIA')).toBe(true)
     })
 
     it('obtenerPorId() devuelve null cuando el perfil no existe', async () => {
@@ -63,11 +74,9 @@ export function probarContratoRepositorioDePerfiles(
       expect(perfil).toBeNull()
     })
 
-    it('obtenerPorRol() devuelve solo perfiles con ese rol', async () => {
+    it('buscarPorDni() devuelve null cuando no existe', async () => {
       const repositorio = crearRepositorio()
-      const porRol = await repositorio.obtenerPorRol('SECRETARIA')
-      expect(Array.isArray(porRol)).toBe(true)
-      expect(porRol?.every((p) => p.rol === 'SECRETARIA')).toBe(true)
+      expect(await repositorio.buscarPorDni('00000000')).toBeNull()
     })
 
     it.runIf(escritura)('guardar() y obtenerPorId() devuelven el mismo perfil', async () => {

@@ -9,11 +9,14 @@ probarContratoRepositorioDePerfiles(() => new RepositorioDePerfilesFake())
 describe('contrato: RepositorioDePerfilesFake', () => {
   it('viene sembrado con un perfil por rol del personal', async () => {
     const repositorio = new RepositorioDePerfilesFake()
-    const todos = await repositorio.obtenerTodos()
-    expect(todos.length).toBeGreaterThan(0)
+    const todos = await repositorio.listar({}, { pagina: 1, porPagina: 100 })
+    expect(todos.items.length).toBeGreaterThan(0)
 
-    const porRol = await repositorio.obtenerPorRol('TESORERIA')
-    expect(porRol?.length).toBe(1)
-    expect(porRol?.[0]?.rol).toBe('TESORERIA')
+    const porRol = await repositorio.listar(
+      { rol: 'TESORERIA' },
+      { pagina: 1, porPagina: 100 },
+    )
+    expect(porRol.items.length).toBe(1)
+    expect(porRol.items[0]?.rol).toBe('TESORERIA')
   })
 })

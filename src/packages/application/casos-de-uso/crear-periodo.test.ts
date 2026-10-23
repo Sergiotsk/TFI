@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { GeneradorDeIdsFake } from '../puertos/generador-de-ids/fake'
+import { RelojFijo } from '../puertos/reloj/fake'
 import { RepositorioDePeriodosFake } from '../puertos/repositorio-de-periodos/fake'
 import { RepositorioDePostulacionesFake } from '../puertos/repositorio-de-postulaciones/fake'
 import type { Actor } from './actor'
 import { CrearPeriodoUseCase } from './crear-periodo'
 import { NoAutorizado } from './errores'
 
+const AHORA = new Date('2026-10-20T00:00:00.000Z')
 const CIERRE = new Date('2027-03-01T00:00:00.000Z')
 
 const director: Actor = {
@@ -27,7 +29,7 @@ function armarMundo() {
   const periodos = new RepositorioDePeriodosFake(postulaciones)
 
   return {
-    caso: new CrearPeriodoUseCase(periodos, new GeneradorDeIdsFake('periodo')),
+    caso: new CrearPeriodoUseCase(periodos, new GeneradorDeIdsFake('periodo'), new RelojFijo(AHORA)),
     periodos,
   }
 }

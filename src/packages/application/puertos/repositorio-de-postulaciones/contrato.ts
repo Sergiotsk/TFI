@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { NumeroDePostulacion, PostulacionDuplicada } from '@tfi/domain'
 import type { PeriodoDeIngreso, Postulacion } from '@tfi/domain'
+import { PAGINACION_POR_DEFECTO } from '../../paginacion'
 import type { DatosDePostulacionSembrada } from './fake'
 import type { RepositorioDePostulaciones } from './puerto'
 
@@ -149,28 +150,31 @@ export function probarContratoDeRepositorioDePostulaciones(
       await repositorio.crear(aspirante, periodoB.id)
       await repositorio.crear(otroAspirante, periodoA.id)
 
-      const delPeriodo = await repositorio.listar({ periodoId: periodoA.id })
-      expect(delPeriodo).toHaveLength(2)
-      expect(delPeriodo.every((p) => p.periodoId === periodoA.id)).toBe(true)
+      const delPeriodo = await repositorio.listar(
+        { periodoId: periodoA.id },
+        PAGINACION_POR_DEFECTO,
+      )
+      expect(delPeriodo.items).toHaveLength(2)
+      expect(delPeriodo.items.every((p) => p.periodoId === periodoA.id)).toBe(true)
 
-      const delAspirante = await repositorio.listar({
-        periodoId: periodoA.id,
-        aspiranteId: aspirante,
-      })
-      expect(delAspirante).toHaveLength(1)
-      expect(delAspirante[0]?.id).toBeDefined()
+      const delAspirante = await repositorio.listar(
+        { periodoId: periodoA.id, aspiranteId: aspirante },
+        PAGINACION_POR_DEFECTO,
+      )
+      expect(delAspirante.items).toHaveLength(1)
+      expect(delAspirante.items[0]?.id).toBeDefined()
 
-      const preinscriptos = await repositorio.listar({
-        periodoId: periodoA.id,
-        estado: 'PREINSCRIPTO',
-      })
-      expect(preinscriptos).toHaveLength(2)
+      const preinscriptos = await repositorio.listar(
+        { periodoId: periodoA.id, estado: 'PREINSCRIPTO' },
+        PAGINACION_POR_DEFECTO,
+      )
+      expect(preinscriptos.items).toHaveLength(2)
 
-      const confirmadas = await repositorio.listar({
-        periodoId: periodoA.id,
-        estado: 'VACANTE_CONFIRMADA',
-      })
-      expect(confirmadas).toHaveLength(0)
+      const confirmadas = await repositorio.listar(
+        { periodoId: periodoA.id, estado: 'VACANTE_CONFIRMADA' },
+        PAGINACION_POR_DEFECTO,
+      )
+      expect(confirmadas.items).toHaveLength(0)
     })
 
     it('listar() devuelve ordenado por número ascendente', async () => {
@@ -179,9 +183,12 @@ export function probarContratoDeRepositorioDePostulaciones(
       const primera = await repositorio.crear(await crearAspirante(dniUnico()), periodo.id)
       const segunda = await repositorio.crear(await crearAspirante(dniUnico()), periodo.id)
 
-      const lista = await repositorio.listar({ periodoId: periodo.id })
+      const lista = await repositorio.listar(
+        { periodoId: periodo.id },
+        PAGINACION_POR_DEFECTO,
+      )
 
-      expect(lista.map((p) => p.id)).toEqual([primera.id, segunda.id])
+      expect(lista.items.map((p) => p.id)).toEqual([primera.id, segunda.id])
     })
 
     it('listar() filtra por motivo de revisión', async () => {
@@ -201,10 +208,13 @@ export function probarContratoDeRepositorioDePostulaciones(
         motivoRevision: 'FUERA_DE_PLAZO',
       })
 
-      const sinCupo = await repositorio.listar({ periodoId: periodo.id, motivoRevision: 'SIN_CUPO' })
+      const sinCupo = await repositorio.listar(
+        { periodoId: periodo.id, motivoRevision: 'SIN_CUPO' },
+        PAGINACION_POR_DEFECTO,
+      )
 
-      expect(sinCupo).toHaveLength(1)
-      expect(sinCupo[0]?.motivoRevision).toBe('SIN_CUPO')
+      expect(sinCupo.items).toHaveLength(1)
+      expect(sinCupo.items[0]?.motivoRevision).toBe('SIN_CUPO')
     })
 
     it('buscarPorDni() devuelve cualquier estado y respeta el período', async () => {
@@ -216,14 +226,38 @@ export function probarContratoDeRepositorioDePostulaciones(
       const enA = await repositorio.crear(aspiranteId, periodoA.id)
       await repositorio.crear(aspiranteId, periodoB.id)
 
-      const todas = await repositorio.buscarPorDni(dni)
-      expect(todas).toHaveLength(2)
+      const todas = await repositorio.buscarPorDni(dni, PAGINACION_POR_DEFECTO)
+      expect(todas.items).toHaveLength(2)
 
-      const soloA = await repositorio.buscarPorDni(dni, periodoA.id)
-      expect(soloA).toHaveLength(1)
-      expect(soloA[0]?.id).toBe(enA.id)
+      const soloA = await repositorio.buscarPorDni(dni, PAGINACION_POR_DEFECTO, periodoA.id)
+      expect(soloA.items).toHaveLength(1)
+      expect(soloA.items[0]?.id).toBe(enA.id)
 
-      expect(await repositorio.buscarPorDni(dniUnico())).toHaveLength(0)
+      expect(
+        (await repositorio.buscarPorDni(dniUnico(), PAGINACION_POR_DEFECTO)).items,
+      ).toHaveLength(0)
+    })
+
+    it('listar() pagina los resultados y devuelve el total', async () => {
+      const { repositorio, crearAspirante, crearPeriodo } = await crearEntorno()
+      const periodo = await crearPeriodo()
+      await repositorio.crear(await crearAspirante(dniUnico()), periodo.id)
+      await repositorio.crear(await crearAspirante(dniUnico()), periodo.id)
+      await repositorio.crear(await crearAspirante(dniUnico()), periodo.id)
+
+      const primera = await repositorio.listar(
+        { periodoId: periodo.id },
+        { pagina: 1, porPagina: 2 },
+      )
+      const segunda = await repositorio.listar(
+        { periodoId: periodo.id },
+        { pagina: 2, porPagina: 2 },
+      )
+
+      expect(primera.items).toHaveLength(2)
+      expect(primera.total).toBe(3)
+      expect(primera.totalPaginas).toBe(2)
+      expect(segunda.items).toHaveLength(1)
     })
   })
 }

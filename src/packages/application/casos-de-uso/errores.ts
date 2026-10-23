@@ -32,3 +32,11 @@ export class DatosDuplicados extends Error {
     this.name = 'DatosDuplicados'
   }
 }
+
+/** Los datos de la solicitud no cumplen una regla de negocio (no es un 500). */
+export class SolicitudInvalida extends Error {
+  constructor(mensaje = 'Los datos de la solicitud no son válidos') {
+    super(mensaje)
+    this.name = 'SolicitudInvalida'
+  }
+}

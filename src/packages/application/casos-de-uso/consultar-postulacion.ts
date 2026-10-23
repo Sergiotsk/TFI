@@ -34,9 +34,13 @@ export class ConsultarPostulacionUseCase {
     exigirRol(actor, 'ASPIRANTE')
 
     const ahora = this.reloj.ahora()
-    const propias = await this.postulaciones.listar({ aspiranteId: actor.perfilId })
+    // Las propias son pocas (una por período); se piden en una página amplia.
+    const propias = await this.postulaciones.listar(
+      { aspiranteId: actor.perfilId },
+      { pagina: 1, porPagina: 100 },
+    )
 
-    return propias.map((postulacion) => aPostulacionConsultada(postulacion, ahora))
+    return propias.items.map((postulacion) => aPostulacionConsultada(postulacion, ahora))
   }
 }
 

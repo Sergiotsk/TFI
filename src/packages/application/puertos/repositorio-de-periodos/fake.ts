@@ -1,5 +1,7 @@
-import { ocupaCupo } from '@tfi/domain'
+import { ocupaCupo, PeriodoDuplicado } from '@tfi/domain'
 import type { PeriodoDeIngreso } from '@tfi/domain'
+import { armarPagina, rangoDe } from '../../paginacion'
+import type { Pagina, Paginacion } from '../../paginacion'
 import type { RepositorioDePostulaciones } from '../repositorio-de-postulaciones/puerto'
 import type { RepositorioDePeriodos } from './puerto'
 
@@ -22,14 +24,33 @@ export class RepositorioDePeriodosFake implements RepositorioDePeriodos {
       .sort((a, b) => a.cierraEl.getTime() - b.cierraEl.getTime())
   }
 
+  async listarTodos(
+    institucionId: string,
+    paginacion: Paginacion,
+  ): Promise<Pagina<PeriodoDeIngreso>> {
+    const filtrados = [...this.periodos.values()]
+      .filter((p) => p.institucionId === institucionId)
+      .sort((a, b) => b.cierraEl.getTime() - a.cierraEl.getTime())
+
+    const { desde, hasta } = rangoDe(paginacion)
+
+    return armarPagina(filtrados.slice(desde, hasta + 1), filtrados.length, paginacion)
+  }
+
   async contarOcupados(periodoId: string): Promise<number> {
-    const postulaciones = await this.postulaciones.listar({ periodoId })
+    const { items: postulaciones } = await this.postulaciones.listar(
+      { periodoId },
+      { pagina: 1, porPagina: 100 },
+    )
 
     return postulaciones.filter((p) => ocupaCupo(p.estado)).length
   }
 
   async contarPendientesVigentes(periodoId: string, ahora: Date): Promise<number> {
-    const postulaciones = await this.postulaciones.listar({ periodoId })
+    const { items: postulaciones } = await this.postulaciones.listar(
+      { periodoId },
+      { pagina: 1, porPagina: 100 },
+    )
 
     return postulaciones.filter(
       (p) => p.estado === 'PAGO_PENDIENTE' && p.estadoEn(ahora) === 'PAGO_PENDIENTE',
@@ -37,6 +58,14 @@ export class RepositorioDePeriodosFake implements RepositorioDePeriodos {
   }
 
   async guardar(periodo: PeriodoDeIngreso): Promise<void> {
+    const repetido = [...this.periodos.values()].find(
+      (otro) =>
+        otro.id !== periodo.id &&
+        otro.institucionId === periodo.institucionId &&
+        otro.nombre === periodo.nombre,
+    )
+    if (repetido) throw new PeriodoDuplicado(periodo.nombre)
+
     this.periodos.set(periodo.id, periodo)
   }
 }

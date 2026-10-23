@@ -1,5 +1,7 @@
 import { ROLES_DEL_PERSONAL } from '@tfi/domain'
 import type { Reloj } from '../puertos/reloj/puerto'
+import { armarPagina, normalizarPaginacion } from '../paginacion'
+import type { Pagina, Paginacion } from '../paginacion'
 import type {
   FiltrosDePostulacion,
   RepositorioDePostulaciones,
@@ -17,7 +19,8 @@ import type { PostulacionConsultada } from './postulacion-consultada'
  * decide el rol y devuelve el estado efectivo y el aviso de FR-007.
  *
  * Los filtros son opcionales: por aspirante (el "id de perfil"), por período y
- * por estado **persistido**. El listado completo es el caso sin filtros.
+ * por estado **persistido**. El listado completo es el caso sin filtros. La
+ * respuesta está paginada.
  */
 export class ListarPostulacionesUseCase {
   constructor(
@@ -28,12 +31,18 @@ export class ListarPostulacionesUseCase {
   async ejecutar(
     actor: Actor,
     filtros: FiltrosDePostulacion = {},
-  ): Promise<PostulacionConsultada[]> {
+    paginacion?: Partial<Paginacion>,
+  ): Promise<Pagina<PostulacionConsultada>> {
     exigirRol(actor, ...ROLES_DEL_PERSONAL)
 
     const ahora = this.reloj.ahora()
-    const postulaciones = await this.postulaciones.listar(filtros)
+    const normalizada = normalizarPaginacion(paginacion)
+    const pagina = await this.postulaciones.listar(filtros, normalizada)
 
-    return postulaciones.map((postulacion) => aPostulacionConsultada(postulacion, ahora))
+    return armarPagina(
+      pagina.items.map((postulacion) => aPostulacionConsultada(postulacion, ahora)),
+      pagina.total,
+      normalizada,
+    )
   }
 }

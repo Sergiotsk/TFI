@@ -1,5 +1,7 @@
 import { NumeroDePostulacion, Postulacion, PostulacionDuplicada } from '@tfi/domain'
 import type { EstadoPostulacion, MotivoRevision } from '@tfi/domain'
+import { armarPagina, rangoDe } from '../../paginacion'
+import type { Pagina, Paginacion } from '../../paginacion'
 import type { FiltrosDePostulacion, RepositorioDePostulaciones } from './puerto'
 
 export interface DatosDePostulacionSembrada {
@@ -33,8 +35,11 @@ export class RepositorioDePostulacionesFake implements RepositorioDePostulacione
     return null
   }
 
-  async listar(filtros: FiltrosDePostulacion): Promise<Postulacion[]> {
-    return [...this.postulaciones.values()]
+  async listar(
+    filtros: FiltrosDePostulacion,
+    paginacion: Paginacion,
+  ): Promise<Pagina<Postulacion>> {
+    const filtradas = [...this.postulaciones.values()]
       .filter((p) => filtros.aspiranteId === undefined || p.aspiranteId === filtros.aspiranteId)
       .filter((p) => filtros.periodoId === undefined || p.periodoId === filtros.periodoId)
       .filter((p) => filtros.estado === undefined || p.estado === filtros.estado)
@@ -42,13 +47,21 @@ export class RepositorioDePostulacionesFake implements RepositorioDePostulacione
         (p) => filtros.motivoRevision === undefined || p.motivoRevision === filtros.motivoRevision,
       )
       .sort((a, b) => a.numero.valor - b.numero.valor)
+
+    const { desde, hasta } = rangoDe(paginacion)
+
+    return armarPagina(filtradas.slice(desde, hasta + 1), filtradas.length, paginacion)
   }
 
-  async buscarPorDni(dni: string, periodoId?: string): Promise<Postulacion[]> {
+  async buscarPorDni(
+    dni: string,
+    paginacion: Paginacion,
+    periodoId?: string,
+  ): Promise<Pagina<Postulacion>> {
     const aspiranteId = this.aspiranteConDni(dni)
-    if (aspiranteId === undefined) return []
+    if (aspiranteId === undefined) return armarPagina([], 0, paginacion)
 
-    return this.listar({ aspiranteId, periodoId })
+    return this.listar({ aspiranteId, periodoId }, paginacion)
   }
 
   async crear(aspiranteId: string, periodoId: string): Promise<Postulacion> {

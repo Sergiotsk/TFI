@@ -9,7 +9,7 @@ probarContratoRepositorioDeDocumentos(() => new RepositorioDeDocumentosFake())
 describe('contrato: RepositorioDeDocumentosFake', () => {
   it('viene sembrado con documentos', async () => {
     const repositorio = new RepositorioDeDocumentosFake()
-    const documentos = await repositorio.obtenerTodos()
-    expect(documentos.length).toBeGreaterThan(0)
+    const pagina = await repositorio.listar({}, { pagina: 1, porPagina: 100 })
+    expect(pagina.items.length).toBeGreaterThan(0)
   })
 })

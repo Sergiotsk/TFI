@@ -4,6 +4,7 @@ import type {
   NumeroDePostulacion,
   Postulacion,
 } from '@tfi/domain'
+import type { Pagina, Paginacion } from '../../paginacion'
 
 /**
  * Filtros de lectura. `estado` filtra por el estado **persistido**, no por el
@@ -28,12 +29,20 @@ export interface FiltrosDePostulacion {
  *   las RPC de acreditación y decisión.
  * - `buscarPorDni` busca en el perfil del aspirante, no en la Postulación, y
  *   devuelve cualquier estado (no solo las pendientes).
+ * - `listar` y `buscarPorDni` paginan en la base.
  */
 export interface RepositorioDePostulaciones {
   obtenerPorId(id: string): Promise<Postulacion | null>
   obtenerPorNumero(numero: NumeroDePostulacion): Promise<Postulacion | null>
-  listar(filtros: FiltrosDePostulacion): Promise<Postulacion[]>
-  buscarPorDni(dni: string, periodoId?: string): Promise<Postulacion[]>
+  listar(
+    filtros: FiltrosDePostulacion,
+    paginacion: Paginacion,
+  ): Promise<Pagina<Postulacion>>
+  buscarPorDni(
+    dni: string,
+    paginacion: Paginacion,
+    periodoId?: string,
+  ): Promise<Pagina<Postulacion>>
   crear(aspiranteId: string, periodoId: string): Promise<Postulacion>
   guardarTransicion(antes: Postulacion, despues: Postulacion): Promise<'ok' | 'conflicto'>
 }
