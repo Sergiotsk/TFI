@@ -1,33 +1,76 @@
-// Errores del dominio. `NoAutorizado` no está acá: lo lanza el caso de uso, no la entidad.
+import type { EstadoPostulacion } from './estados'
 
-/** La transición pedida no existe en la máquina de estados (o no se cumple su condición). */
+/**
+ * Una transición que la máquina de estados no permite.
+ *
+ * Acepta el formato del dominio de la Postulación (`desde`, `hacia`) y el
+ * formato con mensaje que usan los pagos.
+ */
 export class TransicionInvalida extends Error {
-  constructor(mensaje: string) {
-    super(mensaje)
+  readonly desde?: EstadoPostulacion
+  readonly hacia?: EstadoPostulacion
+
+  constructor(mensaje: string)
+  constructor(desde: EstadoPostulacion, hacia: EstadoPostulacion)
+  constructor(desdeOMensaje: EstadoPostulacion | string, hacia?: EstadoPostulacion) {
+    super(
+      hacia === undefined
+        ? desdeOMensaje
+        : `Transición inválida de ${desdeOMensaje} a ${hacia}`,
+    )
     this.name = 'TransicionInvalida'
+
+    if (hacia !== undefined) {
+      this.desde = desdeOMensaje as EstadoPostulacion
+      this.hacia = hacia
+    }
   }
 }
 
-/** Se intentó iniciar el pago en un período que ya cerró (FR-011). */
+/** El período de ingreso ya cerró: no se puede iniciar el pago. */
 export class PeriodoCerrado extends Error {
-  constructor(mensaje = 'El período de ingreso está cerrado.') {
-    super(mensaje)
+  constructor(readonly periodoId: string) {
+    super('El período de ingreso está cerrado')
     this.name = 'PeriodoCerrado'
   }
 }
 
-/** Se intentó iniciar el pago en un período sin cupos libres (FR-011). */
+/** El período se quedó sin cupos libres para aceptar nuevos pagos (FR-011). */
 export class SinCuposParaIniciar extends Error {
-  constructor(mensaje = 'El período no tiene cupos libres.') {
-    super(mensaje)
+  constructor(readonly periodoId: string) {
+    super('El período no tiene cupos libres para iniciar el pago')
     this.name = 'SinCuposParaIniciar'
   }
 }
 
-/** Se intentó bajar `totalCupos` por debajo de las vacantes ya confirmadas. */
+/** El período se llenó antes de que el personal pudiera confirmar la vacante. */
+export class SinCuposParaConfirmar extends Error {
+  constructor(readonly periodoId: string) {
+    super('El período no tiene cupos libres para confirmar la vacante')
+    this.name = 'SinCuposParaConfirmar'
+  }
+}
+
+/** No se puede bajar el total de cupos por debajo de las vacantes ya confirmadas. */
 export class CuposPorDebajoDeConfirmadas extends Error {
-  constructor(mensaje = 'El total de cupos no puede ser menor a las vacantes ya confirmadas.') {
-    super(mensaje)
+  constructor(
+    readonly totalCupos: number,
+    readonly confirmadas: number,
+  ) {
+    super(
+      `El total de cupos (${totalCupos}) no puede ser menor que las vacantes confirmadas (${confirmadas})`,
+    )
     this.name = 'CuposPorDebajoDeConfirmadas'
+  }
+}
+
+/** Ya hay una Postulación activa de ese aspirante en el período (índice único parcial). */
+export class PostulacionDuplicada extends Error {
+  constructor(
+    readonly aspiranteId: string,
+    readonly periodoId: string,
+  ) {
+    super('Ya hay una Postulación activa de este aspirante en el período')
+    this.name = 'PostulacionDuplicada'
   }
 }

@@ -72,7 +72,7 @@ export function evaluarPago(
 
   // 5. Nunca inició el pago. Un VENCIDO sin venceEl (migrado de RECHAZADO, research R8) tampoco tuvo plazo.
   const { estado, venceEl } = postulacion
-  if ((estado !== 'PAGO_PENDIENTE' && estado !== 'VENCIDO') || venceEl === undefined) {
+  if ((estado !== 'PAGO_PENDIENTE' && estado !== 'VENCIDO') || venceEl === null || venceEl === undefined) {
     return { tipo: 'NO_IMPUTAR', motivo: 'SIN_PAGO_INICIADO', postulacionId }
   }
 

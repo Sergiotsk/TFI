@@ -3,10 +3,39 @@ export { Perfil } from './perfil/perfil'
 export type { Rol } from './perfil/rol'
 export { ROLES_DEL_PERSONAL } from './perfil/rol'
 export type { Sexo } from './perfil/sexo'
+export { PeriodoDeIngreso } from './periodo/periodo-de-ingreso'
+export { PeriodoDuplicado, PeriodoInvalido } from './periodo/errores'
+export { Postulacion } from './postulacion/postulacion'
+export { NumeroDePostulacion } from './postulacion/numero-de-postulacion'
+export {
+  ESTADOS_DE_POSTULACION,
+  ESTADOS_QUE_OCUPAN_CUPO,
+  MOTIVOS_DE_REVISION,
+  TRANSICIONES,
+  ocupaCupo,
+} from './postulacion/estados'
+export type { EstadoPostulacion, EstadoDePostulacion, MotivoDeRevision } from './postulacion/estados'
+export type { MotivoRevision } from './postulacion/motivoRevision'
+export {
+  TransicionInvalida,
+  PeriodoCerrado,
+  SinCuposParaIniciar,
+  SinCuposParaConfirmar,
+  CuposPorDebajoDeConfirmadas,
+  PostulacionDuplicada,
+} from './postulacion/errores'
 export { Documento } from './documento/documento'
-export type { EstadoDocumento } from './documento/estado'
+export {
+  TIPOS_DE_DOCUMENTO,
+  TRANSICIONES_DE_DOCUMENTO,
+} from './documento/estado'
+export type { EstadoDocumento, TipoDeDocumento } from './documento/estado'
+export {
+  ObservacionDeDocumentoRequerida,
+  TransicionDeDocumentoInvalida,
+} from './documento/errores'
 
-// Feature 001: postulación con plazo de pago y control de cupos
+// Dominio de pagos: base para la importación del informe y las decisiones de Dirección.
 export { Monto } from './pago/monto'
 export { ReferenciaDePago, type ProveedorDePago } from './pago/referencia-de-pago'
 export {
@@ -21,18 +50,6 @@ export {
 export { CargaDeInforme, type ResumenDeCarga } from './pago/carga-de-informe'
 export { DecisionDeDireccion, type ResolucionDeDireccion } from './pago/decision-de-direccion'
 export { Dni } from './perfil/dni'
-export { PeriodoDeIngreso } from './periodo/periodo-de-ingreso'
-export { NumeroDePostulacion } from './postulacion/numero-de-postulacion'
-export {
-  ESTADOS_DE_POSTULACION,
-  ESTADOS_QUE_OCUPAN_CUPO,
-  MOTIVOS_DE_REVISION,
-  ocupaCupo,
-  type EstadoDePostulacion,
-  type MotivoDeRevision,
-} from './postulacion/estados'
-export { TransicionInvalida, PeriodoCerrado, SinCuposParaIniciar, CuposPorDebajoDeConfirmadas } from './postulacion/errores'
-export { Postulacion } from './postulacion/postulacion'
 export {
   evaluarPago,
   type Candidata,

@@ -26,9 +26,8 @@ describe.skipIf(!hayEntornoDePruebaConServicio())(
           }),
         ),
       // El alta del perfil la hace el trigger crear_perfil_al_registrarse, en
-      // la misma transaccion que el usuario de Supabase Auth: RLS y los GRANT
-      // no dejan escribir la fila desde la app, y el adaptador no puede
-      // implementar guardar() (tarea T045b).
+      // la misma transaccion que el usuario de Supabase Auth. El adaptador solo
+      // actualiza datos personales, asi que no puede crear la fila de prueba.
       { escritura: false },
     )
   },

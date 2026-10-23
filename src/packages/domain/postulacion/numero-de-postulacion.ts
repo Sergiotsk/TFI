@@ -1,19 +1,33 @@
-const DIGITOS_DE_VENTANILLA = 6
+const CANTIDAD_DE_DIGITOS = 6
 
-// ID legible de la Postulación para la ventanilla (el `id` interno es un UUID).
+/**
+ * El número legible de la Postulación: el que se dice en la ventanilla.
+ *
+ * La base lo genera con una identidad, así que solo se construye desde un
+ * entero positivo. `formatear()` completa con ceros a la izquierda; si el
+ * número ya es más largo, se muestra completo.
+ */
 export class NumeroDePostulacion {
   constructor(readonly valor: number) {
     if (!Number.isSafeInteger(valor) || valor <= 0) {
-      throw new Error(`Número de postulación inválido: ${valor}. Debe ser un entero mayor a 0.`)
+      throw new Error(`Número de Postulación inválido: ${valor}`)
     }
   }
 
-  /** El número con ceros a la izquierda hasta 6 dígitos (ej. `000042`). */
-  formatear(): string {
-    return String(this.valor).padStart(DIGITOS_DE_VENTANILLA, '0')
+  static desde(valor: number): NumeroDePostulacion {
+    return new NumeroDePostulacion(valor)
   }
 
-  igualA(otro: NumeroDePostulacion): boolean {
+  formatear(): string {
+    return String(this.valor).padStart(CANTIDAD_DE_DIGITOS, '0')
+  }
+
+  equals(otro: NumeroDePostulacion): boolean {
     return this.valor === otro.valor
+  }
+
+  /** Alias usado por el dominio de pagos. */
+  igualA(otro: NumeroDePostulacion): boolean {
+    return this.equals(otro)
   }
 }
