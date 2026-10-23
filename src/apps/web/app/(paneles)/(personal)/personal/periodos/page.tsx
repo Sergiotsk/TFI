@@ -1,11 +1,23 @@
 import { AccionPendiente } from '@/components/maqueta/accion-pendiente'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
+import { formatearFecha, formatearMontoEnCentavos } from '@/components/panel/formato'
 import { cn } from '@/lib/utils'
-import { formatearFecha, formatearMonto, periodosConOcupacion } from '@/maquetas/datos'
+import { conActorDePanel } from '../../../sesion-de-panel'
 
-// Maqueta de T097 con datos de ejemplo. Sin guarda de sesión: la protege el proxy del plan de login.
-// Se conecta a /api/periodos y /api/periodos/:id/ocupacion (contracts/api-http.md).
-export default function PeriodosPage() {
+// Períodos reales (ListarPeriodosTodos) con su ocupación (ConsultarOcupacion).
+// Alta y edición siguen pendientes: las migraciones las restringen a Dirección y falta definir el formulario.
+export default async function PeriodosPage() {
+  const periodos = await conActorDePanel(async ({ listarPeriodosTodos, consultarOcupacion }, actor) => {
+    const pagina = await listarPeriodosTodos.ejecutar(actor, { pagina: 1, porPagina: 100 })
+
+    return Promise.all(
+      pagina.items.map(async (periodo) => ({
+        periodo,
+        ocupacion: await consultarOcupacion.ejecutar(actor, periodo.id),
+      })),
+    )
+  })
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <EncabezadoDePanel
@@ -16,12 +28,18 @@ export default function PeriodosPage() {
       />
 
       <main className="mx-auto grid max-w-6xl gap-4 px-4 py-8 sm:px-6 md:grid-cols-2 lg:px-8">
-        {periodosConOcupacion.map((periodo) => {
-          const excedido = periodo.ocupados > periodo.cupos
-          const libres = Math.max(periodo.cupos - periodo.ocupados - periodo.pendientesVigentes, 0)
+        {periodos.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Todavía no hay períodos de ingreso.</p>
+        ) : null}
+
+        {periodos.map(({ periodo, ocupacion }) => {
+          const excedido = ocupacion.ocupados > ocupacion.totalCupos
 
           return (
-            <article key={periodo.id} className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-xs">
+            <article
+              key={periodo.id}
+              className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-xs"
+            >
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-base font-semibold">{periodo.nombre}</h2>
                 <AccionPendiente variant="outline" size="sm">
@@ -32,11 +50,11 @@ export default function PeriodosPage() {
               <div>
                 <span className="block text-xs text-muted-foreground">Ocupación</span>
                 <span className={cn('text-3xl font-bold', excedido ? 'text-destructive' : 'text-foreground')}>
-                  {periodo.ocupados} / {periodo.cupos}
+                  {ocupacion.ocupados} / {ocupacion.totalCupos}
                 </span>
                 {excedido ? (
                   <span className="block text-xs text-destructive">
-                    Excedido por {periodo.ocupados - periodo.cupos} (pagos aceptados por Dirección)
+                    Excedido por {ocupacion.ocupados - ocupacion.totalCupos} (pagos aceptados por Dirección)
                   </span>
                 ) : null}
               </div>
@@ -44,11 +62,11 @@ export default function PeriodosPage() {
               <dl className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <dt className="text-muted-foreground">Pendientes de pago vigentes</dt>
-                  <dd className="font-semibold">{periodo.pendientesVigentes}</dd>
+                  <dd className="font-semibold">{ocupacion.pendientesVigentes}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Libres para iniciar pago</dt>
-                  <dd className="font-semibold">{libres}</dd>
+                  <dd className="font-semibold">{ocupacion.libres}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Cierra el</dt>
@@ -56,11 +74,11 @@ export default function PeriodosPage() {
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Plazo de pago</dt>
-                  <dd className="font-semibold">{periodo.plazoDePagoDias} días</dd>
+                  <dd className="font-semibold">{periodo.diasPlazoPago} días</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Matrícula</dt>
-                  <dd className="font-semibold">{formatearMonto(periodo.matriculaCentavos)}</dd>
+                  <dd className="font-semibold">{formatearMontoEnCentavos(periodo.montoMatriculaCentavos)}</dd>
                 </div>
               </dl>
             </article>
