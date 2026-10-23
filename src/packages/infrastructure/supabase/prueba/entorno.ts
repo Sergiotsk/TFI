@@ -294,14 +294,20 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
   }
 }
 
-let tesoreriaDeLaCorrida: Promise<{ id: string; cliente: SupabaseClient }> | undefined
+let tesoreriaDeLaCorrida:
+  | Promise<{ id: string; institucionId: string; cliente: SupabaseClient }>
+  | undefined
 
-/** Un usuario de Tesorería de FRH con su sesión, uno por corrida. */
+/**
+ * Un usuario de Tesorería con su sesión, uno por corrida, en una institución de
+ * prueba propia: así los pagos y las cargas de los contratos no aparecen en el
+ * panel de Tesorería de FRH.
+ */
 function tesoreriaConSesion(
   servicio: SupabaseClient,
-  institucionId: string,
-): Promise<{ id: string; cliente: SupabaseClient }> {
+): Promise<{ id: string; institucionId: string; cliente: SupabaseClient }> {
   tesoreriaDeLaCorrida ??= (async () => {
+    const institucionId = await crearInstitucionInactiva(servicio)
     const usuario = await crearUsuario(servicio, dniUnico())
     const { error } = await servicio
       .from('perfiles')
@@ -309,7 +315,7 @@ function tesoreriaConSesion(
       .eq('id', usuario.id)
     if (error) throw new Error(`No se pudo dar el rol de Tesorería: ${error.message}`)
 
-    return { id: usuario.id, cliente: await clienteConSesion(usuario.email) }
+    return { id: usuario.id, institucionId, cliente: await clienteConSesion(usuario.email) }
   })()
 
   return tesoreriaDeLaCorrida
@@ -318,13 +324,13 @@ function tesoreriaConSesion(
 /**
  * Entorno del contrato de `RegistroDePagos`: el adaptador usa la sesión de
  * Tesorería, así pasa por la verificación de rol e institución de la RPC.
- * Los períodos se siembran ya cerrados (la RPC no mira el cierre) para no
- * llenar de períodos abiertos la lista que ve el aspirante.
+ * Todo se siembra en la institución de prueba de la Tesorería, y los períodos
+ * ya cerrados (la RPC no mira el cierre).
  */
 export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegistroDePagos> {
   const servicio = clienteDeServicio()
-  const institucionId = await idDeLaInstitucionFrh(servicio)
-  const tesoreria = await tesoreriaConSesion(servicio, institucionId)
+  const tesoreria = await tesoreriaConSesion(servicio)
+  const { institucionId } = tesoreria
   const periodos = new RepositorioDePeriodosSupabase(servicio)
   const cargas = new RegistroDeCargasSupabase(tesoreria.cliente)
 
@@ -368,13 +374,11 @@ export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegis
 
 /** Entorno del contrato de `RegistroDeCargas`, con la sesión de Tesorería. */
 export async function prepararEntornoDeRegistroDeCargas(): Promise<EntornoDeRegistroDeCargas> {
-  const servicio = clienteDeServicio()
-  const institucionId = await idDeLaInstitucionFrh(servicio)
-  const tesoreria = await tesoreriaConSesion(servicio, institucionId)
+  const tesoreria = await tesoreriaConSesion(clienteDeServicio())
 
   return {
     cargas: new RegistroDeCargasSupabase(tesoreria.cliente),
-    institucionId,
+    institucionId: tesoreria.institucionId,
     cargadaPor: tesoreria.id,
   }
 }
