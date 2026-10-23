@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import type { Rol } from '@tfi/domain'
 import { esRutaProtegida } from '../lib/rutas-protegidas'
-import { PANEL_DE_ROL } from './paneles'
+import { MENU_DE_ROL, PANEL_DE_ROL } from './paneles'
 
 describe('PANEL_DE_ROL', () => {
   test.each<[Rol, string]>([
@@ -16,6 +16,33 @@ describe('PANEL_DE_ROL', () => {
   test('todos los paneles exigen sesión en el proxy', () => {
     for (const ruta of Object.values(PANEL_DE_ROL)) {
       expect(esRutaProtegida(ruta)).toBe(true)
+    }
+  })
+})
+
+describe('MENU_DE_ROL', () => {
+  // Según quién puede usar cada pantalla en contracts/api-http.md y puertos.md (ListarBandeja): la bandeja de pagos
+  // es de Tesorería y Secretaría, los períodos de Secretaría y Dirección, y los casos A_DECIDIR solo de Dirección.
+  test.each<[Rol, string[]]>([
+    ['ASPIRANTE', ['/aspirante/postulacion']],
+    ['TESORERIA', ['/personal/pagos']],
+    ['SECRETARIA', ['/personal/periodos', '/personal/pagos']],
+    ['DIRECCION', ['/direccion/casos', '/personal/periodos']],
+  ])('%s ve %j', (rol, rutas) => {
+    expect(MENU_DE_ROL[rol].map((item) => item.href)).toEqual(rutas)
+  })
+
+  test('el primer ítem de cada menú es el panel al que lo manda /panel', () => {
+    for (const [rol, items] of Object.entries(MENU_DE_ROL) as [Rol, (typeof MENU_DE_ROL)[Rol]][]) {
+      expect(items[0]?.href).toBe(PANEL_DE_ROL[rol])
+    }
+  })
+
+  test('todos los ítems exigen sesión en el proxy', () => {
+    for (const items of Object.values(MENU_DE_ROL)) {
+      for (const item of items) {
+        expect(esRutaProtegida(item.href)).toBe(true)
+      }
     }
   })
 })
