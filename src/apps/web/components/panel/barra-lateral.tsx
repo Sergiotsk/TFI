@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarRange, Gavel, LogOut, Wallet, type LucideIcon } from 'lucide-react'
+import { CalendarRange, ClipboardList, Gavel, LogOut, Wallet, type LucideIcon } from 'lucide-react'
 import { cerrarSesion } from '@/app/panel/actions'
 import {
   Sidebar,
@@ -24,6 +24,7 @@ const ICONOS: Record<IconoDeMenu, LucideIcon> = {
   periodos: CalendarRange,
   pagos: Wallet,
   casos: Gavel,
+  postulaciones: ClipboardList,
 }
 
 interface BarraLateralProps {

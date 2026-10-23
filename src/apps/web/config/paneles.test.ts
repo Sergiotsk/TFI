@@ -23,10 +23,11 @@ describe('PANEL_DE_ROL', () => {
 describe('MENU_DE_ROL', () => {
   // Según quién puede usar cada pantalla en contracts/api-http.md y puertos.md (ListarBandeja): la bandeja de pagos
   // es de Tesorería y Secretaría, los períodos de Secretaría y Dirección, y los casos A_DECIDIR solo de Dirección.
+  // Las postulaciones (buscar, acreditar pago, prorrogar plazo) las operan los tres roles del personal (ADR 0009).
   test.each<[RolDelPersonal, string[]]>([
-    ['TESORERIA', ['/personal/pagos']],
-    ['SECRETARIA', ['/personal/periodos', '/personal/pagos']],
-    ['DIRECCION', ['/direccion/casos', '/personal/periodos']],
+    ['TESORERIA', ['/personal/pagos', '/personal/postulaciones']],
+    ['SECRETARIA', ['/personal/periodos', '/personal/postulaciones', '/personal/pagos']],
+    ['DIRECCION', ['/direccion/casos', '/personal/periodos', '/personal/postulaciones']],
   ])('%s ve %j', (rol, rutas) => {
     expect(MENU_DE_ROL[rol].map((item) => item.href)).toEqual(rutas)
   })
