@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import Link from 'next/link'
-import { ESTADOS_DE_POSTULACION, ROLES_DEL_PERSONAL } from '@tfi/domain'
+import {
+  ESTADOS_DE_POSTULACION,
+  ROLES_DEL_PERSONAL,
+  TIPOS_DE_DOCUMENTO,
+} from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
 import { Button } from '@/components/ui/button'
 import { CLASE_CAMPO, CLASE_ETIQUETA } from '@/components/auth/clases'
@@ -78,6 +82,7 @@ const PERFIL_INICIAL: PerfilEnEdicion = {
 }
 
 interface PerfilDeApi {
+  id: string
   nombre: string
   apellido: string
   dni: string
@@ -96,6 +101,9 @@ export function PanelDePruebas() {
   const [mensaje, setMensaje] = useState<string | null>(null)
 
   const [rolFiltro, setRolFiltro] = useState('')
+  const [dniPerfil, setDniPerfil] = useState('')
+  const [paginaPerfiles, setPaginaPerfiles] = useState('1')
+  const [porPaginaPerfiles, setPorPaginaPerfiles] = useState('20')
   const [perfilId, setPerfilId] = useState('')
   const [perfilEnEdicion, setPerfilEnEdicion] = useState<PerfilEnEdicion>(PERFIL_INICIAL)
 
@@ -106,7 +114,18 @@ export function PanelDePruebas() {
 
   const [postulacionId, setPostulacionId] = useState('')
   const [diasDeProrroga, setDiasDeProrroga] = useState('3')
+  const [dniPostulante, setDniPostulante] = useState('')
+  const [paginaPostulaciones, setPaginaPostulaciones] = useState('1')
+  const [porPaginaPostulaciones, setPorPaginaPostulaciones] = useState('20')
   const [documentoId, setDocumentoId] = useState('')
+  const [documentoTipo, setDocumentoTipo] = useState('DNI')
+  const [documentoVigencia, setDocumentoVigencia] = useState('365')
+  const [documentoEstado, setDocumentoEstado] = useState('APROBADO')
+  const [documentoObservaciones, setDocumentoObservaciones] = useState('')
+  const [archivoDocumento, setArchivoDocumento] = useState<File | null>(null)
+  const [filtroEstadoDocumento, setFiltroEstadoDocumento] = useState('')
+  const [paginaDocumentos, setPaginaDocumentos] = useState('1')
+  const [porPaginaDocumentos, setPorPaginaDocumentos] = useState('20')
   const [filtroAspiranteId, setFiltroAspiranteId] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
   const [soloPeriodoElegido, setSoloPeriodoElegido] = useState(false)
@@ -152,13 +171,26 @@ export function PanelDePruebas() {
     void cargarSesion()
   }, [cargarSesion])
 
-  async function llamar(metodo: 'GET' | 'POST' | 'PATCH', url: string, cuerpo?: unknown) {
+  async function llamar(
+    metodo: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+    url: string,
+    cuerpo?: unknown,
+  ) {
     setOcupado(true)
     try {
+      const esFormulario = cuerpo instanceof FormData
       const respuesta = await fetch(url, {
         method: metodo,
-        headers: cuerpo === undefined ? undefined : { 'Content-Type': 'application/json' },
-        body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+        headers:
+          cuerpo === undefined || esFormulario
+            ? undefined
+            : { 'Content-Type': 'application/json' },
+        body:
+          cuerpo === undefined
+            ? undefined
+            : esFormulario
+              ? cuerpo
+              : JSON.stringify(cuerpo),
       })
       const json: unknown = await interpretarJson(await respuesta.text())
 
@@ -179,6 +211,18 @@ export function PanelDePruebas() {
       if (respuesta.ok && metodo === 'POST' && url === '/api/postulaciones') {
         const id = idDe(json)
         if (id) setPostulacionId(id)
+      }
+      if (
+        respuesta.ok &&
+        metodo === 'GET' &&
+        url.startsWith('/api/postulaciones/por-dni')
+      ) {
+        const id = primerIdDe(json)
+        if (id) setPostulacionId(id)
+      }
+      if (respuesta.ok && metodo === 'POST' && url === '/api/documentos') {
+        const id = idDe(json)
+        if (id) setDocumentoId(id)
       }
       if (respuesta.ok && metodo === 'GET' && url === '/api/postulaciones/mias') {
         const id = primerIdDe(json)
@@ -291,10 +335,51 @@ export function PanelDePruebas() {
     if (soloPeriodoElegido && periodoId.trim() !== '') {
       parametros.set('periodoId', periodoId.trim())
     }
+    if (paginaPostulaciones.trim() !== '') parametros.set('pagina', paginaPostulaciones.trim())
+    if (porPaginaPostulaciones.trim() !== '') {
+      parametros.set('porPagina', porPaginaPostulaciones.trim())
+    }
 
     const consulta = parametros.toString()
 
     return consulta === '' ? '/api/postulaciones' : `/api/postulaciones?${consulta}`
+  }
+
+  function urlDePerfiles(): string {
+    const parametros = new URLSearchParams()
+    if (rolFiltro !== '') parametros.set('rol', rolFiltro)
+    if (dniPerfil.trim() !== '') parametros.set('dni', dniPerfil.trim())
+    if (paginaPerfiles.trim() !== '') parametros.set('pagina', paginaPerfiles.trim())
+    if (porPaginaPerfiles.trim() !== '') parametros.set('porPagina', porPaginaPerfiles.trim())
+
+    const consulta = parametros.toString()
+
+    return consulta === '' ? '/api/perfiles' : `/api/perfiles?${consulta}`
+  }
+
+  function urlDeDocumentos(): string {
+    const parametros = new URLSearchParams()
+    if (postulacionId.trim() !== '') parametros.set('postulacionId', postulacionId.trim())
+    if (filtroEstadoDocumento !== '') parametros.set('estado', filtroEstadoDocumento)
+    if (paginaDocumentos.trim() !== '') parametros.set('pagina', paginaDocumentos.trim())
+    if (porPaginaDocumentos.trim() !== '') parametros.set('porPagina', porPaginaDocumentos.trim())
+
+    const consulta = parametros.toString()
+
+    return consulta === '' ? '/api/documentos' : `/api/documentos?${consulta}`
+  }
+
+  async function subirDocumento(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault()
+    if (!archivoDocumento || postulacionId.trim() === '') return
+
+    const formulario = new FormData()
+    formulario.set('postulacionId', postulacionId.trim())
+    formulario.set('tipo', documentoTipo)
+    formulario.set('vigencia', documentoVigencia.trim() || '365')
+    formulario.set('archivo', archivoDocumento)
+
+    await llamar('POST', '/api/documentos', formulario)
   }
 
   function editarPerfil<K extends keyof PerfilEnEdicion>(
@@ -310,12 +395,14 @@ export function PanelDePruebas() {
     }
   }
 
-  function cuerpoDePerfil(): Record<string, unknown> | null {
+  function cuerpoDePerfil(incluirDni = true): Record<string, unknown> | null {
     const cuerpo: Record<string, unknown> = {}
 
     if (perfilEnEdicion.nombre.trim() !== '') cuerpo.nombre = perfilEnEdicion.nombre.trim()
     if (perfilEnEdicion.apellido.trim() !== '') cuerpo.apellido = perfilEnEdicion.apellido.trim()
-    if (perfilEnEdicion.dni.trim() !== '') cuerpo.dni = perfilEnEdicion.dni.trim()
+    if (incluirDni && perfilEnEdicion.dni.trim() !== '') {
+      cuerpo.dni = perfilEnEdicion.dni.trim()
+    }
     if (perfilEnEdicion.cuil.trim() !== '') cuerpo.cuil = perfilEnEdicion.cuil.trim()
     if (perfilEnEdicion.fechaNacimiento !== '') {
       cuerpo.fechaNacimiento = perfilEnEdicion.fechaNacimiento
@@ -340,26 +427,47 @@ export function PanelDePruebas() {
         return
       }
 
-      const datos = datosDe(cuerpo)
-      if (!esPerfil(datos)) {
-        setMensaje('La respuesta del perfil no tiene el formato esperado')
-        return
-      }
-
-      setPerfilEnEdicion({
-        nombre: datos.nombre,
-        apellido: datos.apellido,
-        dni: datos.dni,
-        cuil: datos.cuil,
-        fechaNacimiento: datos.fechaNacimiento.slice(0, 10),
-        sexo: datos.sexo,
-        telefono: datos.telefono ?? '',
-        direccion: datos.direccion ?? '',
-      })
-      setMensaje(null)
+      volcarPerfil(datosDe(cuerpo))
     } finally {
       setOcupado(false)
     }
+  }
+
+  async function cargarMiPerfilParaEditar() {
+    setOcupado(true)
+    try {
+      const respuesta = await fetch('/api/perfiles/mio', { cache: 'no-store' })
+      const cuerpo: unknown = await interpretarJson(await respuesta.text())
+
+      if (!respuesta.ok) {
+        setMensaje(mensajeDeError(cuerpo) ?? 'No se pudo cargar el perfil')
+        return
+      }
+
+      volcarPerfil(datosDe(cuerpo))
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  function volcarPerfil(datos: unknown) {
+    if (!esPerfil(datos)) {
+      setMensaje('La respuesta del perfil no tiene el formato esperado')
+      return
+    }
+
+    setPerfilId(datos.id)
+    setPerfilEnEdicion({
+      nombre: datos.nombre,
+      apellido: datos.apellido,
+      dni: datos.dni,
+      cuil: datos.cuil,
+      fechaNacimiento: datos.fechaNacimiento.slice(0, 10),
+      sexo: datos.sexo,
+      telefono: datos.telefono ?? '',
+      direccion: datos.direccion ?? '',
+    })
+    setMensaje(null)
   }
 
   const sinSesion = sesion === null
@@ -507,14 +615,26 @@ export function PanelDePruebas() {
                 <FilaPermiso endpoint="GET /api/auth/yo" quien="Autenticado" />
                 <FilaPermiso endpoint="GET /api/perfiles" quien={rolesDe(ROLES_DEL_PERSONAL)} />
                 <FilaPermiso endpoint="GET /api/perfiles/:id" quien="El propio o personal" />
+                <FilaPermiso endpoint="GET /api/perfiles/mio" quien="Autenticado" />
+                <FilaPermiso endpoint="PATCH /api/perfiles/mio" quien="Autenticado (propio)" />
                 <FilaPermiso
                   endpoint="PATCH /api/perfiles/:id"
                   quien={rolesDe(ROLES_DEL_PERSONAL)}
                 />
                 <FilaPermiso endpoint="GET /api/periodos" quien="Autenticado" />
+                <FilaPermiso endpoint="GET /api/periodos/todos" quien={rolesDe(ROLES_DEL_PERSONAL)} />
+                <FilaPermiso endpoint="GET /api/periodos/:id" quien="Autenticado" />
+                <FilaPermiso
+                  endpoint="GET /api/periodos/:id/ocupacion"
+                  quien={rolesDe(ROLES_DEL_PERSONAL)}
+                />
                 <FilaPermiso endpoint="POST /api/periodos" quien="Director" />
                 <FilaPermiso endpoint="PATCH /api/periodos/:id" quien="Director" />
                 <FilaPermiso endpoint="GET /api/postulaciones" quien={rolesDe(ROLES_DEL_PERSONAL)} />
+                <FilaPermiso
+                  endpoint="GET /api/postulaciones/por-dni"
+                  quien={rolesDe(ROLES_DEL_PERSONAL)}
+                />
                 <FilaPermiso endpoint="POST /api/postulaciones" quien="Aspirante" />
                 <FilaPermiso endpoint="GET /api/postulaciones/mias" quien="Aspirante" />
                 <FilaPermiso endpoint="GET /api/postulaciones/:id" quien="El propio o personal" />
@@ -530,8 +650,22 @@ export function PanelDePruebas() {
                   endpoint="POST /api/postulaciones/:id/prorrogar-plazo"
                   quien={rolesDe(ROLES_DEL_PERSONAL)}
                 />
-                <FilaPermiso endpoint="GET /api/document" quien={rolesDe(ROLES_DEL_PERSONAL)} />
-                <FilaPermiso endpoint="GET /api/document/:id" quien={rolesDe(ROLES_DEL_PERSONAL)} />
+                <FilaPermiso
+                  endpoint="GET /api/documentos"
+                  quien="Aspirante dueño (con postulacionId) o Secretaría/Dirección"
+                />
+                <FilaPermiso
+                  endpoint="POST /api/documentos"
+                  quien="Aspirante dueño o Secretaría/Dirección"
+                />
+                <FilaPermiso
+                  endpoint="GET /api/documentos/:id"
+                  quien="Aspirante dueño o Secretaría/Dirección"
+                />
+                <FilaPermiso
+                  endpoint="PATCH|DELETE /api/documentos/:id"
+                  quien="Aspirante dueño (DELETE) o Secretaría/Dirección"
+                />
               </tbody>
             </table>
           </div>
@@ -541,11 +675,12 @@ export function PanelDePruebas() {
           titulo="Perfiles"
           descripcion={
             <>
-              <code>GET /api/perfiles</code> lista (solo personal, con filtro opcional por rol);{' '}
-              <code>GET /api/perfiles/:id</code> devuelve uno (el propio o personal).{' '}
-              <code>PATCH /api/perfiles/:id</code> lo puede hacer el personal para corregir datos
-              personales: no cambia rol, email ni institución. No hay alta ni baja: el perfil lo crea
-              el trigger de registro.
+              <code>GET /api/perfiles</code> lista (solo personal, con filtros opcionales por rol y DNI
+              y paginación); <code>GET /api/perfiles/:id</code> devuelve uno (el propio o personal).{' '}
+              <code>PATCH /api/perfiles/:id</code> lo puede hacer el personal;{' '}
+              <code>PATCH /api/perfiles/mio</code> deja que cualquier persona corrija sus propios
+              datos. En ambos casos no cambia DNI, rol, email ni institución. No hay alta ni baja: el
+              perfil lo crea el trigger de registro.
             </>
           }
         >
@@ -568,15 +703,50 @@ export function PanelDePruebas() {
                 ))}
               </select>
             </div>
+            <div className="w-52">
+              <label htmlFor="perfiles-dni" className={CLASE_ETIQUETA}>
+                Buscar por DNI
+              </label>
+              <input
+                id="perfiles-dni"
+                inputMode="numeric"
+                placeholder="Ej. 30123456"
+                value={dniPerfil}
+                onChange={(evento) => setDniPerfil(evento.target.value)}
+                className={CLASE_CAMPO}
+              />
+            </div>
+            <div className="w-24">
+              <label htmlFor="perfiles-pagina" className={CLASE_ETIQUETA}>
+                Página
+              </label>
+              <input
+                id="perfiles-pagina"
+                type="number"
+                min="1"
+                value={paginaPerfiles}
+                onChange={(evento) => setPaginaPerfiles(evento.target.value)}
+                className={CLASE_CAMPO}
+              />
+            </div>
+            <div className="w-24">
+              <label htmlFor="perfiles-por-pagina" className={CLASE_ETIQUETA}>
+                Por página
+              </label>
+              <input
+                id="perfiles-por-pagina"
+                type="number"
+                min="1"
+                max="100"
+                value={porPaginaPerfiles}
+                onChange={(evento) => setPorPaginaPerfiles(evento.target.value)}
+                className={CLASE_CAMPO}
+              />
+            </div>
             <Button
               variant="outline"
               disabled={deshabilitado}
-              onClick={() =>
-                void llamar(
-                  'GET',
-                  rolFiltro === '' ? '/api/perfiles' : `/api/perfiles?rol=${rolFiltro}`,
-                )
-              }
+              onClick={() => void llamar('GET', urlDePerfiles())}
             >
               GET /api/perfiles
             </Button>
@@ -613,6 +783,45 @@ export function PanelDePruebas() {
                   Mi perfil
                 </Button>
               ) : null}
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Mi perfil (cualquier rol)</p>
+            <p className="text-sm text-muted-foreground">
+              <code>GET /api/perfiles/mio</code> devuelve el perfil de la sesión y{' '}
+              <code>PATCH /api/perfiles/mio</code> permite corregir nombre, apellido, CUIL,
+              nacimiento, sexo, teléfono y dirección. El DNI no se puede cambiar.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                disabled={deshabilitado}
+                onClick={() => void llamar('GET', '/api/perfiles/mio')}
+              >
+                GET /api/perfiles/mio
+              </Button>
+              <Button
+                variant="outline"
+                disabled={deshabilitado || sesion === null}
+                onClick={() => {
+                  const cuerpo = cuerpoDePerfil(false)
+                  if (!cuerpo) {
+                    setMensaje('Completá al menos un campo para actualizar tu perfil')
+                    return
+                  }
+                  void llamar('PATCH', '/api/perfiles/mio', cuerpo)
+                }}
+              >
+                PATCH /api/perfiles/mio
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={ocupado || sesion === null}
+                onClick={() => void cargarMiPerfilParaEditar()}
+              >
+                Cargar mis datos
+              </Button>
             </div>
           </div>
 
@@ -751,7 +960,9 @@ export function PanelDePruebas() {
           titulo="Períodos"
           descripcion={
             <>
-              <code>GET</code> lo ve cualquier usuario autenticado (solo los abiertos);{' '}
+              <code>GET /api/periodos</code> lo ve cualquier usuario autenticado (solo los abiertos);{' '}
+              <code>GET /api/periodos/todos</code>, <code>GET /api/periodos/:id</code> y{' '}
+              <code>GET /api/periodos/:id/ocupacion</code> completan la consulta del personal.{' '}
               <code>POST</code> y <code>PATCH</code> son solo del Director. Secretaría y Tesorería
               solo consultan. No hay DELETE: el período se cierra cambiando la fecha.
             </>
@@ -764,6 +975,27 @@ export function PanelDePruebas() {
               onClick={() => void llamar('GET', '/api/periodos')}
             >
               GET /api/periodos
+            </Button>
+            <Button
+              variant="outline"
+              disabled={deshabilitado}
+              onClick={() => void llamar('GET', '/api/periodos/todos')}
+            >
+              GET /api/periodos/todos
+            </Button>
+            <Button
+              variant="outline"
+              disabled={deshabilitado || periodoId.trim() === ''}
+              onClick={() => void llamar('GET', `/api/periodos/${periodoId.trim()}`)}
+            >
+              GET /api/periodos/:id
+            </Button>
+            <Button
+              variant="outline"
+              disabled={deshabilitado || periodoId.trim() === ''}
+              onClick={() => void llamar('GET', `/api/periodos/${periodoId.trim()}/ocupacion`)}
+            >
+              GET /api/periodos/:id/ocupacion
             </Button>
           </div>
 
@@ -886,9 +1118,11 @@ export function PanelDePruebas() {
             <>
               Crear, listar las propias e iniciar el pago son de <strong>Aspirante</strong>. El
               personal (Secretaría, Dirección y Tesorería) puede listar todas y filtrar por perfil,
-              período o estado; ver una por id lo puede hacer el dueño o cualquier rol del personal.
-              Las acciones manuales del personal son explícitas: acreditar un pago o prorrogar el
-              plazo. No hay PATCH ni DELETE de estados: el estado lo mueve la máquina de estados.
+              período o estado, con paginación, y buscar el historial completo de una persona por DNI
+              con <code>GET /api/postulaciones/por-dni</code>. Ver una por id lo puede hacer el dueño o
+              cualquier rol del personal. Las acciones manuales del personal son explícitas: acreditar
+              un pago o prorrogar el plazo. No hay PATCH ni DELETE de estados: el estado lo mueve la
+              máquina de estados.
             </>
           }
         >
@@ -948,14 +1182,79 @@ export function PanelDePruebas() {
               Solo el período elegido
             </label>
 
-            <Button
-              className="mt-3"
-              variant="outline"
-              disabled={deshabilitado}
-              onClick={() => void llamar('GET', urlDeListado())}
-            >
-              GET /api/postulaciones
-            </Button>
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <div className="w-24">
+                <label htmlFor="postulaciones-pagina" className={CLASE_ETIQUETA}>
+                  Página
+                </label>
+                <input
+                  id="postulaciones-pagina"
+                  type="number"
+                  min="1"
+                  value={paginaPostulaciones}
+                  onChange={(evento) => setPaginaPostulaciones(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div className="w-24">
+                <label htmlFor="postulaciones-por-pagina" className={CLASE_ETIQUETA}>
+                  Por página
+                </label>
+                <input
+                  id="postulaciones-por-pagina"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={porPaginaPostulaciones}
+                  onChange={(evento) => setPorPaginaPostulaciones(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <Button
+                variant="outline"
+                disabled={deshabilitado}
+                onClick={() => void llamar('GET', urlDeListado())}
+              >
+                GET /api/postulaciones
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Buscar por DNI (solo personal)</p>
+            <p className="text-sm text-muted-foreground">
+              Devuelve todas las Postulaciones de la persona, en cualquier estado, sin importar el
+              período. Acepta el DNI con o sin puntos.
+            </p>
+            <div className="mt-2 flex flex-wrap items-end gap-2">
+              <div className="w-52">
+                <label htmlFor="postulaciones-dni" className={CLASE_ETIQUETA}>
+                  DNI
+                </label>
+                <input
+                  id="postulaciones-dni"
+                  inputMode="numeric"
+                  placeholder="Ej. 30123456"
+                  value={dniPostulante}
+                  onChange={(evento) => setDniPostulante(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <Button
+                variant="outline"
+                disabled={deshabilitado || dniPostulante.trim() === ''}
+                onClick={() =>
+                  void llamar(
+                    'GET',
+                    `/api/postulaciones/por-dni?dni=${encodeURIComponent(
+                      dniPostulante.trim(),
+                    )}&pagina=1&porPagina=20`,
+                  )
+                }
+              >
+                GET /api/postulaciones/por-dni
+              </Button>
+            </div>
           </div>
 
           <div className="mt-4">
@@ -1066,36 +1365,142 @@ export function PanelDePruebas() {
           titulo="Documentos"
           descripcion={
             <>
-              Solo lectura y solo personal. <strong>Ojo:</strong> el repositorio todavía es un fake:
-              devuelve datos de prueba, no la tabla real de documentos.
+              El aspirante sube, consulta y borra los documentos de su Postulación; Secretaría y
+              Dirección pueden ver, revisar, corregir y borrar los de cualquier postulante de su
+              institución. Tesorería no participa. Los archivos van a un bucket privado y{' '}
+              <code>GET /api/documentos/:id</code> devuelve una URL firmada de cinco minutos. La
+              Postulación avanza sola: al subir el primero pasa a{' '}
+              <code>ESPERANDO_DOCUMENTACION</code>, al revisar a{' '}
+              <code>DOCUMENTACION_EN_REVISION</code>, <code>OBSERVADO</code> o{' '}
+              <code>DOCUMENTACION_VALIDADA</code>.
             </>
           }
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="w-40">
+              <label htmlFor="documentos-estado" className={CLASE_ETIQUETA}>
+                Estado
+              </label>
+              <select
+                id="documentos-estado"
+                value={filtroEstadoDocumento}
+                onChange={(evento) => setFiltroEstadoDocumento(evento.target.value)}
+                className={CLASE_CAMPO}
+              >
+                <option value="">Todos</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="APROBADO">APROBADO</option>
+                <option value="OBSERVADO">OBSERVADO</option>
+              </select>
+            </div>
+            <div className="w-24">
+              <label htmlFor="documentos-pagina" className={CLASE_ETIQUETA}>
+                Página
+              </label>
+              <input
+                id="documentos-pagina"
+                type="number"
+                min="1"
+                value={paginaDocumentos}
+                onChange={(evento) => setPaginaDocumentos(evento.target.value)}
+                className={CLASE_CAMPO}
+              />
+            </div>
+            <div className="w-24">
+              <label htmlFor="documentos-por-pagina" className={CLASE_ETIQUETA}>
+                Por página
+              </label>
+              <input
+                id="documentos-por-pagina"
+                type="number"
+                min="1"
+                max="100"
+                value={porPaginaDocumentos}
+                onChange={(evento) => setPorPaginaDocumentos(evento.target.value)}
+                className={CLASE_CAMPO}
+              />
+            </div>
             <Button
               variant="outline"
               disabled={deshabilitado}
-              onClick={() => void llamar('GET', '/api/document')}
+              onClick={() => void llamar('GET', urlDeDocumentos())}
             >
-              GET /api/document
-            </Button>
-            <Button
-              variant="outline"
-              disabled={deshabilitado || postulacionId.trim() === ''}
-              onClick={() =>
-                void llamar(
-                  'GET',
-                  `/api/document?postulacionId=${encodeURIComponent(postulacionId.trim())}`,
-                )
-              }
-            >
-              GET /api/document?postulacionId=…
+              GET /api/documentos
             </Button>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            El filtro por Postulación usa el id del apartado de arriba. Un aspirante tiene que
+            indicarlo; Secretaría y Dirección pueden listar toda la institución.
+          </p>
 
-          <div className="mt-4">
+          <form onSubmit={subirDocumento} className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Subir documento</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="documento-tipo" className={CLASE_ETIQUETA}>
+                  Tipo
+                </label>
+                <select
+                  id="documento-tipo"
+                  value={documentoTipo}
+                  onChange={(evento) => setDocumentoTipo(evento.target.value)}
+                  className={CLASE_CAMPO}
+                >
+                  {TIPOS_DE_DOCUMENTO.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {tipo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="documento-vigencia" className={CLASE_ETIQUETA}>
+                  Vigencia en días (0 = sin vencimiento)
+                </label>
+                <input
+                  id="documento-vigencia"
+                  type="number"
+                  min="0"
+                  max="3650"
+                  value={documentoVigencia}
+                  onChange={(evento) => setDocumentoVigencia(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="documento-archivo" className={CLASE_ETIQUETA}>
+                  Archivo (PDF, JPG o PNG, máximo 10 MB)
+                </label>
+                <input
+                  id="documento-archivo"
+                  type="file"
+                  accept="application/pdf,image/jpeg,image/png"
+                  onChange={(evento) => setArchivoDocumento(evento.target.files?.[0] ?? null)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              className="mt-3"
+              disabled={
+                deshabilitado ||
+                postulacionId.trim() === '' ||
+                archivoDocumento === null
+              }
+            >
+              POST /api/documentos
+            </Button>
+            {postulacionId.trim() === '' ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Elegí o creá una Postulación para habilitar la subida.
+              </p>
+            ) : null}
+          </form>
+
+          <div className="mt-4 border-t border-border pt-4">
             <label htmlFor="documento-id" className={CLASE_ETIQUETA}>
-              Documento por id
+              Documento por id (copiá el id de la respuesta de la lista)
             </label>
             <input
               id="documento-id"
@@ -1104,19 +1509,83 @@ export function PanelDePruebas() {
               onChange={(evento) => setDocumentoId(evento.target.value)}
               className={CLASE_CAMPO}
             />
-            <Button
-              className="mt-2"
-              variant="outline"
-              disabled={deshabilitado || documentoId.trim() === ''}
-              onClick={() => void llamar('GET', `/api/document/${documentoId.trim()}`)}
-            >
-              GET /api/document/:id
-            </Button>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                disabled={deshabilitado || documentoId.trim() === ''}
+                onClick={() => void llamar('GET', `/api/documentos/${documentoId.trim()}`)}
+              >
+                GET /api/documentos/:id
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={deshabilitado || documentoId.trim() === ''}
+                onClick={() => void llamar('DELETE', `/api/documentos/${documentoId.trim()}`)}
+              >
+                DELETE /api/documentos/:id
+              </Button>
+            </div>
           </div>
 
-          <p className="mt-4 text-xs text-muted-foreground">
-            El filtro por Postulación usa el id del apartado de arriba.
-          </p>
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Revisar documento (solo Secretaría/Dirección)</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="documento-revision-estado" className={CLASE_ETIQUETA}>
+                  Nuevo estado
+                </label>
+                <select
+                  id="documento-revision-estado"
+                  value={documentoEstado}
+                  onChange={(evento) => setDocumentoEstado(evento.target.value)}
+                  className={CLASE_CAMPO}
+                >
+                  <option value="PENDIENTE">PENDIENTE</option>
+                  <option value="APROBADO">APROBADO</option>
+                  <option value="OBSERVADO">OBSERVADO</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="documento-observaciones" className={CLASE_ETIQUETA}>
+                  Motivo (obligatorio al observar)
+                </label>
+                <input
+                  id="documento-observaciones"
+                  value={documentoObservaciones}
+                  onChange={(evento) => setDocumentoObservaciones(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                disabled={deshabilitado || documentoId.trim() === ''}
+                onClick={() =>
+                  void llamar('PATCH', `/api/documentos/${documentoId.trim()}`, {
+                    estado: documentoEstado,
+                    ...(documentoObservaciones.trim() === ''
+                      ? {}
+                      : { observaciones: documentoObservaciones.trim() }),
+                  })
+                }
+              >
+                PATCH /api/documentos/:id (revisión)
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={deshabilitado || documentoId.trim() === ''}
+                onClick={() =>
+                  void llamar('PATCH', `/api/documentos/${documentoId.trim()}`, {
+                    tipo: documentoTipo,
+                    vigencia: Number(documentoVigencia),
+                  })
+                }
+              >
+                PATCH /api/documentos/:id (metadatos)
+              </Button>
+            </div>
+          </div>
         </Tarjeta>
 
         <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
@@ -1207,12 +1676,15 @@ where email = 'tu@email.com';`}</pre>
               <p className="mt-1">
                 Con <code>SECRETARIA</code>, <code>DIRECCION</code> o <code>TESORERIA</code>,{' '}
                 <code>GET /api/postulaciones</code> devuelve todas y podés filtrar por{' '}
-                <code>aspiranteId</code>, período o estado (el id del perfil sale del apartado de
-                Perfiles). <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200.
-                Crear e iniciar pago responden 403. En Perfiles podés listar, filtrar por rol y
-                corregir datos personales con <code>PATCH</code>; en Documentos, leer (datos de
-                prueba). Con <code>SECRETARIA</code> o <code>TESORERIA</code> los períodos son de
-                solo lectura; con <code>DIRECCION</code> podés crearlos y modificarlos.
+                <code>aspiranteId</code>, período o estado, y paginar (el id del perfil sale del
+                apartado de Perfiles). También podés buscar el historial completo de una persona por
+                DNI. <code>GET /api/postulaciones/:id</code> de otro aspirante responde 200. Crear e
+                iniciar pago responden 403. En Perfiles podés listar, filtrar por rol o DNI y corregir
+                datos personales con <code>PATCH</code>; en Documentos, revisar los archivos. Con{' '}
+                <code>SECRETARIA</code> o <code>TESORERIA</code> los períodos son de solo lectura; con{' '}
+                <code>DIRECCION</code> podés crearlos y modificarlos. <code>/periodos/todos</code>,{' '}
+                <code>/periodos/:id</code> y <code>/periodos/:id/ocupacion</code> completan la
+                consulta.
               </p>
             </div>
 
@@ -1225,6 +1697,18 @@ where email = 'tu@email.com';`}</pre>
                 <code>prorrogar-plazo</code> extiende el vencimiento o reactiva una{' '}
                 <code>VENCIDO</code> con los días que indiques. No se puede editar el estado
                 libremente: la máquina de estados y el control de cupos lo impiden.
+              </p>
+            </div>
+
+            <div>
+              <p className="font-medium text-foreground">6. Documentación</p>
+              <p className="mt-1">
+                Una Postulación recién creada no admite documentos: primero hay que acreditar el pago
+                y confirmar la vacante. Desde ahí, el aspirante sube sus archivos con{' '}
+                <code>POST /api/documentos</code>. Secretaría o Dirección los revisan con{' '}
+                <code>PATCH /api/documentos/:id</code>: observar exige un motivo y deja la
+                Postulación en <code>OBSERVADO</code>; aprobar el último documento la deja en{' '}
+                <code>DOCUMENTACION_VALIDADA</code>. Tesorería recibe 403 en todo el circuito.
               </p>
             </div>
           </div>
@@ -1397,6 +1881,7 @@ function esPeriodo(valor: unknown): valor is Periodo {
 function esPerfil(valor: unknown): valor is PerfilDeApi {
   return (
     esObjeto(valor) &&
+    typeof valor.id === 'string' &&
     typeof valor.nombre === 'string' &&
     typeof valor.apellido === 'string' &&
     typeof valor.dni === 'string' &&
