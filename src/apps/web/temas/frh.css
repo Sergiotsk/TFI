@@ -1,0 +1,23 @@
+/*
+ * Tema de UTN FRH para los paneles (Principio VIII). Se aplica con data-institucion="FRH" en
+ * app/(paneles)/layout.tsx, así que estos valores solo valen dentro de los paneles y no pisan la landing.
+ * El :root:has() lleva el tema a todo el documento mientras haya un panel montado: los tooltips y la barra en el
+ * celular (Sheet) se renderizan en un portal dentro de <body>, fuera del div con el atributo.
+ *
+ * Solo van los tokens que distinguen a la institución; el resto sale de globals.css. Por ahora repite los
+ * colores que globals.css todavía tiene en :root (los usan el login y el registro). Cuando exista el
+ * DESIGN.md (TODO(DESIGN_MD) de la constitución), los valores salen de ahí.
+ */
+[data-institucion='FRH'],
+:root:has([data-institucion='FRH']) {
+  --background: #f0f3ff;
+  --primary: #005a9c;
+  --primary-foreground: #ffffff;
+  --ring: #005a9c;
+  --sidebar: #ffffff;
+  --sidebar-primary: #005a9c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e1e9f7;
+  --sidebar-accent-foreground: #003f6e;
+  --sidebar-ring: #005a9c;
+}
