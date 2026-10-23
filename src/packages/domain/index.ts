@@ -4,6 +4,7 @@ export type { Rol } from './perfil/rol'
 export { ROLES_DEL_PERSONAL } from './perfil/rol'
 export type { Sexo } from './perfil/sexo'
 export { PeriodoDeIngreso } from './periodo/periodo-de-ingreso'
+export { PeriodoDuplicado, PeriodoInvalido } from './periodo/errores'
 export { Postulacion } from './postulacion/postulacion'
 export { NumeroDePostulacion } from './postulacion/numero-de-postulacion'
 export {
@@ -23,4 +24,12 @@ export {
   PostulacionDuplicada,
 } from './postulacion/errores'
 export { Documento } from './documento/documento'
-export type { EstadoDocumento } from './documento/estado'
+export {
+  TIPOS_DE_DOCUMENTO,
+  TRANSICIONES_DE_DOCUMENTO,
+} from './documento/estado'
+export type { EstadoDocumento, TipoDeDocumento } from './documento/estado'
+export {
+  ObservacionDeDocumentoRequerida,
+  TransicionDeDocumentoInvalida,
+} from './documento/errores'

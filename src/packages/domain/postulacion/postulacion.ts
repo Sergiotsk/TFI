@@ -111,6 +111,19 @@ export class Postulacion {
     return this.con({ estado: 'VENCIDO', motivoRevision: null })
   }
 
+  /**
+   * Avance del circuito de documentación (posterior a la vacante confirmada).
+   *
+   * Es genérico a propósito: el caso de uso decide si corresponde
+   * `DOCUMENTACION_EN_REVISION`, `OBSERVADO` o `DOCUMENTACION_VALIDADA` y el
+   * dominio valida el grafo. El vencimiento de pago ya no aplica.
+   */
+  avanzarDocumentacion(hacia: EstadoPostulacion, ahora: Date): Postulacion {
+    this.exigirTransicion(hacia, ahora)
+
+    return this.con({ estado: hacia, venceEl: null, motivoRevision: null })
+  }
+
   private exigirTransicion(
     hacia: EstadoPostulacion,
     ahora: Date,
