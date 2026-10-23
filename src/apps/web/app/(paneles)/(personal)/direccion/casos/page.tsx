@@ -1,4 +1,5 @@
 import { AccionPendiente } from '@/components/maqueta/accion-pendiente'
+import { AvisoDeEjemplo } from '@/components/maqueta/aviso-de-ejemplo'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { InsigniaDePago, motivosDeRevision } from '@/components/panel/insignia-de-estado'
 import {
@@ -18,6 +19,8 @@ export default function CasosDeDireccionPage() {
         titulo="Pagos a decidir"
         descripcion="Pagos acreditados que no se pudieron confirmar solos. Aceptar confirma la vacante aunque se pase el cupo."
       />
+
+      <AvisoDeEjemplo faltante="US5" />
 
       <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6 lg:px-8">
         {casosADecidir.length === 0 ? (

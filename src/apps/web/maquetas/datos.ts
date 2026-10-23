@@ -1,13 +1,7 @@
-// Datos de ejemplo para las maquetas de los paneles. No son entidades del dominio: son lo que cada pantalla
-// necesita mostrar. Cuando existan los endpoints de contracts/api-http.md, cada página reemplaza estos datos
-// por la llamada correspondiente y este archivo se borra.
-
-export type EstadoPostulacion =
-  | 'PREINSCRIPTO'
-  | 'PAGO_PENDIENTE'
-  | 'PAGO_EN_REVISION'
-  | 'VACANTE_CONFIRMADA'
-  | 'VENCIDO'
+// Datos de ejemplo de las pantallas que todavía no tienen backend: la bandeja de pagos (US1) y los casos a decidir
+// de Dirección (US5). No son entidades del dominio. Cuando existan los endpoints de contracts/api-http.md, cada
+// página reemplaza estos datos por la llamada correspondiente y este archivo se borra.
+// Las pantallas del aspirante, las postulaciones y los períodos ya usan los casos de uso reales.
 
 export type EstadoPago = 'A_DECIDIR' | 'NO_IMPUTADO' | 'DEVUELTO'
 
@@ -20,13 +14,6 @@ export type MotivoNoImputado =
   | 'MONTO_INSUFICIENTE'
   | 'YA_TIENE_PAGO'
   | 'SIN_PAGO_INICIADO'
-
-export interface PostulacionDelAspirante {
-  numero: number
-  estado: EstadoPostulacion
-  periodo: string
-  venceEl: string | null
-}
 
 export interface CasoADecidir {
   pagoId: string
@@ -61,24 +48,6 @@ export interface CargaDeInforme {
   aDecidir: number
   noImputados: number
   duplicados: number
-}
-
-export interface PeriodoConOcupacion {
-  id: string
-  nombre: string
-  cierraEl: string
-  plazoDePagoDias: number
-  matriculaCentavos: number
-  cupos: number
-  ocupados: number
-  pendientesVigentes: number
-}
-
-export const postulacionDelAspirante: PostulacionDelAspirante = {
-  numero: 128,
-  estado: 'PAGO_PENDIENTE',
-  periodo: 'Ingreso 2027, primer cuatrimestre',
-  venceEl: '2026-10-28T23:59:00-03:00',
 }
 
 export const casosADecidir: CasoADecidir[] = [
@@ -158,29 +127,6 @@ export const cargasDeInforme: CargaDeInforme[] = [
     aDecidir: 1,
     noImputados: 0,
     duplicados: 3,
-  },
-]
-
-export const periodosConOcupacion: PeriodoConOcupacion[] = [
-  {
-    id: 'periodo-1',
-    nombre: 'Ingreso 2027, primer cuatrimestre',
-    cierraEl: '2026-12-15T23:59:00-03:00',
-    plazoDePagoDias: 7,
-    matriculaCentavos: 9_400_000,
-    cupos: 50,
-    ocupados: 52,
-    pendientesVigentes: 6,
-  },
-  {
-    id: 'periodo-2',
-    nombre: 'Ingreso 2027, segundo cuatrimestre',
-    cierraEl: '2027-07-15T23:59:00-03:00',
-    plazoDePagoDias: 7,
-    matriculaCentavos: 9_400_000,
-    cupos: 40,
-    ocupados: 0,
-    pendientesVigentes: 0,
   },
 ]
 

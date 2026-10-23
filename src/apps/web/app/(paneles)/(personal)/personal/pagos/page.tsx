@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { AccionPendiente } from '@/components/maqueta/accion-pendiente'
+import { AvisoDeEjemplo } from '@/components/maqueta/aviso-de-ejemplo'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { InsigniaDePago, motivosDeNoImputado } from '@/components/panel/insignia-de-estado'
 import { cn } from '@/lib/utils'
@@ -35,6 +36,8 @@ export default async function BandejaDePagosPage({
         descripcion="Pagos del informe diario que no se pudieron imputar a una postulación, y pagos devueltos."
         acciones={<AccionPendiente>Importar informe</AccionPendiente>}
       />
+
+      <AvisoDeEjemplo faltante="US1" />
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
         <section className="space-y-4">
