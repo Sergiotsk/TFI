@@ -58,6 +58,73 @@ interface RepositorioDePeriodos {
   `PAGO_EN_REVISION` ni `VENCIDO`.
 - `contarPendientesVigentes` excluye las pendientes con `vence_el < ahora` (vencimiento perezoso).
 
+## RepositorioDeDocumentos
+
+```ts
+interface FiltrosDeDocumento {
+  postulacionId?: string
+  estado?: EstadoDocumento
+  tipo?: TipoDeDocumento
+}
+
+interface RepositorioDeDocumentos {
+  listar(filtros: FiltrosDeDocumento, paginacion: Paginacion): Promise<Pagina<Documento>>
+  obtenerPorId(id: string): Promise<Documento | null>
+  obtenerPorPostulacion(postulacionId: string): Promise<Documento[]>
+  guardar(documento: Documento): Promise<void>
+  eliminar(id: string): Promise<void>
+}
+```
+
+**Casos de contrato**:
+- `guardar` y `obtenerPorId` devuelven los mismos metadatos (ruta, nombre, MIME, tamaño, vigencia y estado).
+- `obtenerPorId` de un id inexistente devuelve `null`.
+- `obtenerPorPostulacion` solo devuelve los documentos de esa Postulación.
+- `listar` filtra por Postulación, estado y tipo, y respeta el paginado.
+- `eliminar` borra la fila y deja de aparecer en las consultas.
+
+## AlmacenDeArchivos
+
+```ts
+interface ArchivoParaSubir {
+  contenido: ArrayBuffer
+  nombreArchivo: string
+  mimeType: string
+}
+
+interface AlmacenDeArchivos {
+  subir(ruta: string, archivo: ArchivoParaSubir): Promise<void>
+  eliminar(ruta: string): Promise<void>
+  urlFirmada(ruta: string, segundos: number): Promise<string>
+}
+```
+
+**Casos de contrato**:
+- `subir` guarda el archivo y `urlFirmada` devuelve una URL temporal.
+- `eliminar` borra el archivo y luego `urlFirmada` falla.
+- `urlFirmada` falla si el archivo nunca se subió.
+
+## AccionesDeDocumentacion
+
+```ts
+type ResultadoDeDocumentacion =
+  | 'OK'
+  | 'CONFLICTO'
+  | 'NO_ENCONTRADA'
+  | 'NO_AUTORIZADO'
+  | 'TRANSICION_INVALIDA'
+
+interface AccionesDeDocumentacion {
+  transicionar(postulacionId: string, hacia: EstadoPostulacion): Promise<ResultadoDeDocumentacion>
+}
+```
+
+**Casos de contrato**:
+- `ESPERANDO_DOCUMENTACION` pasa a `DOCUMENTACION_EN_REVISION`.
+- Desde `DOCUMENTACION_EN_REVISION` se puede pasar a `OBSERVADO` o a `DOCUMENTACION_VALIDADA`.
+- Una transición fuera del grafo devuelve `TRANSICION_INVALIDA` y no cambia el estado.
+- Una Postulación inexistente devuelve `NO_ENCONTRADA`.
+
 ## RegistroDePagos
 
 ```ts
@@ -132,6 +199,10 @@ mezcla instituciones.
 | `ConsultarOcupacion` | el personal | Periodos, Reloj |
 | `ListarBandeja(estado)` | `A_DECIDIR`: `DIRECCION`; `NO_IMPUTADO` y `DEVUELTO`: `TESORERIA` y `SECRETARIA` (lectura) | Pagos |
 | `DecidirPagoExcepcional` | `DIRECCION` | Pagos |
+| `SubirDocumento` | `ASPIRANTE` (la propia) o `SECRETARIA` / `DIRECCION` (su institución) | Documentos, Almacén, Acciones, Postulaciones, Periodos, Reloj, Ids |
+| `ListarDocumentos` / `ConsultarDocumento` | personal de la institución; el aspirante solo los propios | Documentos, Almacén, Postulaciones, Periodos |
+| `RevisarDocumento` / `ActualizarDocumento` | `SECRETARIA` o `DIRECCION` | Documentos, Acciones, Postulaciones, Periodos, Reloj |
+| `EliminarDocumento` | el aspirante dueño o `SECRETARIA` / `DIRECCION` | Documentos, Almacén, Postulaciones, Periodos |
 
 `AcreditarPago` reintenta hasta 3 veces ante un `CONFLICTO` (research R2). Si se agotan los intentos, falla con un
 error inesperado y el informe marca esa fila para reprocesar (la idempotencia hace seguro el reproceso).
