@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { randomInt, randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PeriodoDeIngreso, Postulacion } from '@tfi/domain'
@@ -37,18 +37,16 @@ import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulacio
 
 const UN_DIA = 24 * 60 * 60 * 1000
 
-let contador = 0
+// Al azar y no con Date.now() + un contador: vitest corre cada archivo en su propio worker, cada uno con su
+// contador desde 0, y dos workers en el mismo milisegundo generaban el mismo código o DNI.
 
+/** 12 caracteres hex: entra en `instituciones.codigo` (VARCHAR(20)) con el prefijo `PRUEBA-`. */
 function marcaUnica(): string {
-  contador += 1
-  return `${Date.now().toString(36)}${contador.toString(36)}`
+  return randomUUID().replace(/-/g, '').slice(0, 12)
 }
 
-let contadorDni = 0
-
 function dniUnico(): string {
-  contadorDni += 1
-  return String(10_000_000 + ((Date.now() + contadorDni * 7919) % 89_000_000))
+  return String(randomInt(10_000_000, 99_000_000))
 }
 
 export function clienteDeServicio(): SupabaseClient {
