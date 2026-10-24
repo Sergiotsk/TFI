@@ -1,13 +1,20 @@
+import Link from 'next/link'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { formatearFecha, formatearMontoEnCentavos } from '@/components/panel/formato'
 import { FormularioDeDecision } from '@/components/panel/formulario-de-decision'
 import { InsigniaDePago, motivosDeRevision } from '@/components/panel/insignia-de-estado'
 import { conActorDePanel } from '../../../sesion-de-panel'
 import { decidirCasoAccion } from './actions'
+import { avisoDeDecision } from './esquemas'
 
 // Casos de Dirección (US5): pagos que no se pudieron confirmar solos, por fuera de plazo o sin cupo
 // (ListarCasosADecidir). Aceptar confirma la vacante aunque se pase el cupo; rechazar deja el pago para devolver.
-export default async function CasosDeDireccionPage() {
+export default async function CasosDeDireccionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [clave: string]: string | string[] | undefined }>
+}) {
+  const aviso = avisoDeDecision(await searchParams)
   const casos = await conActorDePanel(async ({ listarCasosADecidir }, actor) =>
     actor.rol === 'DIRECCION' ? listarCasosADecidir.ejecutar(actor) : null,
   )
@@ -21,6 +28,18 @@ export default async function CasosDeDireccionPage() {
       />
 
       <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6 lg:px-8">
+        {aviso ? (
+          <div
+            role="status"
+            className="flex items-start justify-between gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm"
+          >
+            <p className="font-medium text-primary">{aviso}</p>
+            <Link href="/direccion/casos" className="text-xs text-muted-foreground underline">
+              Cerrar
+            </Link>
+          </div>
+        ) : null}
+
         {casos === null ? (
           <p className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
             Los casos a decidir son de Dirección.
@@ -73,7 +92,7 @@ export default async function CasosDeDireccionPage() {
               </div>
             </dl>
 
-            <FormularioDeDecision accion={decidirCasoAccion} pagoId={pago.id} />
+            <FormularioDeDecision accion={decidirCasoAccion} pagoId={pago.id} numero={postulacion.numero} />
           </article>
         ))}
       </main>

@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { esquemaDecision, esquemaParametrosDePago } from '@/http/esquemas/pagos'
 import { conActorDePanel, resolverAccion, type EstadoDeAccion } from '../../../sesion-de-panel'
 
@@ -37,6 +38,13 @@ export async function decidirCasoAccion(
   for (const ruta of RUTAS_AFECTADAS) revalidatePath(ruta)
   // El contador de casos de la barra lateral lo calcula el layout.
   revalidatePath('/', 'layout')
+
+  // Si salió bien, el caso desaparece de la lista: el aviso lo muestra la página. Fuera de resolverAccion, porque
+  // redirect corta con una excepción.
+  if (estado?.ok) {
+    const numero = String(datos.get('numero') ?? '')
+    redirect(`/direccion/casos?${new URLSearchParams({ decision: decision.data.decision, numero })}`)
+  }
 
   return estado
 }

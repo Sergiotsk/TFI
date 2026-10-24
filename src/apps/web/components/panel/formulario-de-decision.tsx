@@ -7,15 +7,19 @@ import type { EstadoDeAccion } from '@/app/(paneles)/sesion-de-panel'
 interface FormularioDeDecisionProps {
   accion: (anterior: EstadoDeAccion, datos: FormData) => Promise<EstadoDeAccion>
   pagoId: string
+  /** Número de la Postulación, para el aviso que muestra la página después de decidir. */
+  numero: string
 }
 
-// Aceptar o rechazar un caso de Dirección, con un comentario opcional. Cada botón manda su `decision`.
-export function FormularioDeDecision({ accion, pagoId }: FormularioDeDecisionProps) {
+// Aceptar o rechazar un caso de Dirección, con un comentario opcional. Cada botón manda su `decision`. Si sale bien,
+// la acción redirige y el aviso lo muestra la página; acá solo queda el error.
+export function FormularioDeDecision({ accion, pagoId, numero }: FormularioDeDecisionProps) {
   const [estado, ejecutar, enviando] = useActionState(accion, null)
 
   return (
     <form action={ejecutar} className="space-y-3 border-t border-border pt-4">
       <input type="hidden" name="id" value={pagoId} />
+      <input type="hidden" name="numero" value={numero} />
       <label className="block space-y-1 text-xs">
         <span className="text-muted-foreground">Comentario (opcional)</span>
         <textarea
