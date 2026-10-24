@@ -4,7 +4,7 @@
    Paleta tomada de las maquetas del sistema (docs/prototipos):
    azul UTN #005a9c, fondo #f0f3ff, neutros slate y verde esmeralda para lo confirmado.
    ========================================================== */
-:root {
+.landing {
     --utn: #005a9c;
     --utn-deep: #00487d;
     --sky: #0284c7;
@@ -44,8 +44,11 @@
 
 html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
 
-body {
-    margin: 0;
+/* Wrapper de la landing: acá se enchufan las fuentes (next/font) y el resto de la página las hereda */
+.landing {
+    --font-body: var(--font-landing-body, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+    --font-display: var(--font-landing-display, "Bricolage Grotesque", "Inter", system-ui, sans-serif);
+    font-family: var(--font-body);
     background: var(--page);
     color: var(--slate-800);
     font-size: 1.0625rem;
@@ -53,29 +56,24 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Wrapper de la landing: acá se enchufan las fuentes (next/font) y el resto de la página las hereda */
-.landing {
-    --font-body: var(--font-landing-body, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
-    --font-display: var(--font-landing-display, "Bricolage Grotesque", "Inter", system-ui, sans-serif);
-    font-family: var(--font-body);
-}
-
-h1, h2, h3 {
+/* Reglas de elementos acotadas a la landing. Van dentro de :where() para que conserven la prioridad
+   que tenían (la de un selector de elemento) y las clases de la landing sigan pudiendo pisarlas. */
+.landing :where(h1, h2, h3) {
     margin: 0;
     font-family: var(--font-display);
     line-height: 1.1;
     letter-spacing: -0.025em;
     color: var(--slate-900);
 }
-p, ul, ol, dl, figure { margin: 0; padding: 0; }
-li { list-style: none; }
-dd { margin: 0; }
-img { max-width: 100%; display: block; }
-[hidden] { display: none !important; } /* sin esto, img{display:block} muestra las imágenes que todavía no cargaron */
-a { color: var(--utn); }
+.landing :where(p, ul, ol, dl, figure) { margin: 0; padding: 0; }
+.landing :where(li) { list-style: none; }
+.landing :where(dd) { margin: 0; }
+.landing :where(img) { max-width: 100%; display: block; }
+.landing [hidden] { display: none !important; } /* sin esto, img{display:block} muestra las imágenes que todavía no cargaron */
+.landing :where(a) { color: var(--utn); }
 
-:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 4px; }
-h1:focus { outline: none; }
+.landing :where(:focus-visible) { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 4px; }
+.landing h1:focus { outline: none; }
 
 .container { width: min(100% - 2.5rem, var(--page-ancho)); margin-inline: auto; }
 
@@ -111,11 +109,11 @@ h1:focus { outline: none; }
 }
 .pill--oscura { background: rgba(255, 255, 255, .12); color: #fff; border-color: rgba(255, 255, 255, .3); }
 
-/* Card de TUP de la portada: late al entrar (tres pulsos y queda quieta) */
-.pill--pulso { gap: .6rem; padding: .35rem 1rem; animation: pulso-pill 2.2s ease-out .5s 3; }
+/* Card de TUP de la portada: late todo el tiempo */
+.pill--pulso { gap: .6rem; padding: .35rem 1rem; animation: pulso-pill 2.4s ease-out .5s infinite; }
 .pill__punto {
     width: .55rem; height: .55rem; border-radius: 50%; background: var(--blue-200);
-    animation: latido 1.1s ease-in-out .5s 6;
+    animation: latido 1.2s ease-in-out .5s infinite;
 }
 @keyframes pulso-pill {
     0% { box-shadow: 0 0 0 0 rgba(191, 219, 254, .6); }
@@ -376,18 +374,33 @@ h1:focus { outline: none; }
 .regla strong { font-family: var(--font-display); font-size: 1.25rem; color: var(--slate-900); }
 
 /* ---------- Cómo funciona ---------- */
-.pasos { counter-reset: paso; }
+.pasos { counter-reset: paso; position: relative; }
 .pasos__item { counter-increment: paso; position: relative; padding: 0 0 1.9rem 3.5rem; }
 .pasos__item:last-child { padding-bottom: 0; }
 .pasos__item::before {
-    content: counter(paso); position: absolute; left: 0; top: 0;
+    content: counter(paso); position: absolute; left: 0; top: 0; z-index: 1;
     display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%;
-    background: var(--utn); color: #fff; font: 700 1rem var(--font-display);
+    border: 2px solid var(--utn); background: var(--utn); color: #fff; font: 700 1rem var(--font-display);
+    transition: background-color .3s, border-color .3s, color .3s, transform .4s cubic-bezier(.34, 1.56, .64, 1);
 }
-.pasos__item:not(:last-child)::after {
-    content: ""; position: absolute; left: 1.0625rem; top: 2.5rem; bottom: .25rem; width: 2px; background: var(--slate-300);
+.pasos__item--hito::before { background: var(--ok); border-color: var(--ok); }
+
+/* Una sola línea continua detrás de los círculos: una pista gris y, encima, el relleno que sigue al scroll.
+   --linea-alto y --avance los calcula pasos-con-scroll.tsx (sin JS queda la línea completa). */
+.pasos::before, .pasos::after {
+    content: ""; position: absolute; left: 1.0625rem; top: 1.125rem; width: 2px; border-radius: 2px;
+    height: var(--linea-alto, calc(100% - 2.5rem));
 }
-.pasos__item--hito::before { background: var(--ok); }
+.pasos::before { background: var(--slate-300); }
+.pasos::after {
+    background: var(--utn); transform-origin: 50% 0; transform: scaleY(var(--avance, 1));
+    transition: transform .12s linear;
+}
+
+/* Con movimiento: los círculos arrancan apagados y se encienden cuando la línea los alcanza */
+.reveal-on .pasos__item:not(.is-alcanzado)::before {
+    background: var(--white); border-color: var(--slate-300); color: var(--slate-500); transform: scale(.9);
+}
 .pasos__item h3 { margin-bottom: .3rem; font-size: 1.25rem; font-weight: 700; }
 .pasos__item p { max-width: 56ch; color: var(--slate-600); }
 

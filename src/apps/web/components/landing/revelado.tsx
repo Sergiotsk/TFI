@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 /**
  * Efectos de scroll de la página, todos sutiles:
- *  - Aparición escalonada de las secciones (.reveal, con variantes --izq, --der y --zoom).
+ *  - Aparición escalonada de las secciones (.reveal, con variantes --izq, --der y --zoom); se repite al volver a pasar.
  *  - Barra fina de progreso de lectura arriba de todo.
  *  - Parallax suave en los elementos con data-parallax="velocidad" (la trama de las bandas azules, la imagen de la sede).
  *  - El encabezado gana sombra cuando se baja (data-desplazado en <html>).
@@ -21,16 +21,20 @@ export function Revelado() {
     // 1) Aparición al entrar en pantalla
     if ('IntersectionObserver' in window) {
       raiz.classList.add('reveal-on')
+      // La animación se repite: aparece al entrar (con el 12% a la vista) y se rearma recién cuando
+      // el elemento salió por completo de la pantalla. Entre medio no cambia nada, para que no parpadee.
       const observador = new IntersectionObserver(
         (entradas) => {
           entradas.forEach((entrada) => {
-            if (entrada.isIntersecting) {
+            const muyAlto = entrada.intersectionRect.height >= window.innerHeight * 0.5
+            if (entrada.intersectionRatio >= 0.12 || muyAlto) {
               entrada.target.classList.add('is-visible')
-              observador.unobserve(entrada.target)
+            } else if (!entrada.isIntersecting) {
+              entrada.target.classList.remove('is-visible')
             }
           })
         },
-        { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+        { threshold: [0, 0.12], rootMargin: '0px 0px -6% 0px' },
       )
       document.querySelectorAll('.reveal').forEach((el) => observador.observe(el))
       limpiezas.push(() => {

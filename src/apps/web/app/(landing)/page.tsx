@@ -11,6 +11,7 @@ import { retraso } from '@/lib/landing/retraso'
 import { cn } from '@/lib/utils'
 import { FlechaDerecha } from '@/components/landing/flecha'
 import { IconoRol } from '@/components/landing/iconos-rol'
+import { PasosConScroll } from '@/components/landing/pasos-con-scroll'
 import { Revelado } from '@/components/landing/revelado'
 import { TicketRecorrido } from '@/components/landing/ticket-recorrido'
 
@@ -144,7 +145,7 @@ export default function Inicio() {
               <FlechaDerecha />
             </a>
           </div>
-          <ol className="pasos">
+          <PasosConScroll>
             <li className="pasos__item reveal" style={retraso(0)}>
               <h3>Preinscripción</h3>
               <p>
@@ -179,7 +180,7 @@ export default function Inicio() {
                 En todo momento puede ver en qué estado está su trámite y qué le falta.
               </p>
             </li>
-          </ol>
+          </PasosConScroll>
         </div>
       </section>
 
