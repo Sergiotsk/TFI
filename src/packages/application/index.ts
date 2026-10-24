@@ -103,6 +103,7 @@ export { ImportarInformeDePagosUseCase } from './casos-de-uso/importar-informe-d
 export type { FilaImportada, ResultadoDeImportacion } from './casos-de-uso/importar-informe-de-pagos'
 export { DecidirPagoExcepcionalUseCase } from './casos-de-uso/decidir-pago-excepcional'
 export { ListarBandejaUseCase } from './casos-de-uso/listar-bandeja'
+export { ListarCasosADecidirUseCase, type CasoADecidir } from './casos-de-uso/listar-casos-a-decidir'
 export type { EstadoDeBandeja } from './casos-de-uso/listar-bandeja'
 export { ListarCargasDeInformeUseCase } from './casos-de-uso/listar-cargas-de-informe'
 export type {
