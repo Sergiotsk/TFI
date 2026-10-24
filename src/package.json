@@ -8,14 +8,16 @@
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm -r typecheck && tsc -p scripts",
     "lint": "eslint .",
     "test": "vitest run --project unidad",
     "test:watch": "vitest --project unidad",
-    "test:contratos": "vitest run --project contratos --passWithNoTests"
+    "test:contratos": "vitest run --project contratos --passWithNoTests",
+    "migraciones:verificar": "node scripts/migraciones/verificar.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
+    "@types/node": "24.19.2",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.1",
     "eslint-plugin-import-x": "4.17.1",

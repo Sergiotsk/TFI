@@ -144,7 +144,7 @@ interface RegistroDePagos {
   existe(referencia: ReferenciaDePago): Promise<Pago | null>
   listarPorEstado(institucionId: string, estado: EstadoPago): Promise<Pago[]>
   registrarDecision(pagoId: string, decision: 'ACEPTAR' | 'RECHAZAR', decididaPor: string, comentario?: string)
-    : Promise<'ok' | 'conflicto'>
+    : Promise<{ tipo: 'REGISTRADA'; pago: Pago } | { tipo: 'CONFLICTO' }>
 }
 ```
 
@@ -170,7 +170,8 @@ data-model.md).
 - `NO_IMPUTAR` no modifica ninguna Postulación.
 - `registrarDecision(ACEPTAR)` con `SIN_CUPO` confirma aunque `ocupados >= total`.
 - `registrarDecision(RECHAZAR)` deja la Postulación en `VENCIDO` y el pago en `DEVUELTO`.
-- `registrarDecision` dos veces sobre el mismo pago: la segunda devuelve `conflicto`.
+- `registrarDecision` dos veces sobre el mismo pago: la segunda devuelve `CONFLICTO`.
+- `registrarDecision` en paralelo sobre el mismo pago: una sola devuelve `REGISTRADA`.
 
 ## RegistroDeCargas
 

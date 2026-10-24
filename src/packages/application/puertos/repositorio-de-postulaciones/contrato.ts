@@ -29,11 +29,9 @@ export interface EntornoDePostulaciones {
   sembrarPostulacion: (datos: DatosDePostulacionSembrada) => Promise<Postulacion>
 }
 
-let contador = 0
-
+// Al azar: con Date.now() + un contador, dos workers de vitest en el mismo milisegundo daban el mismo DNI.
 function dniUnico(): string {
-  contador += 1
-  return String(10_000_000 + ((Date.now() + contador) % 89_000_000))
+  return String(10_000_000 + Math.floor(Math.random() * 89_000_000))
 }
 
 function unDiaDespues(ahora: Date): Date {

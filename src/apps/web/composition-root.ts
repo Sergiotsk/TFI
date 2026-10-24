@@ -9,6 +9,9 @@ import {
   AlmacenDeArchivosSupabase,
   AccionesDeDocumentacionSupabase,
   AccionesDelPersonalSupabase,
+  RegistroDePagosSupabase,
+  RegistroDeCargasSupabase,
+  LectorDeInformeProvisorio,
   RelojDeSistema,
   GeneradorDeIdsCrypto,
   RepositorioDeIntencionesDePagoSupabase,
@@ -41,6 +44,12 @@ import {
   RevisarDocumentoUseCase,
   ActualizarDocumentoUseCase,
   EliminarDocumentoUseCase,
+  AcreditarPagoUseCase,
+  ImportarInformeDePagosUseCase,
+  ListarBandejaUseCase,
+  ListarCargasDeInformeUseCase,
+  DecidirPagoExcepcionalUseCase,
+  ListarCasosADecidirUseCase,
 } from '@tfi/application'
 import { IniciarPagoConPasarelaUseCase } from '@tfi/application'
 
@@ -58,6 +67,14 @@ export function crearDependencias(supabase: SupabaseClient) {
   const accionesDeDocumentacion = new AccionesDeDocumentacionSupabase(supabase)
   const reloj = new RelojDeSistema()
   const generadorDeIds = new GeneradorDeIdsCrypto()
+  const registroDePagos = new RegistroDePagosSupabase(supabase)
+  const registroDeCargas = new RegistroDeCargasSupabase(supabase)
+  const acreditarPago = new AcreditarPagoUseCase(
+    repoPostulaciones,
+    repoPeriodos,
+    repoPerfiles,
+    registroDePagos,
+  )
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let iniciarPagoConPasarela: any | undefined
@@ -124,6 +141,20 @@ export function crearDependencias(supabase: SupabaseClient) {
       accionesDelPersonal,
       reloj,
     ),
+    // Informe de pagos (US1). El lector es el del formato provisorio hasta que llegue el real (T04).
+    lectorDeInforme: new LectorDeInformeProvisorio(),
+    acreditarPago,
+    importarInformeDePagos: new ImportarInformeDePagosUseCase(registroDeCargas, acreditarPago),
+    listarBandeja: new ListarBandejaUseCase(registroDePagos),
+    listarCargasDeInforme: new ListarCargasDeInformeUseCase(registroDeCargas),
+    // Pagos excepcionales: los decide Dirección (US5).
+    listarCasosADecidir: new ListarCasosADecidirUseCase(
+      registroDePagos,
+      repoPostulaciones,
+      repoPeriodos,
+      repoPerfiles,
+    ),
+    decidirPagoExcepcional: new DecidirPagoExcepcionalUseCase(registroDePagos),
     actualizarPerfil: new ActualizarPerfilUseCase(repoPerfiles),
     actualizarPerfilPropio: new ActualizarPerfilPropioUseCase(repoPerfiles),
     listarDocumentos: new ListarDocumentosUseCase(

@@ -37,7 +37,7 @@ export {
 
 // Dominio de pagos: base para la importación del informe y las decisiones de Dirección.
 export { Monto } from './pago/monto'
-export { ReferenciaDePago, type ProveedorDePago } from './pago/referencia-de-pago'
+export { PROVEEDORES_DE_PAGO, ReferenciaDePago, type ProveedorDePago } from './pago/referencia-de-pago'
 export {
   Pago,
   ESTADOS_DE_PAGO,

@@ -2,7 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarRange, ClipboardList, Gavel, LogOut, Wallet, type LucideIcon } from 'lucide-react'
+import {
+  CalendarRange,
+  CircleAlert,
+  ClipboardList,
+  FileUp,
+  Gavel,
+  LogOut,
+  Undo2,
+  type LucideIcon,
+} from 'lucide-react'
 import { cerrarSesion } from '@/app/panel/actions'
 import {
   Sidebar,
@@ -13,26 +22,33 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { ETIQUETAS_DE_ROL, INSTITUCION } from '@/config/institucion'
-import { MENU_DE_ROL, type IconoDeMenu, type RolDelPersonal } from '@/config/paneles'
+import { MENU_DE_ROL, type IconoDeMenu, type ItemDeMenu, type RolDelPersonal } from '@/config/paneles'
 
 const ICONOS: Record<IconoDeMenu, LucideIcon> = {
   periodos: CalendarRange,
-  pagos: Wallet,
+  informes: FileUp,
+  'no-imputados': CircleAlert,
+  devoluciones: Undo2,
   casos: Gavel,
   postulaciones: ClipboardList,
 }
 
+export type ContadoresDeMenu = Partial<Record<NonNullable<ItemDeMenu['contador']>, number>>
+
 interface BarraLateralProps {
   rol: RolDelPersonal
   nombre: string
+  /** Pendientes de cada bandeja, para el número al lado del ítem. */
+  contadores?: ContadoresDeMenu
 }
 
-export function BarraLateral({ rol, nombre }: BarraLateralProps) {
+export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps) {
   const pathname = usePathname()
 
   return (
@@ -51,6 +67,7 @@ export function BarraLateral({ rol, nombre }: BarraLateralProps) {
             <SidebarMenu>
               {MENU_DE_ROL[rol].map((item) => {
                 const Icono = ICONOS[item.icono]
+                const pendientes = item.contador ? (contadores[item.contador] ?? 0) : 0
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
@@ -61,6 +78,9 @@ export function BarraLateral({ rol, nombre }: BarraLateralProps) {
                       <Icono />
                       <span>{item.etiqueta}</span>
                     </SidebarMenuButton>
+                    {pendientes > 0 ? (
+                      <SidebarMenuBadge aria-label={`${pendientes} pendientes`}>{pendientes}</SidebarMenuBadge>
+                    ) : null}
                   </SidebarMenuItem>
                 )
               })}

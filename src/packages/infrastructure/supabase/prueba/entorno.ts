@@ -1,13 +1,16 @@
-import { randomUUID } from 'node:crypto'
+import { randomInt, randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PeriodoDeIngreso, Postulacion } from '@tfi/domain'
 import type { DatosDePostulacionSembrada } from '@tfi/application'
-import type {
-  DatosDePeriodoDePrueba,
-  EntornoDeDocumentos,
-  EntornoDePostulaciones,
-  EntornoDePeriodos,
+import {
+  MATRICULA_DE_PRUEBA_CENTAVOS,
+  type DatosDePeriodoDePrueba,
+  type EntornoDeDocumentos,
+  type EntornoDePostulaciones,
+  type EntornoDePeriodos,
+  type EntornoDeRegistroDeCargas,
+  type EntornoDeRegistroDePagos,
 } from '@tfi/application/contratos'
 import {
   claveDeServicioDePrueba,
@@ -19,6 +22,8 @@ import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
 import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
 import { RepositorioDePeriodosSupabase } from '../repositorio-de-periodos'
+import { RegistroDeCargasSupabase } from '../registro-de-cargas'
+import { RegistroDePagosSupabase } from '../registro-de-pagos'
 import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulaciones'
 
 /**
@@ -32,18 +37,16 @@ import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulacio
 
 const UN_DIA = 24 * 60 * 60 * 1000
 
-let contador = 0
+// Al azar y no con Date.now() + un contador: vitest corre cada archivo en su propio worker, cada uno con su
+// contador desde 0, y dos workers en el mismo milisegundo generaban el mismo código o DNI.
 
+/** 12 caracteres hex: entra en `instituciones.codigo` (VARCHAR(20)) con el prefijo `PRUEBA-`. */
 function marcaUnica(): string {
-  contador += 1
-  return `${Date.now().toString(36)}${contador.toString(36)}`
+  return randomUUID().replace(/-/g, '').slice(0, 12)
 }
 
-let contadorDni = 0
-
 function dniUnico(): string {
-  contadorDni += 1
-  return String(10_000_000 + ((Date.now() + contadorDni * 7919) % 89_000_000))
+  return String(randomInt(10_000_000, 99_000_000))
 }
 
 export function clienteDeServicio(): SupabaseClient {
@@ -286,5 +289,106 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
     aspiranteId: aspirante.id,
     delPersonal: new RepositorioDeDocumentosSupabase(await clienteConSesion(personal.email)),
     personalId: personal.id,
+  }
+}
+
+interface PersonalConSesion {
+  id: string
+  cliente: SupabaseClient
+}
+
+let personalDePagosDeLaCorrida:
+  | Promise<{ institucionId: string; tesoreria: PersonalConSesion; direccion: PersonalConSesion }>
+  | undefined
+
+/**
+ * Tesorería y Dirección con su sesión, una vez por corrida, en una institución de
+ * prueba propia: así los pagos, las cargas y los casos de los contratos no
+ * aparecen en los paneles de FRH.
+ */
+function personalDePagosConSesion(
+  servicio: SupabaseClient,
+): Promise<{ institucionId: string; tesoreria: PersonalConSesion; direccion: PersonalConSesion }> {
+  personalDePagosDeLaCorrida ??= (async () => {
+    const institucionId = await crearInstitucionInactiva(servicio)
+
+    const conRol = async (rol: 'TESORERIA' | 'DIRECCION'): Promise<PersonalConSesion> => {
+      const usuario = await crearUsuario(servicio, dniUnico())
+      const { error } = await servicio
+        .from('perfiles')
+        .update({ rol, institucion_id: institucionId })
+        .eq('id', usuario.id)
+      if (error) throw new Error(`No se pudo dar el rol ${rol}: ${error.message}`)
+
+      return { id: usuario.id, cliente: await clienteConSesion(usuario.email) }
+    }
+
+    return { institucionId, tesoreria: await conRol('TESORERIA'), direccion: await conRol('DIRECCION') }
+  })()
+
+  return personalDePagosDeLaCorrida
+}
+
+/**
+ * Entorno del contrato de `RegistroDePagos`: el adaptador usa la sesión de
+ * Tesorería para acreditar y la de Dirección para decidir, así pasa por la
+ * verificación de rol e institución de cada RPC.
+ * Todo se siembra en la institución de prueba de la Tesorería, y los períodos
+ * ya cerrados (la RPC no mira el cierre).
+ */
+export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegistroDePagos> {
+  const servicio = clienteDeServicio()
+  const { institucionId, tesoreria, direccion } = await personalDePagosConSesion(servicio)
+  const periodos = new RepositorioDePeriodosSupabase(servicio)
+  const cargas = new RegistroDeCargasSupabase(tesoreria.cliente)
+
+  return {
+    registro: new RegistroDePagosSupabase(tesoreria.cliente),
+    registroDeDireccion: new RegistroDePagosSupabase(direccion.cliente),
+    direccionId: direccion.id,
+    institucionId,
+    ahora: () => new Date(),
+    sembrar: async (datos) => {
+      const periodoId =
+        datos.periodoId ??
+        (
+          await crearPeriodo(servicio, institucionId, {
+            totalCupos: datos.totalCupos ?? 10,
+            cierraEl: new Date(Date.now() - UN_DIA),
+            montoMatriculaCentavos: MATRICULA_DE_PRUEBA_CENTAVOS,
+          })
+        ).id
+      const aspiranteId = await crearAspirante(servicio, dniUnico())
+      const postulacion = await sembrarPostulacion(servicio, {
+        aspiranteId,
+        periodoId,
+        estado: datos.estado,
+        venceEl: datos.venceEl,
+      })
+
+      return { postulacionId: postulacion.id, periodoId }
+    },
+    sembrarCarga: async () => (await cargas.iniciar(institucionId, tesoreria.id, 'contrato.csv')).id,
+    estadoDe: async (postulacionId) => {
+      const { data, error } = await servicio
+        .from('postulaciones')
+        .select('*')
+        .eq('id', postulacionId)
+        .single()
+      if (error) throw new Error(`No se pudo leer la Postulación: ${error.message}`)
+      return mapearPostulacion(data).estado
+    },
+    contarOcupados: (periodoId) => periodos.contarOcupados(periodoId),
+  }
+}
+
+/** Entorno del contrato de `RegistroDeCargas`, con la sesión de Tesorería. */
+export async function prepararEntornoDeRegistroDeCargas(): Promise<EntornoDeRegistroDeCargas> {
+  const { institucionId, tesoreria } = await personalDePagosConSesion(clienteDeServicio())
+
+  return {
+    cargas: new RegistroDeCargasSupabase(tesoreria.cliente),
+    institucionId,
+    cargadaPor: tesoreria.id,
   }
 }

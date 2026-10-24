@@ -2,6 +2,7 @@
 # - typecheck: tsc estricto en todos los paquetes.
 # - lint: ESLint, que incluye la regla de límites entre capas (Principio I) y prohíbe `any` (Principio IV).
 # - test: Vitest, proyecto `unidad` (sin red ni base).
+# - migraciones: en los PRs, que las migraciones no editen las ya mergeadas ni queden antes de la última de la base.
 # El ruleset de `develop` exige que el job "Calidad" pase para poder mergear.
 name: CI
 
@@ -44,3 +45,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+
+      # El checkout de un PR es el merge con su base: se verifica lo que va a quedar al mergear.
+      # La integración de Supabase aplica las migraciones al mergear a develop, y una versión repetida
+      # o fuera de orden no se aplica (ADR 0004).
+      - name: Verificar migraciones contra la base del PR
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          pnpm migraciones:verificar "origin/$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
