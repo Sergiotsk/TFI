@@ -39,7 +39,10 @@ export async function POST(request: Request) {
     const supabase = crearClienteServiceRole()
     const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase as any)
     const repoPeriodos = new RepositorioDePeriodosSupabase(supabase as any)
-    const accionesDelPersonal = new AccionesDelPersonalSupabase(supabase as any, repoPostulaciones)
+    const accionesDelPersonal: any = new AccionesDelPersonalSupabase(supabase as any, repoPostulaciones)
+    if (typeof accionesDelPersonal.acreditarPagoPorWebhook === 'function') {
+      accionesDelPersonal.confirmarVacante = accionesDelPersonal.acreditarPagoPorWebhook.bind(accionesDelPersonal)
+    }
     const reloj = new RelojDeSistema()
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
     const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase as any)

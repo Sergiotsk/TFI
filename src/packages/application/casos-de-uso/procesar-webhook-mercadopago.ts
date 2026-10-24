@@ -77,15 +77,13 @@ export class ProcesarWebhookMercadoPagoUseCase {
     }
 
     const ahora = this.reloj.ahora()
-    const result = await (this.accionesDelPersonal as any).acreditarPago({
-      postulacionId: intencion.postulacionId,
-      monto: { centavos: intencion.montoCentavos },
-      pagadoEl: datos.dateApproved ?? ahora,
-      referencia: `MP-${params.paymentId}`,
-      proveedor: 'MERCADOPAGO',
-    })
+    let acreditado = false
+    try {
+      const result = await (this.accionesDelPersonal as any).confirmarVacante(intencion.postulacionId)
+      acreditado = result?.resultado === 'OK'
+    } catch {}
 
-    if (result.tipo === 'ACREDITADO') {
+    if (acreditado) {
       try {
         await this.intenciones.marcarCompletada({
           externalId: externalReference,
