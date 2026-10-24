@@ -28,7 +28,7 @@ export interface ItemDeMenu {
   etiqueta: string
   icono: IconoDeMenu
   /** Bandeja de pagos cuyo total de pendientes se muestra al lado del ítem. */
-  contador?: 'NO_IMPUTADO' | 'DEVUELTO'
+  contador?: 'A_DECIDIR' | 'NO_IMPUTADO' | 'DEVUELTO'
 }
 
 const PERIODOS: ItemDeMenu = { href: '/personal/periodos', etiqueta: 'Períodos', icono: 'periodos' }
@@ -52,7 +52,12 @@ const POSTULACIONES: ItemDeMenu = {
   etiqueta: 'Postulaciones',
   icono: 'postulaciones',
 }
-const CASOS: ItemDeMenu = { href: '/direccion/casos', etiqueta: 'Casos a decidir', icono: 'casos' }
+const CASOS: ItemDeMenu = {
+  href: '/direccion/casos',
+  etiqueta: 'Casos a decidir',
+  icono: 'casos',
+  contador: 'A_DECIDIR',
+}
 
 // La barra lateral es del personal: trabaja en varias áreas y va y viene entre ellas. El aspirante no tiene menú,
 // porque su panel es un recorrido lineal (inscripción, pago, documentación, estado).

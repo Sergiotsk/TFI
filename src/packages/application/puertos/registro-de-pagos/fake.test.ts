@@ -20,6 +20,8 @@ probarContratoDeRegistroDePagos(() => {
 
   return {
     registro,
+    registroDeDireccion: registro,
+    direccionId: 'direccion-1',
     institucionId: INSTITUCION,
     ahora: () => AHORA,
     sembrar: async (datos) => {

@@ -1,18 +1,25 @@
 import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { RegistroDePagos, ResultadoDeAcreditacion } from '@tfi/application'
+import type { RegistroDePagos, ResultadoDeAcreditacion, ResultadoDeDecision } from '@tfi/application'
 import type {
   DecisionDeAcreditacion,
   EstadoDePago,
   Pago,
   PagoInformado,
   ReferenciaDePago,
+  ResolucionDeDireccion,
 } from '@tfi/domain'
 import { COLUMNAS_DE_PAGO, mapearPago } from './mapeadores/pago'
 
 const esquemaRespuesta = z.discriminatedUnion('resultado', [
   z.object({ resultado: z.literal('REGISTRADO'), pago: z.unknown() }),
   z.object({ resultado: z.literal('DUPLICADO'), pago: z.unknown() }),
+  z.object({ resultado: z.literal('CONFLICTO') }),
+  z.object({ resultado: z.literal('NO_AUTORIZADO') }),
+])
+
+const esquemaRespuestaDeDecision = z.discriminatedUnion('resultado', [
+  z.object({ resultado: z.literal('REGISTRADA'), pago: z.unknown() }),
   z.object({ resultado: z.literal('CONFLICTO') }),
   z.object({ resultado: z.literal('NO_AUTORIZADO') }),
 ])
@@ -24,6 +31,9 @@ const esquemaRespuesta = z.discriminatedUnion('resultado', [
  * idempotente, toma el lock del período y verifica las precondiciones que
  * asumió el dominio. Se usa con la sesión de Tesorería (la RPC verifica el rol
  * y la institución adentro).
+ *
+ * `registrarDecision` es la RPC `decidir_pago_excepcional`, con la sesión de
+ * Dirección: `decidida_por` lo toma de la sesión, no del parámetro.
  */
 export class RegistroDePagosSupabase implements RegistroDePagos {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -62,6 +72,33 @@ export class RegistroDePagosSupabase implements RegistroDePagos {
         return { tipo: 'CONFLICTO' }
       case 'NO_AUTORIZADO':
         throw new Error('La base rechazó la acreditación: el usuario no es de Tesorería de esta institución')
+    }
+  }
+
+  async registrarDecision(
+    pagoId: string,
+    decision: ResolucionDeDireccion,
+    _decididaPor: string,
+    comentario?: string,
+  ): Promise<ResultadoDeDecision> {
+    const { data, error } = await this.supabase.rpc('decidir_pago_excepcional', {
+      p_pago_id: pagoId,
+      p_decision: decision,
+      p_comentario: comentario ?? null,
+    })
+
+    if (error) {
+      throw new Error(`No se pudo registrar la decisión: ${error.message}`)
+    }
+
+    const respuesta = esquemaRespuestaDeDecision.parse(data)
+    switch (respuesta.resultado) {
+      case 'REGISTRADA':
+        return { tipo: 'REGISTRADA', pago: mapearPago(respuesta.pago) }
+      case 'CONFLICTO':
+        return { tipo: 'CONFLICTO' }
+      case 'NO_AUTORIZADO':
+        throw new Error('La base rechazó la decisión: el usuario no es de Dirección de esta institución')
     }
   }
 

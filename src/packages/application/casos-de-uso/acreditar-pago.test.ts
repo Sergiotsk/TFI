@@ -211,6 +211,7 @@ describe('AcreditarPago', () => {
       registro: (real) => ({
         existe: (referencia) => real.existe(referencia),
         listarPorEstado: (institucion, estado) => real.listarPorEstado(institucion, estado),
+        registrarDecision: (...args) => real.registrarDecision(...args),
         registrarAcreditacion: async (informado, decision, cargaId) => {
           // Justo antes de escribir, otro aspirante se queda con el último cupo.
           otro?.()
@@ -235,6 +236,7 @@ describe('AcreditarPago', () => {
       registro: (real) => ({
         existe: (referencia) => real.existe(referencia),
         listarPorEstado: (institucion, estado) => real.listarPorEstado(institucion, estado),
+        registrarDecision: (...args) => real.registrarDecision(...args),
         registrarAcreditacion: async () => {
           intentos += 1
           return { tipo: 'CONFLICTO' }

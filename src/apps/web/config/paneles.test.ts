@@ -57,6 +57,12 @@ describe('MENU_DE_ROL', () => {
     expect(contadores).toContainEqual(['/personal/pagos/devoluciones', 'DEVUELTO'])
   })
 
+  test('los casos de Dirección muestran cuántos quedan por decidir', () => {
+    const contadores = MENU_DE_ROL.DIRECCION.map((item) => [item.href, item.contador])
+
+    expect(contadores).toContainEqual(['/direccion/casos', 'A_DECIDIR'])
+  })
+
   test('el aspirante no tiene menú: su panel es un recorrido lineal, sin barra lateral', () => {
     expect(Object.keys(MENU_DE_ROL)).not.toContain('ASPIRANTE')
   })
