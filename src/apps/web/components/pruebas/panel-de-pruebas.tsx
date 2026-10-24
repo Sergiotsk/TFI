@@ -1306,6 +1306,53 @@ export function PanelDePruebas() {
               >
                 POST /:id/iniciar-pago
               </Button>
+              <Button
+                disabled={deshabilitado || postulacionId.trim() === ''}
+                onClick={async () => {
+                  setOcupado(true)
+                  setMensaje(null)
+                  try {
+                    const respuesta = await fetch('/api/pagos/iniciar', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ postulacionId: postulacionId.trim() }),
+                    })
+                    const json: unknown = await interpretarJson(await respuesta.text())
+
+                    secuencia.current += 1
+                    setHistorial((previas) => [
+                      {
+                        id: secuencia.current,
+                        hora: new Date().toLocaleTimeString('es-AR'),
+                        metodo: 'POST',
+                        url: '/api/pagos/iniciar',
+                        status: respuesta.status,
+                        cuerpo: json,
+                      },
+                      ...previas,
+                    ])
+
+                    const datos = esObjeto(json) ? (json as Record<string, unknown>).data : undefined
+                    const initPoint =
+                      esObjeto(datos) && typeof (datos as Record<string, unknown>).initPoint === 'string'
+                        ? ((datos as Record<string, unknown>).initPoint as string)
+                        : esObjeto(datos) && typeof (datos as Record<string, unknown>).init_point === 'string'
+                          ? ((datos as Record<string, unknown>).init_point as string)
+                          : undefined
+
+                    if (respuesta.ok && initPoint) {
+                      window.location.href = initPoint
+                      return
+                    }
+
+                    setMensaje(mensajeDeError(json) ?? 'No se pudo iniciar el pago con Mercado Pago')
+                  } finally {
+                    setOcupado(false)
+                  }
+                }}
+              >
+                Pagar con Mercado Pago
+              </Button>
             </div>
           </div>
 

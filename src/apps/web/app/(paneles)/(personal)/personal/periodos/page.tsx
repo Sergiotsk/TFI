@@ -3,6 +3,7 @@ import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { formatearFecha, formatearMontoEnCentavos } from '@/components/panel/formato'
 import { cn } from '@/lib/utils'
 import { conActorDePanel } from '../../../sesion-de-panel'
+import type { PeriodoDeIngreso } from '@tfi/domain'
 
 // Períodos reales (ListarPeriodosTodos) con su ocupación (ConsultarOcupacion).
 // Alta y edición siguen pendientes: las migraciones las restringen a Dirección y falta definir el formulario.
@@ -11,7 +12,7 @@ export default async function PeriodosPage() {
     const pagina = await listarPeriodosTodos.ejecutar(actor, { pagina: 1, porPagina: 100 })
 
     return Promise.all(
-      pagina.items.map(async (periodo) => ({
+      pagina.items.map(async (periodo: PeriodoDeIngreso) => ({
         periodo,
         ocupacion: await consultarOcupacion.ejecutar(actor, periodo.id),
       })),
