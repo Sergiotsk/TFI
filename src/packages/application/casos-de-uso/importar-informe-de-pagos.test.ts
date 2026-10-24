@@ -92,6 +92,7 @@ describe('ImportarInformeDePagos', () => {
     const { caso, sembrar } = await armarMundo((real) => ({
       existe: (referencia) => real.existe(referencia),
       listarPorEstado: (institucion, estado) => real.listarPorEstado(institucion, estado),
+      registrarDecision: (...args) => real.registrarDecision(...args),
       registrarAcreditacion: async (informado, decision, cargaId) =>
         informado.referencia.referenciaExterna === 'r-1'
           ? { tipo: 'CONFLICTO' }

@@ -1,26 +1,30 @@
 import {
+  DecisionDeDireccion,
   Pago,
   type DecisionDeAcreditacion,
   type EstadoDePago,
   type PagoInformado,
   type ReferenciaDePago,
+  type ResolucionDeDireccion,
 } from '@tfi/domain'
 import type { RegistroDeCargasFake } from '../registro-de-cargas/fake'
 import type { Reloj } from '../reloj/puerto'
 import type { RepositorioDePeriodos } from '../repositorio-de-periodos/puerto'
 import type { RepositorioDePostulaciones } from '../repositorio-de-postulaciones/puerto'
-import type { RegistroDePagos, ResultadoDeAcreditacion } from './puerto'
+import type { RegistroDePagos, ResultadoDeAcreditacion, ResultadoDeDecision } from './puerto'
 
 /**
  * Registro de pagos en memoria.
  *
- * Reproduce las garantías de la RPC `acreditar_pago`: idempotencia por
- * referencia, precondición sobre el estado persistido y cupo al confirmar. Las
- * acreditaciones pasan de a una por una cola, que hace de lock del período: dos
- * confirmaciones simultáneas por el último cupo no pueden pasar las dos.
+ * Reproduce las garantías de las RPC `acreditar_pago` y `decidir_pago_excepcional`:
+ * idempotencia por referencia, precondición sobre el estado persistido, cupo al
+ * confirmar y una sola decisión por pago. Las escrituras pasan de a una por una
+ * cola, que hace de lock: dos confirmaciones simultáneas por el último cupo, o dos
+ * decisiones sobre el mismo pago, no pueden pasar las dos.
  */
 export class RegistroDePagosFake implements RegistroDePagos {
   private readonly pagos = new Map<string, Pago>()
+  private readonly decisiones: DecisionDeDireccion[] = []
   private cola: Promise<unknown> = Promise.resolve()
   private siguiente = 1
 
@@ -36,9 +40,21 @@ export class RegistroDePagosFake implements RegistroDePagos {
     decision: DecisionDeAcreditacion,
     cargaId?: string,
   ): Promise<ResultadoDeAcreditacion> {
-    const turno = this.cola.then(() => this.acreditar(pago, decision, cargaId))
-    this.cola = turno.catch(() => undefined)
-    return turno
+    return this.enTurno(() => this.acreditar(pago, decision, cargaId))
+  }
+
+  registrarDecision(
+    pagoId: string,
+    decision: ResolucionDeDireccion,
+    decididaPor: string,
+    comentario?: string,
+  ): Promise<ResultadoDeDecision> {
+    return this.enTurno(() => this.decidir(pagoId, decision, decididaPor, comentario))
+  }
+
+  /** Decisiones registradas, para que los tests verifiquen la trazabilidad. */
+  decisionesRegistradas(): readonly DecisionDeDireccion[] {
+    return this.decisiones
   }
 
   async existe(referencia: ReferenciaDePago): Promise<Pago | null> {
@@ -52,6 +68,40 @@ export class RegistroDePagosFake implements RegistroDePagos {
       if ((await this.institucionDe(pago)) === institucionId) encontrados.push(pago)
     }
     return encontrados
+  }
+
+  private enTurno<T>(operacion: () => Promise<T>): Promise<T> {
+    const turno = this.cola.then(operacion)
+    this.cola = turno.catch(() => undefined)
+    return turno
+  }
+
+  private async decidir(
+    pagoId: string,
+    decision: ResolucionDeDireccion,
+    decididaPor: string,
+    comentario?: string,
+  ): Promise<ResultadoDeDecision> {
+    const pago = [...this.pagos.values()].find((p) => p.id === pagoId)
+    if (!pago || pago.estado !== 'A_DECIDIR' || pago.postulacionId === undefined) return { tipo: 'CONFLICTO' }
+
+    const postulacion = await this.postulaciones.obtenerPorId(pago.postulacionId)
+    if (!postulacion || postulacion.estado !== 'PAGO_EN_REVISION') return { tipo: 'CONFLICTO' }
+
+    const ahora = this.reloj.ahora()
+    // ACEPTAR no mira el cupo: la decisión de Dirección autoriza el exceso (FR-005).
+    const decidida =
+      decision === 'ACEPTAR' ? postulacion.aceptarExcepcion(ahora) : postulacion.rechazarExcepcion(ahora)
+    if ((await this.postulaciones.guardarTransicion(postulacion, decidida)) === 'conflicto') {
+      return { tipo: 'CONFLICTO' }
+    }
+
+    const actualizado = decision === 'ACEPTAR' ? pago.aceptar() : pago.devolver()
+    this.pagos.set(clave(pago.referencia), actualizado)
+    this.decisiones.push(
+      new DecisionDeDireccion(`decision-${this.decisiones.length + 1}`, pagoId, decision, decididaPor, ahora, comentario),
+    )
+    return { tipo: 'REGISTRADA', pago: actualizado }
   }
 
   private async acreditar(
