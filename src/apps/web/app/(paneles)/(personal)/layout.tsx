@@ -23,15 +23,18 @@ export default async function LayoutDelPersonal({ children }: { children: ReactN
     redirect(PANEL_DE_ROL[perfil.rol])
   }
 
-  // Pendientes de las bandejas de pagos, para el número al lado de cada ítem. Solo Tesorería y Secretaría las ven.
+  // Pendientes de las bandejas de pagos, para el número al lado de cada ítem: Tesorería y Secretaría ven los no
+  // imputados y las devoluciones; Dirección, los casos a decidir.
   let contadores: ContadoresDeMenu = {}
+  const actor = { perfilId: perfil.id, rol: perfil.rol, institucionId: perfil.institucionId }
   if (perfil.rol === 'TESORERIA' || perfil.rol === 'SECRETARIA') {
-    const actor = { perfilId: perfil.id, rol: perfil.rol, institucionId: perfil.institucionId }
     const [noImputados, devueltos] = await Promise.all([
       listarBandeja.ejecutar(actor, 'NO_IMPUTADO'),
       listarBandeja.ejecutar(actor, 'DEVUELTO'),
     ])
     contadores = { NO_IMPUTADO: noImputados.length, DEVUELTO: devueltos.length }
+  } else if (perfil.rol === 'DIRECCION') {
+    contadores = { A_DECIDIR: (await listarBandeja.ejecutar(actor, 'A_DECIDIR')).length }
   }
 
   // shadcn guarda en esta cookie si la barra quedó abierta o colapsada.

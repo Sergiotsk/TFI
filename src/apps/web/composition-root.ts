@@ -46,6 +46,8 @@ import {
   ImportarInformeDePagosUseCase,
   ListarBandejaUseCase,
   ListarCargasDeInformeUseCase,
+  DecidirPagoExcepcionalUseCase,
+  ListarCasosADecidirUseCase,
 } from '@tfi/application'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
@@ -114,6 +116,14 @@ export function crearDependencias(supabase: SupabaseClient) {
     importarInformeDePagos: new ImportarInformeDePagosUseCase(registroDeCargas, acreditarPago),
     listarBandeja: new ListarBandejaUseCase(registroDePagos),
     listarCargasDeInforme: new ListarCargasDeInformeUseCase(registroDeCargas),
+    // Pagos excepcionales: los decide Dirección (US5).
+    listarCasosADecidir: new ListarCasosADecidirUseCase(
+      registroDePagos,
+      repoPostulaciones,
+      repoPeriodos,
+      repoPerfiles,
+    ),
+    decidirPagoExcepcional: new DecidirPagoExcepcionalUseCase(registroDePagos),
     actualizarPerfil: new ActualizarPerfilUseCase(repoPerfiles),
     actualizarPerfilPropio: new ActualizarPerfilPropioUseCase(repoPerfiles),
     listarDocumentos: new ListarDocumentosUseCase(

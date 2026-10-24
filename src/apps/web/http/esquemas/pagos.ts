@@ -36,3 +36,13 @@ export const esquemaAcreditaciones = z.object({
 export const esquemaEstadoDeBandeja = z.enum(['A_DECIDIR', 'NO_IMPUTADO', 'DEVUELTO'], {
   message: 'El estado tiene que ser A_DECIDIR, NO_IMPUTADO o DEVUELTO',
 })
+
+/** `POST /api/pagos/:id/decision` (US5) */
+export const esquemaParametrosDePago = z.object({
+  id: z.string().uuid('El id del pago no es válido'),
+})
+
+export const esquemaDecision = z.object({
+  decision: z.enum(['ACEPTAR', 'RECHAZAR'], { message: 'La decisión tiene que ser ACEPTAR o RECHAZAR' }),
+  comentario: z.string().trim().max(500, 'El comentario no puede superar los 500 caracteres').optional(),
+})
