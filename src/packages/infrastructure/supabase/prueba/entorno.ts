@@ -292,48 +292,60 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
   }
 }
 
-let tesoreriaDeLaCorrida:
-  | Promise<{ id: string; institucionId: string; cliente: SupabaseClient }>
+interface PersonalConSesion {
+  id: string
+  cliente: SupabaseClient
+}
+
+let personalDePagosDeLaCorrida:
+  | Promise<{ institucionId: string; tesoreria: PersonalConSesion; direccion: PersonalConSesion }>
   | undefined
 
 /**
- * Un usuario de Tesorería con su sesión, uno por corrida, en una institución de
- * prueba propia: así los pagos y las cargas de los contratos no aparecen en el
- * panel de Tesorería de FRH.
+ * Tesorería y Dirección con su sesión, una vez por corrida, en una institución de
+ * prueba propia: así los pagos, las cargas y los casos de los contratos no
+ * aparecen en los paneles de FRH.
  */
-function tesoreriaConSesion(
+function personalDePagosConSesion(
   servicio: SupabaseClient,
-): Promise<{ id: string; institucionId: string; cliente: SupabaseClient }> {
-  tesoreriaDeLaCorrida ??= (async () => {
+): Promise<{ institucionId: string; tesoreria: PersonalConSesion; direccion: PersonalConSesion }> {
+  personalDePagosDeLaCorrida ??= (async () => {
     const institucionId = await crearInstitucionInactiva(servicio)
-    const usuario = await crearUsuario(servicio, dniUnico())
-    const { error } = await servicio
-      .from('perfiles')
-      .update({ rol: 'TESORERIA', institucion_id: institucionId })
-      .eq('id', usuario.id)
-    if (error) throw new Error(`No se pudo dar el rol de Tesorería: ${error.message}`)
 
-    return { id: usuario.id, institucionId, cliente: await clienteConSesion(usuario.email) }
+    const conRol = async (rol: 'TESORERIA' | 'DIRECCION'): Promise<PersonalConSesion> => {
+      const usuario = await crearUsuario(servicio, dniUnico())
+      const { error } = await servicio
+        .from('perfiles')
+        .update({ rol, institucion_id: institucionId })
+        .eq('id', usuario.id)
+      if (error) throw new Error(`No se pudo dar el rol ${rol}: ${error.message}`)
+
+      return { id: usuario.id, cliente: await clienteConSesion(usuario.email) }
+    }
+
+    return { institucionId, tesoreria: await conRol('TESORERIA'), direccion: await conRol('DIRECCION') }
   })()
 
-  return tesoreriaDeLaCorrida
+  return personalDePagosDeLaCorrida
 }
 
 /**
  * Entorno del contrato de `RegistroDePagos`: el adaptador usa la sesión de
- * Tesorería, así pasa por la verificación de rol e institución de la RPC.
+ * Tesorería para acreditar y la de Dirección para decidir, así pasa por la
+ * verificación de rol e institución de cada RPC.
  * Todo se siembra en la institución de prueba de la Tesorería, y los períodos
  * ya cerrados (la RPC no mira el cierre).
  */
 export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegistroDePagos> {
   const servicio = clienteDeServicio()
-  const tesoreria = await tesoreriaConSesion(servicio)
-  const { institucionId } = tesoreria
+  const { institucionId, tesoreria, direccion } = await personalDePagosConSesion(servicio)
   const periodos = new RepositorioDePeriodosSupabase(servicio)
   const cargas = new RegistroDeCargasSupabase(tesoreria.cliente)
 
   return {
     registro: new RegistroDePagosSupabase(tesoreria.cliente),
+    registroDeDireccion: new RegistroDePagosSupabase(direccion.cliente),
+    direccionId: direccion.id,
     institucionId,
     ahora: () => new Date(),
     sembrar: async (datos) => {
@@ -372,11 +384,11 @@ export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegis
 
 /** Entorno del contrato de `RegistroDeCargas`, con la sesión de Tesorería. */
 export async function prepararEntornoDeRegistroDeCargas(): Promise<EntornoDeRegistroDeCargas> {
-  const tesoreria = await tesoreriaConSesion(clienteDeServicio())
+  const { institucionId, tesoreria } = await personalDePagosConSesion(clienteDeServicio())
 
   return {
     cargas: new RegistroDeCargasSupabase(tesoreria.cliente),
-    institucionId: tesoreria.institucionId,
+    institucionId,
     cargadaPor: tesoreria.id,
   }
 }
