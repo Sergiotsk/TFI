@@ -1,24 +1,24 @@
 ﻿import type { SupabaseClient } from '@supabase/supabase-js'
-import type { CrearIntencionDePago, IntencionDePago, RepositorioDeIntencionesDePago } from '@tfi/application/puertos/repositorio-de-intenciones-de-pago/puerto'
+import type { CrearIntencionDePago, IntencionDePago, RepositorioDeIntencionesDePago } from '@tfi/application'
 
 function mapear(row: Record<string, unknown>): IntencionDePago {
   return {
-    id: row.id,
-    postulacionId: row.postulacion_id,
-    periodoId: row.periodo_id,
-    institucionId: row.institucion_id,
+    id: row.id as string,
+    postulacionId: row.postulacion_id as string,
+    periodoId: row.periodo_id as string,
+    institucionId: row.institucion_id as string,
     montoCentavos: Number(row.monto_centavos),
-    externalId: row.external_id,
-    preferenceId: row.preference_id,
-    initPoint: row.init_point,
-    sandboxInitPoint: row.sandbox_init_point,
-    estado: row.estado,
-    paymentIdMp: row.payment_id_mp,
-    webhookEventId: row.webhook_event_id,
-    pagadoEl: row.pagado_el ? new Date(row.pagado_el) : null,
-    creadoEl: new Date(row.creado_el),
-    actualizadoEl: new Date(row.actualizado_el),
-    expiraEl: row.expira_el ? new Date(row.expira_el) : null,
+    externalId: row.external_id as string,
+    preferenceId: (row.preference_id as string | null) ?? null,
+    initPoint: (row.init_point as string | null) ?? null,
+    sandboxInitPoint: (row.sandbox_init_point as string | null) ?? null,
+    estado: row.estado as IntencionDePago['estado'],
+    paymentIdMp: (row.payment_id_mp as string | null) ?? null,
+    webhookEventId: (row.webhook_event_id as string | null) ?? null,
+    pagadoEl: row.pagado_el ? new Date(row.pagado_el as string) : null,
+    creadoEl: new Date(row.creado_el as string),
+    actualizadoEl: new Date(row.actualizado_el as string),
+    expiraEl: row.expira_el ? new Date(row.expira_el as string) : null,
   }
 }
 

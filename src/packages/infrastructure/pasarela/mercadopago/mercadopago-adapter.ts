@@ -3,7 +3,7 @@
   PasarelaDePago,
   PreferenciaCreada,
   PreferenciaPago,
-} from '@tfi/application/puertos/pasarela-de-pago/puerto'
+} from '@tfi/application'
 
 export interface ConfiguracionMercadoPago {
   accessToken: string
@@ -78,7 +78,7 @@ export class MercadoPagoAdapter implements PasarelaDePago {
     const payer = data.payer && typeof data.payer === 'object' ? (data.payer as Record<string, unknown>) : undefined
     return {
       paymentId: String(data.id),
-      status: data.status as string,
+      status: (typeof data.status === 'string' ? data.status : 'pending') as DatosPagoPasarela['status'],
       statusDetail: typeof data.status_detail === 'string' ? data.status_detail : undefined,
       externalReference: typeof data.external_reference === 'string' ? data.external_reference : undefined,
       transactionAmountCentavos:

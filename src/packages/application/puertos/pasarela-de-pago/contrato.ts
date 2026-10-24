@@ -11,7 +11,7 @@ export function probarContratoDePasarelaDePago(
         externalId: 'int_test_1',
         postulacionId: 'post_test_1',
         titulo: 'Matrícula TUP',
-        monto: { centavos: 5000000 } as { centavos: number },
+        monto: { centavos: 5000000 } as any,
         backUrls: {
           success: 'http://localhost:3000/pagos/retorno?status=success',
           pending: 'http://localhost:3000/pagos/retorno?status=pending',
