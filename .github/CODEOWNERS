@@ -8,10 +8,7 @@
 /src/eslint.config.mjs            @Sergiotsk
 /src/**/tsconfig*.json            @Sergiotsk
 /src/vitest.config.ts             @Sergiotsk
-/src/package.json                 @Sergiotsk
 /src/scripts/migraciones/         @Sergiotsk
 
-# Reglas del proyecto y de los agentes
-/.specify/memory/constitution.md  @Sergiotsk
-/CONTRIBUTING.md                  @Sergiotsk
+# Lo que les impide a los agentes tocar lo de arriba
 /.claude/settings.json            @Sergiotsk

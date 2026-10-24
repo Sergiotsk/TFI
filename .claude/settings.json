@@ -11,8 +11,6 @@
       "Write(/src/vitest.config.ts)",
       "Edit(/src/scripts/migraciones/**)",
       "Write(/src/scripts/migraciones/**)",
-      "Edit(/.specify/memory/constitution.md)",
-      "Write(/.specify/memory/constitution.md)",
       "Edit(/.claude/settings.json)",
       "Write(/.claude/settings.json)",
       "Bash(gh pr merge * --admin*)",
