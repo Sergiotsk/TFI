@@ -20,7 +20,7 @@ export default async function LayoutDelAspirante({ children }: { children: React
   }
   // Ubica a cada uno en su panel; no autoriza nada (cada caso de uso exige su rol).
   if (perfil.rol !== 'ASPIRANTE') {
-    redirect(PANEL_DE_ROL[perfil.rol])
+    redirect(PANEL_DE_ROL[perfil.rol as keyof typeof PANEL_DE_ROL])
   }
 
   return (

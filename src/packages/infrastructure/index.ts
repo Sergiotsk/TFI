@@ -13,3 +13,5 @@ export { GeneradorDeIdsCrypto } from './generador-de-ids/generador-de-ids-crypto
 export { RegistroDePagosSupabase } from './supabase/registro-de-pagos'
 export { RegistroDeCargasSupabase } from './supabase/registro-de-cargas'
 export { LectorDeInformeProvisorio } from './informe-de-pagos/lector-provisorio'
+export * from './pasarela'
+export { RepositorioDeIntencionesDePagoSupabase } from './supabase/repositorio-de-intenciones-de-pago'

@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { Dni, Monto, NumeroDePostulacion, ReferenciaDePago, type PagoInformado } from '@tfi/domain'
 
+export const esquemaIniciarPagoConPasarela = z.object({
+  postulacionId: z.string().uuid({ message: 'postulacionId debe ser un UUID válido' }),
+})
+
 /** Una fila del informe, ya leída, tal como llega en JSON (T071). */
 const esquemaPagoInformado = z
   .object({

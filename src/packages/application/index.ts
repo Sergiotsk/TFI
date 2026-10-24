@@ -1,4 +1,4 @@
-// API pública de @tfi/application: lo que no se exporta acá no se puede importar desde otros paquetes.
+﻿// API pública de @tfi/application: lo que no se exporta acá no se puede importar desde otros paquetes.
 export type { Pagina, Paginacion } from './paginacion'
 export {
   MAXIMO_POR_PAGINA,
@@ -111,3 +111,9 @@ export type {
   LectorDeInformeDePagos,
   ResultadoDeLectura,
 } from './puertos/lector-de-informe-de-pagos/puerto'
+
+// Mercado Pago (pasarela)
+export { IniciarPagoConPasarelaUseCase, type IniciarPagoConPasarelaResultado } from './casos-de-uso/iniciar-pago-con-pasarela'
+export { ProcesarWebhookMercadoPagoUseCase, type ResultadoWebhookPago } from './casos-de-uso/procesar-webhook-mercadopago'
+export * from './puertos/pasarela-de-pago'
+export * from './puertos/repositorio-de-intenciones-de-pago'
