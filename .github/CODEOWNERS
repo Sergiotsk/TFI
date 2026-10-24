@@ -1,0 +1,17 @@
+# Reglas de calidad: un PR que las toque necesita la aprobación del code owner (ruleset de develop y main).
+# Así nadie, persona o agente, puede aflojar una regla para pasar el check "Calidad".
+
+# CI y este mismo archivo
+/.github/                         @Sergiotsk
+
+# Lint, tipos y tests
+/src/eslint.config.mjs            @Sergiotsk
+/src/**/tsconfig*.json            @Sergiotsk
+/src/vitest.config.ts             @Sergiotsk
+/src/package.json                 @Sergiotsk
+/src/scripts/migraciones/         @Sergiotsk
+
+# Reglas del proyecto y de los agentes
+/.specify/memory/constitution.md  @Sergiotsk
+/CONTRIBUTING.md                  @Sergiotsk
+/.claude/settings.json            @Sergiotsk
