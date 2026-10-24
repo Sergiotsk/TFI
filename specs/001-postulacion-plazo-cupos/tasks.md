@@ -224,8 +224,8 @@ lo acepta, la ocupación supera el total y queda la decisión registrada; una se
 - [x] T087 [US5] Implementar src/packages/application/casos-de-uso/decidir-pago-excepcional.ts (hasta que pase T083)
 - [x] T088 [US5] Crear src/supabase/migrations/20261024120000_rpc_decidir_pago_excepcional.sql según contracts/rpc.md (`FOR UPDATE` sobre el pago y la Postulación, exige `rol_actual() = 'DIRECCION'`, inserta en `decisiones_de_direccion`, sin comparar contra el total al aceptar), con `REVOKE` y `GRANT`
 - [x] T089 [US5] Implementar `registrarDecision` en src/packages/infrastructure/supabase/registro-de-pagos.ts y verificar que src/packages/infrastructure/supabase/registro-de-pagos.contrato.test.ts pasa con los casos nuevos
-- [ ] T090 [US5] Crear src/apps/web/app/api/pagos/[id]/decision/route.ts, con su Zod en src/apps/web/http/esquemas/pagos.ts
-- [ ] T091 [US5] Crear el panel de Dirección en src/apps/web/app/(paneles)/(personal)/direccion/casos/page.tsx (casos `A_DECIDIR` con motivo, fecha de pago, vencimiento y ocupación actual del período, más los botones aceptar y rechazar con comentario)
+- [x] T090 [US5] Crear src/apps/web/app/api/pagos/[id]/decision/route.ts, con su Zod en src/apps/web/http/esquemas/pagos.ts
+- [x] T091 [US5] Crear el panel de Dirección en src/apps/web/app/(paneles)/(personal)/direccion/casos/page.tsx (casos `A_DECIDIR` con motivo, fecha de pago, vencimiento y ocupación actual del período, más los botones aceptar y rechazar con comentario)
 
 **Checkpoint**: las tres historias P1 funcionan; se puede recorrer la sección 5 de quickstart.md hasta el paso 7.
 
