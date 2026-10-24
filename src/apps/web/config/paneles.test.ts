@@ -24,12 +24,37 @@ describe('MENU_DE_ROL', () => {
   // Según quién puede usar cada pantalla en contracts/api-http.md y puertos.md (ListarBandeja): la bandeja de pagos
   // es de Tesorería y Secretaría, los períodos de Secretaría y Dirección, y los casos A_DECIDIR solo de Dirección.
   // Las postulaciones (buscar, acreditar pago, prorrogar plazo) las operan los tres roles del personal (ADR 0009).
+  // Los pagos se parten por tarea: importar el informe, resolver los no imputados y hacer las devoluciones.
   test.each<[RolDelPersonal, string[]]>([
-    ['TESORERIA', ['/personal/pagos', '/personal/postulaciones']],
-    ['SECRETARIA', ['/personal/periodos', '/personal/postulaciones', '/personal/pagos']],
+    [
+      'TESORERIA',
+      [
+        '/personal/pagos',
+        '/personal/pagos/no-imputados',
+        '/personal/pagos/devoluciones',
+        '/personal/postulaciones',
+      ],
+    ],
+    [
+      'SECRETARIA',
+      [
+        '/personal/periodos',
+        '/personal/postulaciones',
+        '/personal/pagos',
+        '/personal/pagos/no-imputados',
+        '/personal/pagos/devoluciones',
+      ],
+    ],
     ['DIRECCION', ['/direccion/casos', '/personal/periodos', '/personal/postulaciones']],
   ])('%s ve %j', (rol, rutas) => {
     expect(MENU_DE_ROL[rol].map((item) => item.href)).toEqual(rutas)
+  })
+
+  test('las bandejas de pagos muestran cuántos quedan pendientes', () => {
+    const contadores = MENU_DE_ROL.TESORERIA.map((item) => [item.href, item.contador])
+
+    expect(contadores).toContainEqual(['/personal/pagos/no-imputados', 'NO_IMPUTADO'])
+    expect(contadores).toContainEqual(['/personal/pagos/devoluciones', 'DEVUELTO'])
   })
 
   test('el aspirante no tiene menú: su panel es un recorrido lineal, sin barra lateral', () => {
