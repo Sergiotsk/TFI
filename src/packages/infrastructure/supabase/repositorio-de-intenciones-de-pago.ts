@@ -1,7 +1,7 @@
 ﻿import type { SupabaseClient } from '@supabase/supabase-js'
-import type { CrearIntencionDePago, IntencionDePago, RepositorioDeIntencionesDePago } from '../../application/puertos/repositorio-de-intenciones-de-pago/puerto'
+import type { CrearIntencionDePago, IntencionDePago, RepositorioDeIntencionesDePago } from '@tfi/application/puertos/repositorio-de-intenciones-de-pago/puerto'
 
-function mapear(row: any): IntencionDePago {
+function mapear(row: Record<string, unknown>): IntencionDePago {
   return {
     id: row.id,
     postulacionId: row.postulacion_id,

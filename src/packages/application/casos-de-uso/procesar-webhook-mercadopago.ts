@@ -58,7 +58,9 @@ export class ProcesarWebhookMercadoPagoUseCase {
             paymentIdMp: params.paymentId,
             webhookEventId: params.webhookEventId,
           })
-        } catch {}
+        } catch {
+          // Ignorar errores al marcar como procesada
+        }
       }
       return { procesado: true, yaProcesado: false, acreditado: false }
     }
@@ -79,9 +81,14 @@ export class ProcesarWebhookMercadoPagoUseCase {
     const ahora = this.reloj.ahora()
     let acreditado = false
     try {
-      const result = await (this.accionesDelPersonal as any).confirmarVacante(intencion.postulacionId)
-      acreditado = result?.resultado === 'OK'
-    } catch {}
+      const acciones = this.accionesDelPersonal as { confirmarVacante?: (postulacionId: string) => Promise<{ resultado?: string } | undefined> }
+      if (typeof acciones.confirmarVacante === 'function') {
+        const result = await acciones.confirmarVacante(intencion.postulacionId)
+        acreditado = result?.resultado === 'OK'
+      }
+    } catch {
+      // Ignorar errores al acreditar
+    }
 
     if (acreditado) {
       try {
@@ -91,7 +98,9 @@ export class ProcesarWebhookMercadoPagoUseCase {
           webhookEventId: params.webhookEventId,
           pagadoEl: datos.dateApproved ?? ahora,
         })
-      } catch {}
+      } catch {
+        // Ignorar errores al marcar como completada
+      }
       return { procesado: true, yaProcesado: false, acreditado: true, postulacionId: intencion.postulacionId }
     }
 
@@ -102,7 +111,9 @@ export class ProcesarWebhookMercadoPagoUseCase {
         webhookEventId: params.webhookEventId,
         pagadoEl: datos.dateApproved ?? ahora,
       })
-    } catch {}
+    } catch {
+      // Ignorar errores al marcar como procesada
+    }
     return { procesado: true, yaProcesado: false, acreditado: false, postulacionId: intencion.postulacionId }
   }
 }

@@ -11,7 +11,7 @@ export function probarContratoDePasarelaDePago(
         externalId: 'int_test_1',
         postulacionId: 'post_test_1',
         titulo: 'Matrícula TUP',
-        monto: { centavos: 5000000 } as any,
+        monto: { centavos: 5000000 } as { centavos: number },
         backUrls: {
           success: 'http://localhost:3000/pagos/retorno?status=success',
           pending: 'http://localhost:3000/pagos/retorno?status=pending',
@@ -24,7 +24,7 @@ export function probarContratoDePasarelaDePago(
     })
 
     it('obtiene pago aprobado', async () => {
-      const pasarela: any = crearPasarela()
+      const pasarela = crearPasarela() as PasarelaDePago & { simularPagoAprobado?: (paymentId: string, externalReference: string) => void }
       if (typeof pasarela.simularPagoAprobado === 'function') {
         pasarela.simularPagoAprobado('mp_123', 'int_test_1')
       }

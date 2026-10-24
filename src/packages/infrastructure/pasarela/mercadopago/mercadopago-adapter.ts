@@ -3,7 +3,7 @@
   PasarelaDePago,
   PreferenciaCreada,
   PreferenciaPago,
-} from '../../../../packages/application/puertos/pasarela-de-pago/puerto'
+} from '@tfi/application/puertos/pasarela-de-pago/puerto'
 
 export interface ConfiguracionMercadoPago {
   accessToken: string
@@ -74,19 +74,20 @@ export class MercadoPagoAdapter implements PasarelaDePago {
       throw new Error(`No se pudo obtener pago de MercadoPago: ${res.status} ${texto}`)
     }
 
-    const data = (await res.json()) as any
+    const data = (await res.json()) as Record<string, unknown>
+    const payer = data.payer && typeof data.payer === 'object' ? (data.payer as Record<string, unknown>) : undefined
     return {
       paymentId: String(data.id),
-      status: data.status,
-      statusDetail: data.status_detail,
-      externalReference: data.external_reference,
+      status: data.status as string,
+      statusDetail: typeof data.status_detail === 'string' ? data.status_detail : undefined,
+      externalReference: typeof data.external_reference === 'string' ? data.external_reference : undefined,
       transactionAmountCentavos:
         typeof data.transaction_amount === 'number' ? Math.round(data.transaction_amount * 100) : undefined,
-      currencyId: data.currency_id,
-      payerEmail: data.payer?.email,
-      dateApproved: data.date_approved ? new Date(data.date_approved) : undefined,
-      dateCreated: data.date_created ? new Date(data.date_created) : undefined,
-      dateLastUpdated: data.date_last_updated ? new Date(data.date_last_updated) : undefined,
+      currencyId: typeof data.currency_id === 'string' ? data.currency_id : undefined,
+      payerEmail: typeof payer?.email === 'string' ? payer.email : undefined,
+      dateApproved: typeof data.date_approved === 'string' ? new Date(data.date_approved) : undefined,
+      dateCreated: typeof data.date_created === 'string' ? new Date(data.date_created) : undefined,
+      dateLastUpdated: typeof data.date_last_updated === 'string' ? new Date(data.date_last_updated) : undefined,
     }
   }
 }
