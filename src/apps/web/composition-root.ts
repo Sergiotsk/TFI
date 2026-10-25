@@ -76,7 +76,6 @@ export function crearDependencias(supabase: SupabaseClient) {
     registroDePagos,
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let iniciarPagoConPasarela: any | undefined
 
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
@@ -84,7 +83,6 @@ export function crearDependencias(supabase: SupabaseClient) {
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     iniciarPagoConPasarela = new (IniciarPagoConPasarelaUseCase as any)(
       repoPostulaciones,
       repoPeriodos,
@@ -197,17 +195,14 @@ export function crearDependencias(supabase: SupabaseClient) {
       almacen,
       reloj,
     ),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }
 
 export function crearDependenciasSinSesion() {
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
   if (!habilitarPasarela || !process.env.MP_ACCESS_TOKEN) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { procesarWebhookMercadoPago: undefined as any }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return { procesarWebhookMercadoPago: undefined as any }
 }
 
