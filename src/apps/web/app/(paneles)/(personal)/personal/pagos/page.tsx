@@ -39,7 +39,7 @@ export default async function InformesDePagosPage() {
                 <p className="text-sm text-muted-foreground">Todavía no se cargó ningún informe.</p>
               ) : (
                 <ul className="space-y-3">
-                  {datos.cargas.map((carga) => (
+                  {datos.cargas.map((carga: { id: string; nombreArchivo: string; cargadaEl: Date; resumen: { acreditados: number; aDecidir: number; noImputados: number; devueltos: number; duplicados?: number } }) => (
                     <li key={carga.id} className="rounded-2xl border border-border bg-card p-4 shadow-xs">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <span className="font-mono text-xs break-all">{carga.nombreArchivo}</span>

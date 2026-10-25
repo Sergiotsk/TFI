@@ -6,6 +6,7 @@ import { InsigniaDePago, motivosDeRevision } from '@/components/panel/insignia-d
 import { conActorDePanel } from '../../../sesion-de-panel'
 import { decidirCasoAccion } from './actions'
 import { avisoDeDecision } from './esquemas'
+import type { CasoADecidir } from '@tfi/application'
 
 // Casos de Dirección (US5): pagos que no se pudieron confirmar solos, por fuera de plazo o sin cupo
 // (ListarCasosADecidir). Aceptar confirma la vacante aunque se pase el cupo; rechazar deja el pago para devolver.
@@ -50,7 +51,7 @@ export default async function CasosDeDireccionPage({
           </p>
         ) : null}
 
-        {casos?.map(({ pago, postulacion, aspirante, periodo }) => (
+        {casos?.map(({ pago, postulacion, aspirante, periodo }: CasoADecidir) => (
           <article key={pago.id} className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-xs">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -66,7 +67,9 @@ export default async function CasosDeDireccionPage({
             </div>
 
             {pago.motivoRevision ? (
-              <p className="text-sm font-medium">{motivosDeRevision[pago.motivoRevision]}</p>
+              <p className="text-sm font-medium">
+                {motivosDeRevision[pago.motivoRevision as keyof typeof motivosDeRevision]}
+              </p>
             ) : null}
 
             <dl className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">

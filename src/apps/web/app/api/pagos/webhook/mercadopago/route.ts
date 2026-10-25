@@ -43,10 +43,8 @@ export async function POST(request: Request) {
     const repoPeriodos = new RepositorioDePeriodosSupabase(supabase as any)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const accionesDelPersonal: any = new AccionesDelPersonalSupabase(supabase as any, repoPostulaciones)
-    if (typeof (accionesDelPersonal as { acreditarPagoPorWebhook?: unknown }).acreditarPagoPorWebhook === 'function') {
-      ;(accionesDelPersonal as { confirmarVacante: unknown }).confirmarVacante = (
-        accionesDelPersonal as { acreditarPagoPorWebhook: (...args: unknown[]) => unknown }
-      ).acreditarPagoPorWebhook.bind(accionesDelPersonal)
+    if (typeof accionesDelPersonal.acreditarPagoPorWebhook === 'function') {
+      accionesDelPersonal.confirmarVacante = accionesDelPersonal.acreditarPagoPorWebhook.bind(accionesDelPersonal)
     }
     const reloj = new RelojDeSistema()
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
