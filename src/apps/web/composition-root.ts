@@ -76,18 +76,14 @@ export function crearDependencias(supabase: SupabaseClient) {
     registroDePagos,
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let iniciarPagoConPasarela: unknown | undefined
+  let iniciarPagoConPasarela: IniciarPagoConPasarelaUseCase | undefined
 
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
   if (habilitarPasarela && process.env.MP_ACCESS_TOKEN) {
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
-    const IniciarPagoConPasarelaCtor = IniciarPagoConPasarelaUseCase as unknown as new (
-      ...args: unknown[]
-    ) => unknown
-    iniciarPagoConPasarela = new IniciarPagoConPasarelaCtor(
+    iniciarPagoConPasarela = new IniciarPagoConPasarelaUseCase(
       repoPostulaciones,
       repoPeriodos,
       pasarela,
@@ -199,7 +195,7 @@ export function crearDependencias(supabase: SupabaseClient) {
       almacen,
       reloj,
     ),
-  } as unknown
+  }
 }
 
 export function crearDependenciasSinSesion() {

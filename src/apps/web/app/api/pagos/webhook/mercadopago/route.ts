@@ -37,19 +37,15 @@ export async function POST(request: Request) {
     }
 
     const supabase = crearClienteServiceRole()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const repoPeriodos = new RepositorioDePeriodosSupabase(supabase as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const accionesDelPersonal: any = new AccionesDelPersonalSupabase(supabase as any, repoPostulaciones)
+    const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
+    const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
+    const accionesDelPersonal = new AccionesDelPersonalSupabase(supabase, repoPostulaciones)
     if (typeof accionesDelPersonal.acreditarPagoPorWebhook === 'function') {
       accionesDelPersonal.confirmarVacante = accionesDelPersonal.acreditarPagoPorWebhook.bind(accionesDelPersonal)
     }
     const reloj = new RelojDeSistema()
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase as any)
+    const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
 
     const useCase = new ProcesarWebhookMercadoPagoUseCase(
       repoPostulaciones,
