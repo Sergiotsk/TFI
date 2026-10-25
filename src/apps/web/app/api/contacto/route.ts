@@ -36,7 +36,7 @@ export const POST = async (request: Request) => {
     )
   }
 
-  console.log('[contacto] nueva consulta:', parseado.data)
+  console.log('[contacto] nueva consulta recibida, asunto:', parseado.data.asunto)
 
   return NextResponse.json({ ok: true })
 }
