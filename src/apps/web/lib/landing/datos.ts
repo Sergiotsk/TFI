@@ -7,8 +7,11 @@
 /** Nombre del producto. */
 export const PROYECTO_NOMBRE = 'Sistema de Ingreso TUP'
 
-/** Destino de todos los botones "Ir al sistema de inscripción". Se puede sobrescribir con la variable de entorno SISTEMA_URL. */
-export const SISTEMA_URL = process.env.SISTEMA_URL ?? '/'
+/**
+  * Destino de todos los botones "Ir al sistema de inscripción". Se puede sobrescribir con la variable de
+  * entorno NEXT_PUBLIC_SISTEMA_URL (tiene que llevar ese prefijo para llegar también al navegador).
+  */
+export const SISTEMA_URL = process.env.NEXT_PUBLIC_SISTEMA_URL ?? '/login'
 
 /** Navegación principal (encabezado y pie). */
 export const NAVEGACION = [
