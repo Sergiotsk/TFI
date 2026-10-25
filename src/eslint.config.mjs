@@ -68,6 +68,13 @@ export default defineConfig([
 
   js.configs.recommended,
   tseslint.configs.recommended, // incluye no-explicit-any como error (Principio IV)
+  {
+    name: 'tfi/composicion-raiz-sin-any',
+    files: ['apps/web/composition-root.ts', 'apps/web/app/api/pagos/webhook/mercadopago/route.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
   ...nextSoloEnWeb,
 
   {
