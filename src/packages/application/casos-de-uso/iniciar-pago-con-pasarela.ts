@@ -61,17 +61,11 @@ export class IniciarPagoConPasarelaUseCase {
       throw new SinCuposParaIniciar(periodo.id)
     }
 
-    if (vigente !== postulacion) {
-      const vencimiento = await this.postulaciones.guardarTransicion(postulacion, vigente)
-      if (vencimiento === 'conflicto') throw new ConflictoDeEstado()
-    }
-
-    const guardado = await this.postulaciones.guardarTransicion(vigente, enPago)
-    if (guardado === 'conflicto') throw new ConflictoDeEstado()
-
     const externalId = this.generarExternalId()
     const urls = this.obtenerUrls(externalId)
 
+    // La preferencia se crea antes de guardar la transición: si Mercado Pago falla, la Postulación no queda
+    // en PAGO_PENDIENTE sin preferencia (y sin poder reintentar, porque solo se inicia desde PREINSCRIPTO o VENCIDO).
     const preferencia = await this.pasarela.crearPreferencia({
       externalId,
       postulacionId: enPago.id,
@@ -80,6 +74,14 @@ export class IniciarPagoConPasarelaUseCase {
       backUrls: urls.backUrls,
       notificationUrl: urls.notificationUrl,
     })
+
+    if (vigente !== postulacion) {
+      const vencimiento = await this.postulaciones.guardarTransicion(postulacion, vigente)
+      if (vencimiento === 'conflicto') throw new ConflictoDeEstado()
+    }
+
+    const guardado = await this.postulaciones.guardarTransicion(vigente, enPago)
+    if (guardado === 'conflicto') throw new ConflictoDeEstado()
 
     if (this.intenciones) {
       try {

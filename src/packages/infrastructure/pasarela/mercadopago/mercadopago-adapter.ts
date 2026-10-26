@@ -32,8 +32,12 @@ export class MercadoPagoAdapter implements PasarelaDePago {
       ],
       external_reference: preferencia.externalId,
       back_urls: preferencia.backUrls,
-      notification_url: preferencia.notificationUrl,
-      auto_return: 'approved',
+      // Mercado Pago rechaza auto_return si la URL de éxito no es pública (localhost → 400 invalid_auto_return),
+      // y a una notification_url local no puede llegar: en desarrollo se omiten las dos.
+      ...(preferencia.notificationUrl.startsWith('https://')
+        ? { notification_url: preferencia.notificationUrl }
+        : {}),
+      ...(preferencia.backUrls.success.startsWith('https://') ? { auto_return: 'approved' } : {}),
     }
 
     const res = await fetch(`${this.baseUrl}/checkout/preferences`, {
