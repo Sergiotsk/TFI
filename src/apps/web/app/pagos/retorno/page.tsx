@@ -1,27 +1,26 @@
-﻿export const dynamic = 'force-dynamic'
+﻿import { resolverEstadoDeRetorno } from './estado'
+import type { EstadoDeRetorno, ParametrosDeRetorno } from './estado'
 
-export default function PagosRetornoPage({
+export const dynamic = 'force-dynamic'
+
+const MENSAJES: Record<EstadoDeRetorno, string> = {
+  success: 'Tu pago fue recibido. Si quedó acreditado, ya se confirmó tu vacante.',
+  pending: 'Tu pago está pendiente de acreditación. Te avisaremos cuando se acredite.',
+  failure: 'El pago fue rechazado o cancelado. Podés intentar nuevamente.',
+  desconocido: 'Te redirigimos desde MercadoPago. El estado se actualizará en tu postulación.',
+}
+
+export default async function PagosRetornoPage({
   searchParams,
 }: {
-  searchParams: { status?: string; payment_id?: string; preference_id?: string; external_reference?: string }
+  searchParams: Promise<ParametrosDeRetorno>
 }) {
-  const status = searchParams.status
+  const estado = resolverEstadoDeRetorno(await searchParams)
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
       <h1 className="text-2xl font-semibold">Estado de tu pago</h1>
-      {status === 'success' && (
-        <p>Tu pago fue recibido. Si quedó acreditado, ya se confirmó tu vacante.</p>
-      )}
-      {status === 'pending' && (
-        <p>Tu pago está pendiente de acreditación. Te avisaremos cuando se acredite.</p>
-      )}
-      {status === 'failure' && (
-        <p>El pago fue rechazado o cancelado. Podés intentar nuevamente.</p>
-      )}
-      {!status && (
-        <p>Te redirigimos desde MercadoPago. El estado se actualizará en tu postulación.</p>
-      )}
+      <p>{MENSAJES[estado]}</p>
       <p className="text-sm text-muted-foreground">
         El sistema acredita el pago automáticamente cuando MercadoPago lo confirma.
       </p>
