@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import { RedireccionAlPanel } from './redireccion-al-panel'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,7 @@ export default async function PagosRetornoPage({
       <Link href="/aspirante/postulacion" className={buttonVariants()}>
         Volver a mi postulación
       </Link>
+      <RedireccionAlPanel />
     </main>
   )
 }
