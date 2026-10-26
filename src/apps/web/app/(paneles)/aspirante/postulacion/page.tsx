@@ -108,7 +108,13 @@ export default async function PostulacionDelAspirantePage() {
               </p>
             ) : null}
 
-            {postulacion.estado === 'VACANTE_CONFIRMADA' || postulacion.estado === 'ESPERANDO_DOCUMENTACION' ? (
+            {postulacion.estado === 'ESPERANDO_DOCUMENTACION' ? (
+              <p className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+                Recibimos tu documentación. La Secretaría la va a revisar y vas a ver el resultado acá.
+              </p>
+            ) : null}
+
+            {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
               <Link
                 href="/aspirante/postulacion/documentacion"
                 className={buttonVariants({ size: 'lg' })}
