@@ -6,6 +6,7 @@ import {
   CalendarRange,
   CircleAlert,
   ClipboardList,
+  FileCheck,
   FileUp,
   Gavel,
   LogOut,
@@ -37,6 +38,7 @@ const ICONOS: Record<IconoDeMenu, LucideIcon> = {
   devoluciones: Undo2,
   casos: Gavel,
   postulaciones: ClipboardList,
+  documentacion: FileCheck,
 }
 
 export type ContadoresDeMenu = Partial<Record<NonNullable<ItemDeMenu['contador']>, number>>
