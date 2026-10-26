@@ -51,8 +51,8 @@ export class RepositorioDeIntencionesDePagoSupabase implements RepositorioDeInte
       .select('*')
       .eq('external_id', externalId)
       .maybeSingle()
-    if (error || !data) return null
-    return mapear(data)
+    if (error) throw new Error(`No se pudo leer la intención de pago: ${error.message}`)
+    return data ? mapear(data) : null
   }
 
   async obtenerPorPaymentIdMp(paymentIdMp: string): Promise<IntencionDePago | null> {
@@ -61,8 +61,31 @@ export class RepositorioDeIntencionesDePagoSupabase implements RepositorioDeInte
       .select('*')
       .eq('payment_id_mp', paymentIdMp)
       .maybeSingle()
-    if (error || !data) return null
-    return mapear(data)
+    if (error) throw new Error(`No se pudo leer la intención por pago: ${error.message}`)
+    return data ? mapear(data) : null
+  }
+
+  async obtenerPendientePorPostulacion(
+    postulacionId: string,
+    ahora: Date,
+  ): Promise<IntencionDePago | null> {
+    const { data, error } = await this.supabase
+      .from('intenciones_de_pago')
+      .select('*')
+      .eq('postulacion_id', postulacionId)
+      .eq('estado', 'PENDIENTE')
+      .order('creado_el', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) throw new Error(`No se pudo leer la intención pendiente: ${error.message}`)
+    if (!data) return null
+
+    const intencion = mapear(data)
+    if (intencion.expiraEl !== null && intencion.expiraEl.getTime() <= ahora.getTime()) {
+      return null
+    }
+
+    return intencion
   }
 
   async marcarProcesada(params: {
@@ -80,7 +103,8 @@ export class RepositorioDeIntencionesDePagoSupabase implements RepositorioDeInte
     if (params.externalId) q = q.eq('external_id', params.externalId)
     else if (params.paymentIdMp) q = q.eq('payment_id_mp', params.paymentIdMp)
     else return null
-    const { data } = await q.select('*').maybeSingle()
+    const { data, error } = await q.select('*').maybeSingle()
+    if (error) throw new Error(`No se pudo marcar la intención como procesada: ${error.message}`)
     return data ? mapear(data) : null
   }
 
@@ -98,7 +122,8 @@ export class RepositorioDeIntencionesDePagoSupabase implements RepositorioDeInte
     })
     if (params.externalId) q = q.eq('external_id', params.externalId)
     else q = q.eq('payment_id_mp', params.paymentIdMp)
-    const { data } = await q.select('*').maybeSingle()
+    const { data, error } = await q.select('*').maybeSingle()
+    if (error) throw new Error(`No se pudo completar la intención de pago: ${error.message}`)
     return data ? mapear(data) : null
   }
 }

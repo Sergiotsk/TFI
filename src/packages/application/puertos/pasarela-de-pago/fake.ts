@@ -26,6 +26,11 @@ export class PasarelaDePagoFake implements PasarelaDePago {
     throw new Error(`Pago no encontrado en fake: ${paymentId}`)
   }
 
+  /** Fixture: registra un pago con todos sus datos (monto, moneda, fecha). */
+  simularPago(pago: DatosPagoPasarela): void {
+    this.pagos.set(pago.paymentId, pago)
+  }
+
   simularPagoAprobado(paymentId: string, externalReference: string): void {
     this.pagos.set(paymentId, {
       paymentId,
