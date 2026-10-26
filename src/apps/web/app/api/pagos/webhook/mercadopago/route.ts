@@ -37,21 +37,35 @@ export async function POST(request: Request) {
     }
 
     const supabase = crearClienteServiceRole()
-    const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase as any)
-    const repoPeriodos = new RepositorioDePeriodosSupabase(supabase as any)
-    const accionesDelPersonal: any = new AccionesDelPersonalSupabase(supabase as any, repoPostulaciones)
+    const repoPostulaciones = new RepositorioDePostulacionesSupabase(
+      supabase as unknown as ConstructorParameters<typeof RepositorioDePostulacionesSupabase>[0],
+    )
+    const repoPeriodos = new RepositorioDePeriodosSupabase(
+      supabase as unknown as ConstructorParameters<typeof RepositorioDePeriodosSupabase>[0],
+    )
+    const accionesDelPersonalBase = new AccionesDelPersonalSupabase(
+      supabase as unknown as ConstructorParameters<typeof AccionesDelPersonalSupabase>[0],
+      repoPostulaciones,
+    )
+    const accionesDelPersonal = accionesDelPersonalBase as unknown as {
+      confirmarVacante: (postulacionId: string) => Promise<unknown>
+      acreditarPagoPorWebhook?: (postulacionId: string) => Promise<unknown>
+      prorrogarPlazo: (postulacionId: string, fechaLimite: Date) => Promise<unknown>
+    }
     if (typeof accionesDelPersonal.acreditarPagoPorWebhook === 'function') {
       accionesDelPersonal.confirmarVacante = accionesDelPersonal.acreditarPagoPorWebhook.bind(accionesDelPersonal)
     }
     const reloj = new RelojDeSistema()
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
-    const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase as any)
+    const intenciones = new RepositorioDeIntencionesDePagoSupabase(
+      supabase as unknown as ConstructorParameters<typeof RepositorioDeIntencionesDePagoSupabase>[0],
+    )
 
     const useCase = new ProcesarWebhookMercadoPagoUseCase(
       repoPostulaciones,
       repoPeriodos,
       pasarela,
-      accionesDelPersonal,
+      accionesDelPersonal as unknown as ConstructorParameters<typeof ProcesarWebhookMercadoPagoUseCase>[3],
       reloj,
       intenciones,
     )
