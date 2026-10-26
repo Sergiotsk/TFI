@@ -76,14 +76,17 @@ export function crearDependencias(supabase: SupabaseClient) {
     registroDePagos,
   )
 
-  let iniciarPagoConPasarela: any | undefined
+  let iniciarPagoConPasarela: unknown | undefined
 
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
   if (habilitarPasarela && process.env.MP_ACCESS_TOKEN) {
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
-    iniciarPagoConPasarela = new (IniciarPagoConPasarelaUseCase as any)(
+    const IniciarPagoConPasarelaCtor = IniciarPagoConPasarelaUseCase as unknown as new (
+      ...args: unknown[]
+    ) => unknown
+    iniciarPagoConPasarela = new IniciarPagoConPasarelaCtor(
       repoPostulaciones,
       repoPeriodos,
       pasarela,
@@ -195,15 +198,15 @@ export function crearDependencias(supabase: SupabaseClient) {
       almacen,
       reloj,
     ),
-  } as any
+  }
 }
 
 export function crearDependenciasSinSesion() {
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
   if (!habilitarPasarela || !process.env.MP_ACCESS_TOKEN) {
-    return { procesarWebhookMercadoPago: undefined as any }
+    return { procesarWebhookMercadoPago: undefined }
   }
-  return { procesarWebhookMercadoPago: undefined as any }
+  return { procesarWebhookMercadoPago: undefined }
 }
 
 export type Dependencias = ReturnType<typeof crearDependencias>
