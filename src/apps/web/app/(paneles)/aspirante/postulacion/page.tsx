@@ -165,9 +165,13 @@ export default async function PostulacionDelAspirantePage() {
             ) : null}
 
             {postulacion.estado === 'DOCUMENTACION_VALIDADA' ? (
-              <p className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
-                Tu documentación fue validada. ¡Tu inscripción está completa!
-              </p>
+              <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+                <p className="font-semibold">Tu documentación fue validada. ¡Tu inscripción está completa!</p>
+                <p>
+                  En los próximos días, el personal de la UTN se va a comunicar con vos al correo electrónico que
+                  registraste en este proceso para enviarte los datos de acceso al sistema de alumnos de la facultad.
+                </p>
+              </div>
             ) : null}
 
             {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
