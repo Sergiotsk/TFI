@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils'
-import type { EstadoPostulacion } from '@tfi/domain'
-import type { EstadoPago, MotivoNoImputado, MotivoRevision } from '@/maquetas/datos'
+import type { EstadoDePago, EstadoPostulacion, MotivoNoImputado, MotivoRevision } from '@tfi/domain'
 
 type Tono = 'neutro' | 'aviso' | 'exito' | 'error'
 
@@ -24,7 +23,8 @@ const estadosDePostulacion: Record<EstadoPostulacion, { etiqueta: string; tono: 
   CONFIRMADO_PARA_EXPORTAR: { etiqueta: 'Confirmado', tono: 'exito' },
 }
 
-const estadosDePago: Record<EstadoPago, { etiqueta: string; tono: Tono }> = {
+const estadosDePago: Record<EstadoDePago, { etiqueta: string; tono: Tono }> = {
+  ACREDITADO: { etiqueta: 'Acreditado', tono: 'exito' },
   A_DECIDIR: { etiqueta: 'A decidir', tono: 'aviso' },
   NO_IMPUTADO: { etiqueta: 'No imputado', tono: 'error' },
   DEVUELTO: { etiqueta: 'Devuelto', tono: 'neutro' },
@@ -61,6 +61,6 @@ export function InsigniaDePostulacion({ estado }: { estado: EstadoPostulacion })
   return <Insignia {...estadosDePostulacion[estado]} />
 }
 
-export function InsigniaDePago({ estado }: { estado: EstadoPago }) {
+export function InsigniaDePago({ estado }: { estado: EstadoDePago }) {
   return <Insignia {...estadosDePago[estado]} />
 }
