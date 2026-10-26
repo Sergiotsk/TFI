@@ -2,12 +2,10 @@ import Link from 'next/link'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { BotonPagarMercadoPago } from '@/components/panel/boton-pagar-mercado-pago'
 import { CorregirDocumento } from '@/components/panel/corregir-documento'
-import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { formatearFecha } from '@/components/panel/formato'
 import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { buttonVariants } from '@/components/ui/button'
 import { conActorDePanel } from '../../sesion-de-panel'
-import { crearPostulacionAccion } from './actions'
 import type { Documento, PeriodoDeIngreso } from '@tfi/domain'
 import type { PostulacionConsultada } from '@tfi/application'
 
@@ -65,11 +63,12 @@ export default async function PostulacionDelAspirantePage() {
                         Cierra el {formatearFecha(periodo.cierraEl)}
                       </span>
                     </div>
-                    <FormularioDeAccion
-                      accion={crearPostulacionAccion}
-                      ocultos={{ periodoId: periodo.id }}
-                      etiqueta="Iniciar postulación"
-                    />
+                    <Link
+                      href={`/aspirante/postulacion/requisitos?periodo=${periodo.id}`}
+                      className={buttonVariants()}
+                    >
+                      Ver condiciones e inscribirme
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -116,9 +115,13 @@ export default async function PostulacionDelAspirantePage() {
             ) : null}
 
             {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
-              <p className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
-                Tu pago fue acreditado y tu vacante está confirmada.
-              </p>
+              <div className="space-y-1 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+                <p className="font-semibold">Tu pago fue acreditado y tu vacante está confirmada.</p>
+                <p>
+                  Ahora tenés 10 días hábiles para cargar la documentación obligatoria. Si no la presentás en ese
+                  plazo, perdés la vacante.
+                </p>
+              </div>
             ) : null}
 
             {postulacion.estado === 'ESPERANDO_DOCUMENTACION' ? (
@@ -184,7 +187,14 @@ export default async function PostulacionDelAspirantePage() {
             ) : null}
 
             {postulacion.estado === 'PREINSCRIPTO' || postulacion.estado === 'VENCIDO' ? (
-              <BotonPagarMercadoPago postulacionId={postulacion.id} />
+              <div className="space-y-4">
+                <p className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-950">
+                  El pago es una <strong>seña que reserva tu vacante</strong>. Al iniciarlo tenés un plazo para
+                  completarlo, que vas a ver acá; si vence, el cupo se libera. Con el pago acreditado, tenés 10 días
+                  hábiles para cargar la documentación.
+                </p>
+                <BotonPagarMercadoPago postulacionId={postulacion.id} />
+              </div>
             ) : null}
           </section>
         ))}

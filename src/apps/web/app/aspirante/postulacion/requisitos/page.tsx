@@ -8,8 +8,26 @@ import {
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { ChecklistClausulas } from '@/components/postulante/checklist-clausulas'
+import { formatearFecha, formatearMontoEnCentavos } from '@/components/panel/formato'
+import { conActorDePanel } from '@/app/(paneles)/sesion-de-panel'
+import { redirect } from 'next/navigation'
+import type { PeriodoDeIngreso } from '@tfi/domain'
 
-export default function RequisitosPage() {
+// Demo: las condiciones del período elegido en el panel (ListarPeriodosAbiertos). Aceptarlas crea la Postulación.
+export default async function RequisitosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ periodo?: string }>
+}) {
+  const { periodo: periodoId } = await searchParams
+  const periodos: PeriodoDeIngreso[] = await conActorDePanel(({ listarPeriodosAbiertos }, actor) =>
+    listarPeriodosAbiertos.ejecutar(actor),
+  )
+  const periodo = periodos.find((candidato) => candidato.id === periodoId)
+  if (!periodo) redirect('/aspirante/postulacion')
+
+  const monto = formatearMontoEnCentavos(periodo.montoMatriculaCentavos)
+
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
       <HeaderInstitucional pasoActual={1} dniPostulante="**.***.***" />
@@ -29,7 +47,7 @@ export default function RequisitosPage() {
             </div>
           </div>
           <span className="px-3 py-1 bg-rose-50 text-rose-700 text-xs font-semibold rounded-full border border-rose-200">
-            Cupos restantes: 24
+            Cupo total: {periodo.totalCupos}
           </span>
         </div>
 
@@ -82,8 +100,10 @@ export default function RequisitosPage() {
               </div>
               <p className="text-xs text-amber-900/80 leading-relaxed mb-4">
                 El pago inicial efectúa la reserva preventiva del cupo en el sistema de cómputos de la UTN
-                FRH. Según la reglamentación vigente de carreras autofinanciadas, el trámite genera dos
-                alternativas excluyentes:
+                FRH. Una vez que iniciás el pago tenés <strong>{periodo.diasPlazoPago} días</strong> para
+                completarlo (nunca después del cierre de la inscripción); si el plazo vence, el cupo se libera.
+                Según la reglamentación vigente de carreras autofinanciadas, el trámite genera dos alternativas
+                excluyentes:
               </p>
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="border-l-2 border-emerald-500 pl-3">
@@ -91,7 +111,7 @@ export default function RequisitosPage() {
                     <CheckCircle2 className="h-4 w-4" /> Caso 1: Trámite exitoso
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Presentando la documentación respaldatoria dentro del plazo legal de <strong>10 días hábiles</strong>, el 100% de la seña ($100.000 ARS) se imputa y cancela de forma automática la matrícula formal de inicio de ciclo.
+                    Presentando la documentación respaldatoria dentro del plazo legal de <strong>10 días hábiles</strong>, el 100% de la seña ({monto}) se imputa y cancela de forma automática la matrícula formal de inicio de ciclo.
                   </p>
                 </div>
                 <div className="border-l-2 border-rose-400 pl-3">
@@ -106,7 +126,7 @@ export default function RequisitosPage() {
             </div>
 
             {/* Checklist de Conformidad */}
-            <ChecklistClausulas />
+            <ChecklistClausulas periodoId={periodo.id} monto={monto} />
           </div>
 
           {/* Columna Lateral */}
@@ -119,12 +139,20 @@ export default function RequisitosPage() {
                   <dd className="font-semibold text-foreground">TUP</dd>
                 </div>
                 <div className="flex justify-between py-1 border-b border-border">
-                  <dt className="text-muted-foreground">Ciclo Lectivo</dt>
-                  <dd className="font-semibold text-foreground">1° Cuatrimestre 2026</dd>
+                  <dt className="text-muted-foreground">Período</dt>
+                  <dd className="font-semibold text-foreground">{periodo.nombre}</dd>
                 </div>
                 <div className="flex justify-between py-1 border-b border-border">
                   <dt className="text-muted-foreground">Monto Seña de Reserva</dt>
-                  <dd className="font-bold text-primary text-sm">$100.000 ARS</dd>
+                  <dd className="font-bold text-primary text-sm">{monto}</dd>
+                </div>
+                <div className="flex justify-between py-1 border-b border-border">
+                  <dt className="text-muted-foreground">Plazo para pagar</dt>
+                  <dd className="font-semibold text-rose-600">{periodo.diasPlazoPago} días</dd>
+                </div>
+                <div className="flex justify-between py-1 border-b border-border">
+                  <dt className="text-muted-foreground">Cierre de inscripción</dt>
+                  <dd className="font-semibold text-foreground">{formatearFecha(periodo.cierraEl)}</dd>
                 </div>
                 <div className="flex justify-between py-1 border-b border-border">
                   <dt className="text-muted-foreground">Plazo de la Documentación</dt>

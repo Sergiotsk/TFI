@@ -1,46 +1,55 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useActionState, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { aceptarCondicionesAccion } from '@/app/(paneles)/aspirante/postulacion/actions'
 
-const clausulas = [
-  {
-    id: 1,
-    texto:
-      'Entiendo que estoy iniciando formalmente el proceso de ingreso a la Tecnicatura Universitaria en Programación de la Universidad Tecnológica Nacional - Facultad Regional Haedo.',
-  },
-  {
-    id: 2,
-    texto:
-      'Entiendo y asumo el compromiso de cargar la documentación obligatoria y legalizada dentro del plazo improrrogable de diez (10) días hábiles posteriores al pago. (Analítico o Analítico en Trámite, DNI, etc.)',
-  },
-  {
-    id: 3,
-    texto:
-      'Certifico bajo juramento que cumplo con los requisitos mínimos de admisión (Nivel Secundario completo sin adeudar materias a la fecha de matriculación efectiva).',
-  },
-  {
-    id: 4,
-    texto:
-      'Entiendo que en caso de comprobación de falta de documentación, falsedad o vencimiento de plazos estipulados, perdería automáticamente el cupo reservado y el derecho a reintegro o reembolso alguno.',
-  },
-  {
-    id: 5,
-    texto:
-      'Entiendo que el proceso continúa inmediatamente con el abono de la reserva de cupo arancelada de $100.000 ARS a fin de señar válidamente mi vacante académica.',
-  },
-  {
-    id: 6,
-    texto:
-      'He leído íntegramente, comprendo en su totalidad y acepto sin reservas las condiciones generales del reglamento de ingreso de la UTN Haedo para el ciclo 2026.',
-  },
-]
+interface ChecklistClausulasProps {
+  periodoId: string
+  /** El monto de la seña ya formateado, por ejemplo "$100.000,00". */
+  monto: string
+}
 
-export function ChecklistClausulas() {
+function clausulasDe(monto: string) {
+  return [
+    {
+      id: 1,
+      texto:
+        'Entiendo que estoy iniciando formalmente el proceso de ingreso a la Tecnicatura Universitaria en Programación de la Universidad Tecnológica Nacional - Facultad Regional Haedo.',
+    },
+    {
+      id: 2,
+      texto:
+        'Entiendo y asumo el compromiso de cargar la documentación obligatoria y legalizada dentro del plazo improrrogable de diez (10) días hábiles posteriores al pago. (Analítico o Analítico en Trámite, DNI, etc.)',
+    },
+    {
+      id: 3,
+      texto:
+        'Certifico bajo juramento que cumplo con los requisitos mínimos de admisión (Nivel Secundario completo sin adeudar materias a la fecha de matriculación efectiva).',
+    },
+    {
+      id: 4,
+      texto:
+        'Entiendo que en caso de comprobación de falta de documentación, falsedad o vencimiento de plazos estipulados, perdería automáticamente el cupo reservado y el derecho a reintegro o reembolso alguno.',
+    },
+    {
+      id: 5,
+      texto: `Entiendo que el proceso continúa inmediatamente con el abono de la reserva de cupo arancelada de ${monto} a fin de señar válidamente mi vacante académica.`,
+    },
+    {
+      id: 6,
+      texto:
+        'He leído íntegramente, comprendo en su totalidad y acepto sin reservas las condiciones generales del reglamento de ingreso de la UTN Haedo para el ciclo 2026.',
+    },
+  ]
+}
+
+// Demo: al aceptar todas las cláusulas se crea la Postulación (aceptarCondicionesAccion) y se vuelve al panel.
+export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps) {
+  const clausulas = clausulasDe(monto)
   const [seleccionados, setSeleccionados] = useState<number[]>([])
+  const [estado, aceptar, enviando] = useActionState(aceptarCondicionesAccion, null)
 
   const todosSeleccionados = seleccionados.length === clausulas.length
 
@@ -102,26 +111,30 @@ export function ChecklistClausulas() {
         })}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+      <form
+        action={aceptar}
+        className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4"
+      >
+        <input type="hidden" name="periodoId" value={periodoId} />
         <span className="text-xs text-muted-foreground font-medium">
           {seleccionados.length} de {clausulas.length} cláusulas obligatorias confirmadas
         </span>
 
-        {todosSeleccionados ? (
-          <Link
-            href="/aspirante/postulacion/pago"
-            className={cn(buttonVariants(), 'w-full sm:w-auto shrink-0 whitespace-nowrap px-5 gap-2')}
-          >
-            <span>Continuar a Datos y Pago de Reserva</span>
-            <ArrowRight className="h-4 w-4 shrink-0" />
-          </Link>
-        ) : (
-          <Button disabled className="w-full sm:w-auto shrink-0 whitespace-nowrap px-5 inline-flex items-center justify-center gap-2">
-            <span>Continuar a Datos y Pago de Reserva</span>
-            <ArrowRight className="h-4 w-4 shrink-0" />
-          </Button>
-        )}
-      </div>
+        <Button
+          type="submit"
+          disabled={!todosSeleccionados || enviando}
+          className="w-full sm:w-auto shrink-0 whitespace-nowrap px-5 inline-flex items-center justify-center gap-2"
+        >
+          <span>{enviando ? 'Creando tu postulación…' : 'Aceptar y continuar al pago de la reserva'}</span>
+          <ArrowRight className="h-4 w-4 shrink-0" />
+        </Button>
+
+        {estado && !estado.ok ? (
+          <p role="alert" className="w-full text-xs text-destructive">
+            {estado.mensaje}
+          </p>
+        ) : null}
+      </form>
     </div>
   )
 }
