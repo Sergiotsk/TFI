@@ -1,14 +1,18 @@
+import Link from 'next/link'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
+import { BotonPagarMercadoPago } from '@/components/panel/boton-pagar-mercado-pago'
 import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { formatearFecha } from '@/components/panel/formato'
 import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
+import { buttonVariants } from '@/components/ui/button'
 import { conActorDePanel } from '../../sesion-de-panel'
-import { crearPostulacionAccion, iniciarPagoAccion } from './actions'
+import { crearPostulacionAccion } from './actions'
 import type { PeriodoDeIngreso } from '@tfi/domain'
 import type { PostulacionConsultada } from '@tfi/application'
 
-// Panel del aspirante conectado a los casos de uso: ConsultarPostulacion.listarMias, ListarPeriodosAbiertos,
-// CrearPostulacion e IniciarPago. Sin pasarela de pago: la acreditación la hace el personal.
+// Panel del aspirante conectado a los casos de uso: ConsultarPostulacion.listarMias, ListarPeriodosAbiertos y
+// CrearPostulacion. Demo: el pago se inicia con Mercado Pago y el webhook confirma la vacante; si no llega,
+// el personal acredita el pago a mano.
 export default async function PostulacionDelAspirantePage() {
   const { postulaciones, periodos } = await conActorDePanel(
     async ({ consultarPostulacion, listarPeriodosAbiertos }, actor) => {
@@ -93,8 +97,8 @@ export default async function PostulacionDelAspirantePage() {
 
             {postulacion.estado === 'PAGO_PENDIENTE' ? (
               <p className="text-sm text-muted-foreground">
-                Pagá la matrícula en la facultad o por el medio indicado antes de la fecha límite. No hay pago en
-                línea: el personal acredita tu pago y vas a ver la vacante confirmada acá.
+                Estamos esperando la confirmación de Mercado Pago. Si ya pagaste, en unos instantes vas a ver tu
+                vacante confirmada acá.
               </p>
             ) : null}
 
@@ -104,13 +108,17 @@ export default async function PostulacionDelAspirantePage() {
               </p>
             ) : null}
 
+            {postulacion.estado === 'VACANTE_CONFIRMADA' || postulacion.estado === 'ESPERANDO_DOCUMENTACION' ? (
+              <Link
+                href="/aspirante/postulacion/documentacion"
+                className={buttonVariants({ size: 'lg' })}
+              >
+                Cargar documentación
+              </Link>
+            ) : null}
+
             {postulacion.estado === 'PREINSCRIPTO' || postulacion.estado === 'VENCIDO' ? (
-              <FormularioDeAccion
-                accion={iniciarPagoAccion}
-                ocultos={{ id: postulacion.id }}
-                etiqueta="Iniciar pago"
-                tamano="lg"
-              />
+              <BotonPagarMercadoPago postulacionId={postulacion.id} />
             ) : null}
           </section>
         ))}

@@ -1,11 +1,14 @@
-﻿export const dynamic = 'force-dynamic'
+﻿import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
 
-export default function PagosRetornoPage({
+export const dynamic = 'force-dynamic'
+
+export default async function PagosRetornoPage({
   searchParams,
 }: {
-  searchParams: { status?: string; payment_id?: string; preference_id?: string; external_reference?: string }
+  searchParams: Promise<{ status?: string; payment_id?: string; preference_id?: string; external_reference?: string }>
 }) {
-  const status = searchParams.status
+  const { status } = await searchParams
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
@@ -25,6 +28,9 @@ export default function PagosRetornoPage({
       <p className="text-sm text-muted-foreground">
         El sistema acredita el pago automáticamente cuando MercadoPago lo confirma.
       </p>
+      <Link href="/aspirante/postulacion" className={buttonVariants()}>
+        Volver a mi postulación
+      </Link>
     </main>
   )
 }

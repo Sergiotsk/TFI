@@ -75,8 +75,8 @@ export function UploadDocumentos({ postulacionId }: { postulacionId: string | nu
           return
         }
       }
-      // Redirige a la pantalla de estado y seguimiento del trámite
-      router.push('/aspirante/postulacion/estado')
+      // Demo: vuelve al panel real, que muestra el estado de la postulación
+      router.push('/aspirante/postulacion')
     } catch {
       setError('No se pudo conectar con el servidor. Probá de nuevo.')
     } finally {

@@ -3,6 +3,7 @@ import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { UploadDocumentos } from '@/components/postulante/upload-documentos'
 import { Clock, ShieldAlert, FileText } from 'lucide-react'
 import { conActorDePanel } from '@/app/(paneles)/sesion-de-panel'
+import type { PostulacionConsultada } from '@tfi/application'
 
 // Demo: los mismos estados que SubirDocumento acepta (ESTADOS_QUE_ADMITEN_DOCUMENTOS).
 const ADMITEN_DOCUMENTOS = [
@@ -15,7 +16,10 @@ const ADMITEN_DOCUMENTOS = [
 export default async function DocumentacionPage() {
   const postulacionId = await conActorDePanel(async ({ consultarPostulacion }, actor) => {
     const propias = await consultarPostulacion.listarMias(actor)
-    return propias.find((postulacion) => ADMITEN_DOCUMENTOS.includes(postulacion.estado))?.id ?? null
+    const enDocumentacion = propias.find((postulacion: PostulacionConsultada) =>
+      ADMITEN_DOCUMENTOS.includes(postulacion.estado),
+    )
+    return enDocumentacion?.id ?? null
   })
 
   return (
