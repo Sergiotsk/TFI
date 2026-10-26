@@ -18,6 +18,13 @@ export interface IniciarPagoConPasarelaResultado {
   externalId: string
 }
 
+interface IntencionReutilizable {
+  externalId: string
+  preferenceId: string
+  initPoint: string
+  sandboxInitPoint?: string
+}
+
 /**
  * Inicia el pago con pasarela (MercadoPago). Paralelo al flujo manual.
  * No reemplaza IniciarPagoUseCase: ambos habilitan el pago respetando reglas.
@@ -33,7 +40,7 @@ export class IniciarPagoConPasarelaUseCase {
       backUrls: { success: string; pending: string; failure: string }
       notificationUrl: string
     },
-    private readonly intenciones?: RepositorioDeIntencionesDePago,
+    private readonly intenciones: RepositorioDeIntencionesDePago,
   ) {}
 
   async ejecutar(actor: Actor, postulacionId: string): Promise<IniciarPagoConPasarelaResultado> {
@@ -49,25 +56,54 @@ export class IniciarPagoConPasarelaUseCase {
     const ahora = this.reloj.ahora()
     if (!periodo.estaAbierto(ahora)) throw new PeriodoCerrado(periodo.id)
 
+    const estadoEfectivo = postulacion.estadoEn(ahora)
+    // Un reintento con el plazo todavía vigente no cambia de estado: la fila ya
+    // está en PAGO_PENDIENTE y el trigger no acepta esa transición. Tampoco se
+    // reinicia el vencimiento: el plazo original sigue corriendo.
+    const esReintento = estadoEfectivo === 'PAGO_PENDIENTE'
+
     const vigente =
-      postulacion.estadoEn(ahora) === postulacion.estado
-        ? postulacion
-        : postulacion.vencer(ahora)
-    const enPago = vigente.iniciarPago(periodo.calcularVencimiento(ahora), ahora)
+      estadoEfectivo === postulacion.estado ? postulacion : postulacion.vencer(ahora)
+    const enPago = esReintento
+      ? vigente
+      : vigente.iniciarPago(periodo.calcularVencimiento(ahora), ahora)
 
     const ocupados = await this.periodos.contarOcupados(periodo.id)
     const pendientesVigentes = await this.periodos.contarPendientesVigentes(periodo.id, ahora)
-    if (periodo.cuposLibres(ocupados, pendientesVigentes) <= 0) {
+    // En un reintento la propia Postulación ya figura como pendiente: si se
+    // contara dos veces, un período con el último lugar ocupado por ella misma
+    // devolvería SIN_CUPOS y el aspirante no podría volver a pagar.
+    const pendientesQueOcupan = esReintento
+      ? Math.max(0, pendientesVigentes - 1)
+      : pendientesVigentes
+    if (periodo.cuposLibres(ocupados, pendientesQueOcupan) <= 0) {
       throw new SinCuposParaIniciar(periodo.id)
     }
 
-    if (vigente !== postulacion) {
-      const vencimiento = await this.postulaciones.guardarTransicion(postulacion, vigente)
-      if (vencimiento === 'conflicto') throw new ConflictoDeEstado()
+    if (!esReintento) {
+      if (vigente !== postulacion) {
+        const vencimiento = await this.postulaciones.guardarTransicion(postulacion, vigente)
+        if (vencimiento === 'conflicto') throw new ConflictoDeEstado()
+      }
+
+      const guardado = await this.postulaciones.guardarTransicion(vigente, enPago)
+      if (guardado === 'conflicto') throw new ConflictoDeEstado()
     }
 
-    const guardado = await this.postulaciones.guardarTransicion(vigente, enPago)
-    if (guardado === 'conflicto') throw new ConflictoDeEstado()
+    const reutilizable = await this.buscarIntencionReutilizable(
+      enPago.id,
+      periodo.montoMatricula.centavos,
+      ahora,
+    )
+    if (reutilizable) {
+      return {
+        postulacion: aPostulacionConsultada(enPago, ahora),
+        preferenceId: reutilizable.preferenceId,
+        initPoint: reutilizable.initPoint,
+        sandboxInitPoint: reutilizable.sandboxInitPoint,
+        externalId: reutilizable.externalId,
+      }
+    }
 
     const externalId = this.generarExternalId()
     const urls = this.obtenerUrls(externalId)
@@ -81,22 +117,19 @@ export class IniciarPagoConPasarelaUseCase {
       notificationUrl: urls.notificationUrl,
     })
 
-    if (this.intenciones) {
-      try {
-        await this.intenciones.crear({
-          postulacionId: enPago.id,
-          periodoId: periodo.id,
-          institucionId: periodo.institucionId,
-          montoCentavos: periodo.montoMatricula.centavos,
-          externalId,
-          preferenceId: preferencia.preferenceId,
-          initPoint: preferencia.initPoint,
-          sandboxInitPoint: preferencia.sandboxInitPoint,
-        })
-      } catch {
-        // No romper el flujo si falla el guardado de intención
-      }
-    }
+    // Si no se puede guardar la intención, el webhook después no puede imputar
+    // el pago. Es preferible fallar acá (antes del checkout) que cobrar a ciegas.
+    await this.intenciones.crear({
+      postulacionId: enPago.id,
+      periodoId: periodo.id,
+      institucionId: periodo.institucionId,
+      montoCentavos: periodo.montoMatricula.centavos,
+      externalId,
+      preferenceId: preferencia.preferenceId,
+      initPoint: preferencia.initPoint,
+      sandboxInitPoint: preferencia.sandboxInitPoint,
+      expiraEl: enPago.venceEl,
+    })
 
     return {
       postulacion: aPostulacionConsultada(enPago, ahora),
@@ -105,5 +138,32 @@ export class IniciarPagoConPasarelaUseCase {
       sandboxInitPoint: preferencia.sandboxInitPoint,
       externalId,
     }
+  }
+
+  private async buscarIntencionReutilizable(
+    postulacionId: string,
+    montoCentavos: number,
+    ahora: Date,
+  ): Promise<IntencionReutilizable | null> {
+    try {
+      const pendiente = await this.intenciones.obtenerPendientePorPostulacion(postulacionId, ahora)
+      if (
+        pendiente &&
+        pendiente.preferenceId !== null &&
+        pendiente.initPoint !== null &&
+        pendiente.montoCentavos === montoCentavos
+      ) {
+        return {
+          externalId: pendiente.externalId,
+          preferenceId: pendiente.preferenceId,
+          initPoint: pendiente.initPoint,
+          sandboxInitPoint: pendiente.sandboxInitPoint ?? undefined,
+        }
+      }
+    } catch {
+      // Si la lectura falla, se sigue con una intención nueva.
+    }
+
+    return null
   }
 }
