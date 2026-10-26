@@ -177,7 +177,7 @@ export default function Inicio() {
             <li className="pasos__item reveal" style={retraso(4)}>
               <h3>Seguimiento</h3>
               <p>
-                En todo momento puede ver en qué estado está su trámite y qué le falta.
+                En todo momento puede ver en qué estado está su trámite y qué le falta. Al finalizar el tramite se le otorgara en esta misma plataforma el mail institucional, lejago y datos del alumno.
               </p>
             </li>
           </PasosConScroll>
