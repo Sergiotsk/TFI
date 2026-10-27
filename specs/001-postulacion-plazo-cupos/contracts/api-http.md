@@ -19,9 +19,11 @@ actuales, con el error tipado.
 | `GET /api/periodos/:id/ocupacion` | `ConsultarOcupacion` | el personal | — |
 | `GET /api/documentos?postulacionId=&estado=&tipo=&pagina=&porPagina=` | `ListarDocumentos` | personal de la institución; el aspirante solo los propios | `NoAutorizado` → 403 |
 | `POST /api/documentos` (`multipart/form-data`: `postulacionId`, `tipo`, `vigencia?`, `archivo`) | `SubirDocumento` | el aspirante dueño o `SECRETARIA` / `DIRECCION` | `SolicitudInvalida` → 400, `NoAutorizado` → 403, `ConflictoDeEstado` → 409 |
-| `GET /api/documentos/:id` | `ConsultarDocumento` | el dueño o el personal de su institución | `NoAutorizado` → 403, `NoEncontrado` → 404 |
+| `GET /api/documentos/:id` | `ConsultarDocumento` | el dueño o `SECRETARIA` / `DIRECCION` de su institución | `NoAutorizado` → 403, `NoEncontrado` → 404 |
+| `GET /api/documentos/:id/url` | `ConsultarDocumento` | el dueño o `SECRETARIA` / `DIRECCION` de su institución | `NoAutorizado` → 403, `NoEncontrado` → 404 |
 | `PATCH /api/documentos/:id` `{ estado, observaciones? }` o `{ tipo?, vigencia?, nombreArchivo? }` | `RevisarDocumento` / `ActualizarDocumento` | `SECRETARIA`, `DIRECCION` | `ConflictoDeEstado` → 409 |
 | `DELETE /api/documentos/:id` | `EliminarDocumento` | el aspirante dueño o `SECRETARIA` / `DIRECCION` | `ConflictoDeEstado` → 409 |
+| `POST /api/perfiles/:id/contrasena` | `RestablecerContrasena` | `SECRETARIA`, `DIRECCION` (Dirección también a sus pares) | `NoAutorizado` → 403, `NoEncontrado` → 404 |
 | `POST /api/pagos/acreditaciones` `{ pagos: PagoInformado[] }` | `ImportarInformeDePagos` | `TESORERIA` | — (el resumen informa por fila) |
 | `GET /api/pagos?estado=A_DECIDIR\|NO_IMPUTADO\|DEVUELTO` | `ListarBandeja` | según el estado (ver puertos.md) | `NoAutorizado` → 403 |
 | `POST /api/pagos/:id/decision` `{ decision, comentario? }` | `DecidirPagoExcepcional` | `DIRECCION` | `conflicto` → 409 |
@@ -30,9 +32,16 @@ actuales, con el error tipado.
 es `PAGO_PENDIENTE`, el aviso "tu lugar no está reservado hasta que se acredite el pago" (FR-007). Si el estado es
 `PAGO_EN_REVISION`, devuelve "tu pago está en revisión".
 
-`GET /api/documentos/:id` devuelve el documento con una URL firmada de cinco minutos. El archivo vive en el bucket
-privado `documentos`; la fila de `public.documentos` guarda solo la ruta y los metadatos. La autorización se valida
-en el caso de uso antes de firmar la URL (ADR 0010).
+`GET /api/documentos/:id` devuelve el documento con una URL firmada de **60 segundos**. El archivo vive en el
+bucket privado `documentos`; la fila de `public.documentos` guarda solo la ruta y los metadatos. La autorización se
+valida en el caso de uso antes de firmar la URL (ADR 0010). `GET /api/documentos/:id/url` devuelve solo
+`{ documentoId, urlFirmada, expiraEnSegundos }` para refrescar el enlace sin volver a traer los metadatos; usa el
+mismo caso de uso y por eso el permiso es idéntico. Tesorería y cualquier otro aspirante reciben 403.
+
+`POST /api/perfiles/:id/contrasena` es la recuperación asistida: deja la contraseña de la cuenta en la inicial
+(`nombre` + `dni`, sin acentos, espacios ni puntos) y devuelve `{ perfilId, contrasenaTemporal }` para dictarla. No
+pide la contraseña anterior ni envía email, y necesita la service role key de Supabase Auth. Una `SECRETARIA` no
+puede restablecer la contraseña de `DIRECCION` ni de otra `SECRETARIA`: solo `DIRECCION` lo hace.
 
 `POST /api/pagos/acreditaciones` recibe filas ya parseadas (JSON). El adaptador que lee el archivo de SysAdmin queda
 fuera de esta feature (research R9). Cuando llegue el formato, ese adaptador produce `PagoInformado[]` y llama al

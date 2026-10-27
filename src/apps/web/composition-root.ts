@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   ServicioDeAutenticacionSupabase,
+  ServicioDeAdministracionDeUsuariosSupabase,
   RepositorioDePerfilesSupabase,
   RepositorioDePostulacionesSupabase,
   RepositorioDePeriodosSupabase,
@@ -20,6 +21,7 @@ import {
   CerrarSesionUseCase,
   ConsultarPerfilPropioUseCase,
   ObtenerActorUseCase,
+  RestablecerContrasenaUseCase,
   CrearPostulacionUseCase,
   IniciarPagoUseCase,
   ConsultarPostulacionUseCase,
@@ -170,3 +172,24 @@ export function crearDependencias(supabase: SupabaseClient) {
 }
 
 export type Dependencias = ReturnType<typeof crearDependencias>
+
+/**
+ * Dependencias que necesitan la service role key.
+ *
+ * Se arman aparte de `crearDependencias` a propósito: el cliente con
+ * privilegios de administrador se crea solo en el endpoint que restablece
+ * contraseñas, no en cada request.
+ */
+export function crearDependenciasDeAdministracion(clienteAdmin: SupabaseClient) {
+  const repoPerfiles = new RepositorioDePerfilesSupabase(clienteAdmin)
+
+  return {
+    repoPerfiles,
+    restablecerContrasena: new RestablecerContrasenaUseCase(
+      new ServicioDeAdministracionDeUsuariosSupabase(clienteAdmin),
+      repoPerfiles,
+    ),
+  }
+}
+
+export type DependenciasDeAdministracion = ReturnType<typeof crearDependenciasDeAdministracion>
