@@ -93,6 +93,13 @@ interface PerfilDeApi {
   direccion: string | null
 }
 
+/** Resultado de una verificación automática del panel de pruebas. */
+interface ResultadoDePrueba {
+  nombre: string
+  ok: boolean
+  detalle: string
+}
+
 export function PanelDePruebas() {
   const [sesion, setSesion] = useState<Sesion | null>(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
@@ -106,6 +113,7 @@ export function PanelDePruebas() {
   const [porPaginaPerfiles, setPorPaginaPerfiles] = useState('20')
   const [perfilId, setPerfilId] = useState('')
   const [perfilEnEdicion, setPerfilEnEdicion] = useState<PerfilEnEdicion>(PERFIL_INICIAL)
+  const [contrasenaPerfilId, setContrasenaPerfilId] = useState('')
 
   const [periodoId, setPeriodoId] = useState('')
   const [periodos, setPeriodos] = useState<Periodo[]>([])
@@ -131,6 +139,7 @@ export function PanelDePruebas() {
   const [soloPeriodoElegido, setSoloPeriodoElegido] = useState(false)
 
   const [historial, setHistorial] = useState<Llamada[]>([])
+  const [resultadosDeUrl, setResultadosDeUrl] = useState<ResultadoDePrueba[]>([])
   const [ocupado, setOcupado] = useState(false)
   const secuencia = useRef(0)
 
@@ -240,6 +249,66 @@ export function PanelDePruebas() {
         await cargarPeriodos()
         setPeriodoEnEdicion(null)
       }
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  /**
+   * Prueba automática de `GET /api/documentos/:id/url`.
+   *
+   * Verifica lo que se puede comprobar desde una sola sesión de navegador:
+   * que el dueño o el personal autorizado reciba una URL firmada, que la firma
+   * venza a los 60 segundos o antes y que sin cookies la respuesta sea 401.
+   * Los casos de otro aspirante y de Tesorería (403) se prueban cambiando de
+   * cuenta: el panel los deja anotados abajo para no olvidarlos.
+   */
+  async function probarUrlDeDocumento() {
+    const id = documentoId.trim()
+    if (id === '') return
+
+    setOcupado(true)
+    const resultados: ResultadoDePrueba[] = []
+
+    try {
+      const conSesion = await fetch(`/api/documentos/${id}/url`, { cache: 'no-store' })
+      const cuerpoConSesion: unknown = await interpretarJson(await conSesion.text())
+      const datos = datosDe(cuerpoConSesion)
+      const expira = numeroDe(datos, 'expiraEnSegundos')
+      const url = textoDe(datos, 'urlFirmada')
+
+      resultados.push({
+        nombre: 'Con sesión autorizada responde 200',
+        ok: conSesion.status === 200,
+        detalle: `HTTP ${conSesion.status}`,
+      })
+
+      resultados.push({
+        nombre: 'La URL vence a los 60 segundos o antes',
+        ok: expira !== null && expira > 0 && expira <= 60,
+        detalle: expira === null ? 'falta expiraEnSegundos' : `${expira} s`,
+      })
+
+      resultados.push({
+        nombre: 'La URL es una firma de Storage, no un enlace público',
+        ok: url !== null && url.includes('token='),
+        detalle: url === null ? 'falta urlFirmada' : 'firma presente',
+      })
+
+      // `credentials: 'omit'` descarta las cookies: es la única forma de
+      // simular una petición sin sesión sin abrir otra ventana.
+      const sinSesion = await fetch(`/api/documentos/${id}/url`, {
+        cache: 'no-store',
+        credentials: 'omit',
+      })
+
+      resultados.push({
+        nombre: 'Sin sesión responde 401 y no firma nada',
+        ok: sinSesion.status === 401,
+        detalle: `HTTP ${sinSesion.status}`,
+      })
+
+      setResultadosDeUrl(resultados)
     } finally {
       setOcupado(false)
     }
@@ -663,8 +732,16 @@ export function PanelDePruebas() {
                   quien="Aspirante dueño o Secretaría/Dirección"
                 />
                 <FilaPermiso
+                  endpoint="GET /api/documentos/:id/url"
+                  quien="Aspirante dueño o Secretaría/Dirección (firma de 60 s)"
+                />
+                <FilaPermiso
                   endpoint="PATCH|DELETE /api/documentos/:id"
                   quien="Aspirante dueño (DELETE) o Secretaría/Dirección"
+                />
+                <FilaPermiso
+                  endpoint="POST /api/perfiles/:id/contrasena"
+                  quien="Secretaría/Dirección (Dirección también a sus pares)"
                 />
               </tbody>
             </table>
@@ -953,6 +1030,48 @@ export function PanelDePruebas() {
             >
               PATCH /api/perfiles/:id
             </Button>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>
+              Restablecer contraseña (solo Secretaría/Dirección)
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Deja la contraseña de la cuenta en la inicial: nombre + DNI, sin acentos, espacios
+              ni puntos (por ejemplo <code>ana30123456</code>). No pide la anterior ni manda mail.
+              Una Secretaría no puede restablecer la contraseña de Dirección ni de otra Secretaría.
+              La respuesta trae la contraseña temporal para dictarla en la mesa de entrada.
+            </p>
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <div className="min-w-64 flex-1">
+                <label htmlFor="contrasena-perfil" className={CLASE_ETIQUETA}>
+                  Perfil
+                </label>
+                <input
+                  id="contrasena-perfil"
+                  placeholder="perfilId (UUID)"
+                  value={contrasenaPerfilId}
+                  onChange={(evento) => setContrasenaPerfilId(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <Button
+                variant="outline"
+                disabled={deshabilitado || contrasenaPerfilId.trim() === ''}
+                onClick={() =>
+                  void llamar('POST', `/api/perfiles/${contrasenaPerfilId.trim()}/contrasena`)
+                }
+              >
+                POST /api/perfiles/:id/contrasena
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={ocupado || perfilId.trim() === ''}
+                onClick={() => setContrasenaPerfilId(perfilId.trim())}
+              >
+                Usar el perfil elegido
+              </Button>
+            </div>
           </div>
         </Tarjeta>
 
@@ -1368,8 +1487,9 @@ export function PanelDePruebas() {
               El aspirante sube, consulta y borra los documentos de su Postulación; Secretaría y
               Dirección pueden ver, revisar, corregir y borrar los de cualquier postulante de su
               institución. Tesorería no participa. Los archivos van a un bucket privado y{' '}
-              <code>GET /api/documentos/:id</code> devuelve una URL firmada de cinco minutos. La
-              Postulación avanza sola: al subir el primero pasa a{' '}
+              <code>GET /api/documentos/:id/url</code> devuelve una URL firmada de corta duración
+              (60 segundos) solo para el dueño o para Secretaría y Dirección. La Postulación avanza
+              sola: al subir el primero pasa a{' '}
               <code>ESPERANDO_DOCUMENTACION</code>, al revisar a{' '}
               <code>DOCUMENTACION_EN_REVISION</code>, <code>OBSERVADO</code> o{' '}
               <code>DOCUMENTACION_VALIDADA</code>.
@@ -1520,11 +1640,41 @@ export function PanelDePruebas() {
               <Button
                 variant="ghost"
                 disabled={deshabilitado || documentoId.trim() === ''}
+                onClick={() => void probarUrlDeDocumento()}
+              >
+                Probar GET /api/documentos/:id/url
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={deshabilitado || documentoId.trim() === ''}
                 onClick={() => void llamar('DELETE', `/api/documentos/${documentoId.trim()}`)}
               >
                 DELETE /api/documentos/:id
               </Button>
             </div>
+
+            {resultadosDeUrl.length > 0 ? (
+              <ul className="mt-3 space-y-1 text-sm">
+                {resultadosDeUrl.map((resultado) => (
+                  <li key={resultado.nombre} className="flex flex-wrap items-baseline gap-2">
+                    <span
+                      aria-hidden="true"
+                      className={resultado.ok ? 'text-foreground' : 'text-destructive'}
+                    >
+                      {resultado.ok ? '✓' : '✗'}
+                    </span>
+                    <span className="text-foreground">{resultado.nombre}</span>
+                    <span className="text-xs text-muted-foreground">{resultado.detalle}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            <p className="mt-2 text-xs text-muted-foreground">
+              La prueba automática cubre el 200 del dueño o del personal autorizado, los 60
+              segundos de la firma y el 401 sin sesión. Los 403 de otro aspirante y de Tesorería se
+              verifican cerrando sesión y entrando con esa cuenta.
+            </p>
           </div>
 
           <div className="mt-4 border-t border-border pt-4">
@@ -1895,6 +2045,20 @@ function esPerfil(valor: unknown): valor is PerfilDeApi {
 
 function datosDe(cuerpo: unknown): unknown {
   return esObjeto(cuerpo) ? cuerpo.data : undefined
+}
+
+function numeroDe(datos: unknown, clave: string): number | null {
+  if (!esObjeto(datos)) return null
+
+  const valor = datos[clave]
+  return typeof valor === 'number' && Number.isFinite(valor) ? valor : null
+}
+
+function textoDe(datos: unknown, clave: string): string | null {
+  if (!esObjeto(datos)) return null
+
+  const valor = datos[clave]
+  return typeof valor === 'string' ? valor : null
 }
 
 function periodosDe(cuerpo: unknown): Periodo[] {
