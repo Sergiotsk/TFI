@@ -9,6 +9,7 @@ import {
   FileCheck,
   FileUp,
   Gavel,
+  KeyRound,
   LogOut,
   Undo2,
   type LucideIcon,
@@ -94,6 +95,17 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
       {/* Con la barra colapsada se ocultan los textos, no el cierre de sesión: queda el ícono con su tooltip. */}
       <SidebarFooter>
         <span className="truncate px-2 text-sm font-medium group-data-[collapsible=icon]:hidden">{nombre}</span>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link href="/recuperar-contrasena/nueva" />}
+              tooltip="Cambiar contraseña"
+            >
+              <KeyRound />
+              <span>Cambiar contraseña</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <form action={cerrarSesion}>
           <SidebarMenu>
             <SidebarMenuItem>
