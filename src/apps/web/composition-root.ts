@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   MercadoPagoAdapter,
   ServicioDeAutenticacionSupabase,
+  ServicioDeAdministracionDeUsuariosSupabase,
   RepositorioDePerfilesSupabase,
   RepositorioDePostulacionesSupabase,
   RepositorioDePeriodosSupabase,
@@ -22,6 +23,10 @@ import {
   CerrarSesionUseCase,
   ConsultarPerfilPropioUseCase,
   ObtenerActorUseCase,
+  RestablecerContrasenaUseCase,
+  SolicitarRecuperacionDeContrasenaUseCase,
+  CambiarContrasenaUseCase,
+  ConfirmarEnlaceDeEmailUseCase,
   CrearPostulacionUseCase,
   IniciarPagoUseCase,
   ConsultarPostulacionUseCase,
@@ -52,13 +57,16 @@ import {
   ListarCasosADecidirUseCase,
   IniciarPagoConPasarelaUseCase,
 } from '@tfi/application'
-import { urlDeApp } from '@/lib/url-de-app'
+import { urlBaseDeLaApp, urlDeApp } from '@/lib/url-de-app'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
 // usa para cada puerto. Se arma por request porque el cliente de Supabase
 // lleva las cookies de la sesión (Next.js).
 export function crearDependencias(supabase: SupabaseClient) {
-  const auth = new ServicioDeAutenticacionSupabase(supabase)
+  const appUrl = urlBaseDeLaApp()
+  // La URL de la app se inyecta al adaptador: es configuración de la raíz de
+  // composición, no algo que el adaptador lea del entorno por su cuenta.
+  const auth = new ServicioDeAutenticacionSupabase(supabase, appUrl)
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
   const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
   const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
@@ -82,7 +90,6 @@ export function crearDependencias(supabase: SupabaseClient) {
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
   if (habilitarPasarela && process.env.MP_ACCESS_TOKEN) {
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
     iniciarPagoConPasarela = new IniciarPagoConPasarelaUseCase(
       repoPostulaciones,
@@ -116,6 +123,9 @@ export function crearDependencias(supabase: SupabaseClient) {
     cerrarSesion: new CerrarSesionUseCase(auth),
     consultarPerfilPropio: new ConsultarPerfilPropioUseCase(auth, repoPerfiles),
     obtenerActorUseCase: new ObtenerActorUseCase(auth, repoPerfiles),
+    solicitarRecuperacionDeContrasena: new SolicitarRecuperacionDeContrasenaUseCase(auth),
+    cambiarContrasena: new CambiarContrasenaUseCase(auth),
+    confirmarEnlaceDeEmail: new ConfirmarEnlaceDeEmailUseCase(auth),
     listarPerfiles: new ListarPerfilesUseCase(repoPerfiles),
     crearPostulacion: new CrearPostulacionUseCase(repoPostulaciones, repoPeriodos, reloj),
     iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),
@@ -208,3 +218,24 @@ export function crearDependenciasSinSesion() {
 }
 
 export type Dependencias = ReturnType<typeof crearDependencias>
+
+/**
+ * Dependencias que necesitan la service role key.
+ *
+ * Se arman aparte de `crearDependencias` a propósito: el cliente con
+ * privilegios de administrador se crea solo en el endpoint que restablece
+ * contraseñas, no en cada request.
+ */
+export function crearDependenciasDeAdministracion(clienteAdmin: SupabaseClient) {
+  const repoPerfiles = new RepositorioDePerfilesSupabase(clienteAdmin)
+
+  return {
+    repoPerfiles,
+    restablecerContrasena: new RestablecerContrasenaUseCase(
+      new ServicioDeAdministracionDeUsuariosSupabase(clienteAdmin),
+      repoPerfiles,
+    ),
+  }
+}
+
+export type DependenciasDeAdministracion = ReturnType<typeof crearDependenciasDeAdministracion>
