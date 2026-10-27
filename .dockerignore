@@ -1,0 +1,15 @@
+.git
+.github
+.claude
+.specify
+.vscode
+docs
+specs
+deploy
+node_modules
+**/node_modules
+**/.next
+**/.env*
+!**/.env.example
+**/*.tsbuildinfo
+src/supabase

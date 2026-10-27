@@ -1,0 +1,43 @@
+name: tfi
+
+services:
+  tfi-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:?definí NEXT_PUBLIC_APP_URL en .env}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?definí NEXT_PUBLIC_SUPABASE_URL en .env}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?definí NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY en .env}
+    image: tfi-web:local
+    container_name: tfi-web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?definí SUPABASE_SERVICE_ROLE_KEY en .env}
+      PAGOS_PASARELA: ${PAGOS_PASARELA:-off}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:-}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET:-}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY:-}
+    ports:
+      - "127.0.0.1:3100:3100"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Opcional: se levanta recién cuando configurás el tunnel y ponés el token.
+  #   docker compose --profile tunnel up -d
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: tfi-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      tfi-web:
+        condition: service_healthy
+    profiles:
+      - tunnel
