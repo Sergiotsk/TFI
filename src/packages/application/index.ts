@@ -44,6 +44,17 @@ export { CerrarSesionUseCase } from './casos-de-uso/autenticacion/cerrar-sesion'
 export { ConsultarPerfilPropioUseCase } from './casos-de-uso/autenticacion/consultar-perfil-propio'
 export { ObtenerActorUseCase } from './casos-de-uso/autenticacion/obtener-actor'
 export type { ResultadoDeActor } from './casos-de-uso/autenticacion/obtener-actor'
+export type {
+  ServicioDeAdministracionDeUsuarios,
+  ResultadoDeRestablecimiento,
+} from './puertos/servicio-de-administracion-de-usuarios/puerto'
+export { ServicioDeAdministracionDeUsuariosFake } from './puertos/servicio-de-administracion-de-usuarios/fake'
+export {
+  RestablecerContrasenaUseCase,
+  ROLES_QUE_RESTABLECEN_CONTRASENAS,
+} from './casos-de-uso/autenticacion/restablecer-contrasena'
+export type { ResultadoDeRestablecimientoDeContrasena } from './casos-de-uso/autenticacion/restablecer-contrasena'
+export { contrasenaInicialDe } from './casos-de-uso/autenticacion/contrasena-inicial'
 export {
   NoAutorizado,
   NoEncontrado,

@@ -1,4 +1,5 @@
 export { ServicioDeAutenticacionSupabase } from './supabase/servicio-de-autenticacion'
+export { ServicioDeAdministracionDeUsuariosSupabase } from './supabase/servicio-de-administracion-de-usuarios'
 export { RepositorioDePerfilesSupabase } from './supabase/repositorio-de-perfiles'
 export { crearClienteSupabase } from './supabase/servidor'
 
