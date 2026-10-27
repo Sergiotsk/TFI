@@ -1,4 +1,5 @@
 export { ServicioDeAutenticacionSupabase } from './supabase/servicio-de-autenticacion'
+export { ServicioDeAdministracionDeUsuariosSupabase } from './supabase/servicio-de-administracion-de-usuarios'
 export { RepositorioDePerfilesSupabase } from './supabase/repositorio-de-perfiles'
 export { crearClienteSupabase } from './supabase/servidor'
 
@@ -13,3 +14,5 @@ export { GeneradorDeIdsCrypto } from './generador-de-ids/generador-de-ids-crypto
 export { RegistroDePagosSupabase } from './supabase/registro-de-pagos'
 export { RegistroDeCargasSupabase } from './supabase/registro-de-cargas'
 export { LectorDeInformeProvisorio } from './informe-de-pagos/lector-provisorio'
+export * from './pasarela'
+export { RepositorioDeIntencionesDePagoSupabase } from './supabase/repositorio-de-intenciones-de-pago'

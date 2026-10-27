@@ -24,7 +24,7 @@ export const ESTADOS_QUE_ADMITEN_DOCUMENTOS = [
 
 export const TAMANIO_MAXIMO_DE_ARCHIVO = 10 * 1024 * 1024
 export const MIME_TYPES_PERMITIDOS = ['application/pdf', 'image/jpeg', 'image/png'] as const
-export const SEGUNDOS_DE_URL_FIRMADA = 5 * 60
+export const SEGUNDOS_DE_URL_FIRMADA = 60
 
 export function puedeGestionarDocumentos(actor: Actor): boolean {
   return (ROLES_QUE_GESTIONAN_DOCUMENTOS as readonly string[]).includes(actor.rol)
