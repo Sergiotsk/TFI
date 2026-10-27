@@ -24,6 +24,9 @@ import {
   ConsultarPerfilPropioUseCase,
   ObtenerActorUseCase,
   RestablecerContrasenaUseCase,
+  SolicitarRecuperacionDeContrasenaUseCase,
+  CambiarContrasenaUseCase,
+  ConfirmarEnlaceDeEmailUseCase,
   CrearPostulacionUseCase,
   IniciarPagoUseCase,
   ConsultarPostulacionUseCase,
@@ -54,13 +57,16 @@ import {
   ListarCasosADecidirUseCase,
   IniciarPagoConPasarelaUseCase,
 } from '@tfi/application'
-import { urlDeApp } from '@/lib/url-de-app'
+import { urlBaseDeLaApp, urlDeApp } from '@/lib/url-de-app'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
 // usa para cada puerto. Se arma por request porque el cliente de Supabase
 // lleva las cookies de la sesión (Next.js).
 export function crearDependencias(supabase: SupabaseClient) {
-  const auth = new ServicioDeAutenticacionSupabase(supabase)
+  // La URL de la app se inyecta al adaptador: es configuración de la raíz de
+  // composición, no algo que el adaptador lea del entorno por su cuenta.
+  const appUrl = urlBaseDeLaApp()
+  const auth = new ServicioDeAutenticacionSupabase(supabase, appUrl)
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
   const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
   const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
@@ -84,7 +90,6 @@ export function crearDependencias(supabase: SupabaseClient) {
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
   if (habilitarPasarela && process.env.MP_ACCESS_TOKEN) {
     const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
     iniciarPagoConPasarela = new IniciarPagoConPasarelaUseCase(
       repoPostulaciones,
@@ -118,6 +123,9 @@ export function crearDependencias(supabase: SupabaseClient) {
     cerrarSesion: new CerrarSesionUseCase(auth),
     consultarPerfilPropio: new ConsultarPerfilPropioUseCase(auth, repoPerfiles),
     obtenerActorUseCase: new ObtenerActorUseCase(auth, repoPerfiles),
+    solicitarRecuperacionDeContrasena: new SolicitarRecuperacionDeContrasenaUseCase(auth),
+    cambiarContrasena: new CambiarContrasenaUseCase(auth),
+    confirmarEnlaceDeEmail: new ConfirmarEnlaceDeEmailUseCase(auth),
     listarPerfiles: new ListarPerfilesUseCase(repoPerfiles),
     crearPostulacion: new CrearPostulacionUseCase(repoPostulaciones, repoPeriodos, reloj),
     iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),
