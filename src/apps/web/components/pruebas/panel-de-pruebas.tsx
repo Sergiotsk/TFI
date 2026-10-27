@@ -140,6 +140,10 @@ export function PanelDePruebas() {
 
   const [historial, setHistorial] = useState<Llamada[]>([])
   const [resultadosDeUrl, setResultadosDeUrl] = useState<ResultadoDePrueba[]>([])
+  const [resultadosDeRecuperacion, setResultadosDeRecuperacion] = useState<ResultadoDePrueba[]>([])
+  const [emailDeRecuperacion, setEmailDeRecuperacion] = useState('')
+  const [contrasenaNueva, setContrasenaNueva] = useState('')
+  const [confirmacionNueva, setConfirmacionNueva] = useState('')
   const [ocupado, setOcupado] = useState(false)
   const secuencia = useRef(0)
 
@@ -309,6 +313,53 @@ export function PanelDePruebas() {
       })
 
       setResultadosDeUrl(resultados)
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  /**
+   * Prueba automática del pedido de recuperación de contraseña.
+   *
+   * Cubre lo que se puede verificar sin abrir el email: que un email inválido
+   * se rechace y que un email sin cuenta reciba la misma respuesta que uno con
+   * cuenta (el endpoint no filtra qué emails están registrados). El enlace y el
+   * cambio de contraseña se prueban a mano: el primero en la casilla y el
+   * segundo en `/recuperar-contrasena/nueva`.
+   */
+  async function probarRecuperacionDeContrasena() {
+    setOcupado(true)
+    const resultados: ResultadoDePrueba[] = []
+
+    try {
+      const invalido = await fetch('/api/auth/recuperar-contrasena', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'no-es-un-email' }),
+      })
+
+      resultados.push({
+        nombre: 'Un email inválido responde 400',
+        ok: invalido.status === 400,
+        detalle: `HTTP ${invalido.status}`,
+      })
+
+      const sinCuenta = await fetch('/api/auth/recuperar-contrasena', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: `sin-cuenta-${Date.now()}@example.com` }),
+      })
+
+      resultados.push({
+        nombre: 'Un email sin cuenta responde 200, igual que uno con cuenta',
+        ok: sinCuenta.status === 200,
+        detalle:
+          sinCuenta.status === 503
+            ? 'HTTP 503: límite de envíos del proyecto'
+            : `HTTP ${sinCuenta.status}`,
+      })
+
+      setResultadosDeRecuperacion(resultados)
     } finally {
       setOcupado(false)
     }
@@ -743,6 +794,18 @@ export function PanelDePruebas() {
                   endpoint="POST /api/perfiles/:id/contrasena"
                   quien="Secretaría/Dirección (Dirección también a sus pares)"
                 />
+                <FilaPermiso
+                  endpoint="POST /api/auth/recuperar-contrasena"
+                  quien="Público (no revela si el email existe)"
+                />
+                <FilaPermiso
+                  endpoint="GET /auth/confirmar"
+                  quien="Público (canjea el enlace del email por una sesión)"
+                />
+                <FilaPermiso
+                  endpoint="POST /api/auth/cambiar-contrasena"
+                  quien="Con sesión (solo la contraseña de la cuenta propia)"
+                />
               </tbody>
             </table>
           </div>
@@ -1072,6 +1135,143 @@ export function PanelDePruebas() {
                 Usar el perfil elegido
               </Button>
             </div>
+          </div>
+        </Tarjeta>
+
+        <Tarjeta
+          titulo="Recuperar y cambiar contraseña"
+          descripcion={
+            <>
+              <p>
+                El flujo real: en <Link href="/login">/login</Link>, “Olvidé mi contraseña” lleva a{' '}
+                <Link href="/recuperar-contrasena">/recuperar-contrasena</Link>, que manda un email
+                con un enlace. El enlace pasa por <code>GET /auth/confirmar</code> y abre{' '}
+                <Link href="/recuperar-contrasena/nueva">/recuperar-contrasena/nueva</Link>, donde
+                se ingresa dos veces la contraseña nueva. El personal también llega desde “Cambiar
+                contraseña” en la barra lateral.
+              </p>
+              <p className="mt-2">
+                El email sale por el SMTP configurado en Supabase (Resend). Para que el enlace
+                vuelva a la app, el dominio de <code>NEXT_PUBLIC_APP_URL</code> tiene que estar en
+                las Redirect URLs del proyecto.
+              </p>
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={ocupado}
+              onClick={() => void probarRecuperacionDeContrasena()}
+            >
+              Probar el pedido de recuperación
+            </Button>
+            <Button
+              variant="ghost"
+              disabled={ocupado || email === ''}
+              onClick={() => setEmailDeRecuperacion(email)}
+            >
+              Usar el email del panel
+            </Button>
+          </div>
+
+          {resultadosDeRecuperacion.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-sm">
+              {resultadosDeRecuperacion.map((resultado) => (
+                <li key={resultado.nombre} className="flex flex-wrap items-baseline gap-2">
+                  <span
+                    aria-hidden="true"
+                    className={resultado.ok ? 'text-foreground' : 'text-destructive'}
+                  >
+                    {resultado.ok ? '✓' : '✗'}
+                  </span>
+                  <span className="text-foreground">{resultado.nombre}</span>
+                  <span className="text-xs text-muted-foreground">{resultado.detalle}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Pedir el enlace para un email</p>
+            <p className="text-sm text-muted-foreground">
+              Responde lo mismo exista o no la cuenta. Revisá la casilla para seguir el flujo.
+            </p>
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <div className="min-w-64 flex-1">
+                <label htmlFor="email-recuperacion" className={CLASE_ETIQUETA}>
+                  Email
+                </label>
+                <input
+                  id="email-recuperacion"
+                  type="email"
+                  placeholder="persona@example.com"
+                  value={emailDeRecuperacion}
+                  onChange={(evento) => setEmailDeRecuperacion(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <Button
+                variant="outline"
+                disabled={ocupado || emailDeRecuperacion.trim() === ''}
+                onClick={() =>
+                  void llamar('POST', '/api/auth/recuperar-contrasena', {
+                    email: emailDeRecuperacion.trim(),
+                  })
+                }
+              >
+                POST /api/auth/recuperar-contrasena
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <p className={CLASE_ETIQUETA}>Cambiar la contraseña con la sesión abierta</p>
+            <p className="text-sm text-muted-foreground">
+              Usa la cuenta con la que estás logueado en este panel y la deja logueada; las demás
+              sesiones de esa cuenta se cierran. Sin sesión responde 401.
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="contrasena-nueva" className={CLASE_ETIQUETA}>
+                  Contraseña nueva
+                </label>
+                <input
+                  id="contrasena-nueva"
+                  type="password"
+                  autoComplete="new-password"
+                  value={contrasenaNueva}
+                  onChange={(evento) => setContrasenaNueva(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+              <div>
+                <label htmlFor="contrasena-confirmacion" className={CLASE_ETIQUETA}>
+                  Repetir la contraseña nueva
+                </label>
+                <input
+                  id="contrasena-confirmacion"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmacionNueva}
+                  onChange={(evento) => setConfirmacionNueva(evento.target.value)}
+                  className={CLASE_CAMPO}
+                />
+              </div>
+            </div>
+            <Button
+              className="mt-3"
+              variant="outline"
+              disabled={ocupado || contrasenaNueva === '' || confirmacionNueva === ''}
+              onClick={() =>
+                void llamar('POST', '/api/auth/cambiar-contrasena', {
+                  contrasena: contrasenaNueva,
+                  confirmacion: confirmacionNueva,
+                })
+              }
+            >
+              POST /api/auth/cambiar-contrasena
+            </Button>
           </div>
         </Tarjeta>
 
