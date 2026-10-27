@@ -22,6 +22,9 @@ import {
   ConsultarPerfilPropioUseCase,
   ObtenerActorUseCase,
   RestablecerContrasenaUseCase,
+  SolicitarRecuperacionDeContrasenaUseCase,
+  CambiarContrasenaUseCase,
+  ConfirmarEnlaceDeEmailUseCase,
   CrearPostulacionUseCase,
   IniciarPagoUseCase,
   ConsultarPostulacionUseCase,
@@ -51,12 +54,15 @@ import {
   DecidirPagoExcepcionalUseCase,
   ListarCasosADecidirUseCase,
 } from '@tfi/application'
+import { urlBaseDeLaApp } from '@/lib/url-de-app'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
 // usa para cada puerto. Se arma por request porque el cliente de Supabase
 // lleva las cookies de la sesión (Next.js).
 export function crearDependencias(supabase: SupabaseClient) {
-  const auth = new ServicioDeAutenticacionSupabase(supabase)
+  // La URL de la app se inyecta al adaptador: es configuración de la raíz de
+  // composición, no algo que el adaptador lea del entorno por su cuenta.
+  const auth = new ServicioDeAutenticacionSupabase(supabase, urlBaseDeLaApp())
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
   const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
   const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
@@ -89,6 +95,9 @@ export function crearDependencias(supabase: SupabaseClient) {
     cerrarSesion: new CerrarSesionUseCase(auth),
     consultarPerfilPropio: new ConsultarPerfilPropioUseCase(auth, repoPerfiles),
     obtenerActorUseCase: new ObtenerActorUseCase(auth, repoPerfiles),
+    solicitarRecuperacionDeContrasena: new SolicitarRecuperacionDeContrasenaUseCase(auth),
+    cambiarContrasena: new CambiarContrasenaUseCase(auth),
+    confirmarEnlaceDeEmail: new ConfirmarEnlaceDeEmailUseCase(auth),
     listarPerfiles: new ListarPerfilesUseCase(repoPerfiles),
     crearPostulacion: new CrearPostulacionUseCase(repoPostulaciones, repoPeriodos, reloj),
     iniciarPago: new IniciarPagoUseCase(repoPostulaciones, repoPeriodos, reloj),

@@ -36,6 +36,11 @@ export type {
   DatosDeRegistro,
   ResultadoDeRegistro,
   ResultadoDeInicioDeSesion,
+  ResultadoDeSolicitudDeRecuperacion,
+  ResultadoDeCambioDeContrasena,
+  ResultadoDeConfirmacionDeEnlace,
+  ConfirmacionDeEnlace,
+  TipoDeEnlaceDeEmail,
 } from './puertos/servicio-de-autenticacion/puerto'
 export { ServicioDeAutenticacionFake } from './puertos/servicio-de-autenticacion/fake'
 export { RegistrarAspiranteUseCase } from './casos-de-uso/autenticacion/registrar-aspirante'
@@ -44,6 +49,14 @@ export { CerrarSesionUseCase } from './casos-de-uso/autenticacion/cerrar-sesion'
 export { ConsultarPerfilPropioUseCase } from './casos-de-uso/autenticacion/consultar-perfil-propio'
 export { ObtenerActorUseCase } from './casos-de-uso/autenticacion/obtener-actor'
 export type { ResultadoDeActor } from './casos-de-uso/autenticacion/obtener-actor'
+export { SolicitarRecuperacionDeContrasenaUseCase } from './casos-de-uso/autenticacion/solicitar-recuperacion-de-contrasena'
+export { CambiarContrasenaUseCase } from './casos-de-uso/autenticacion/cambiar-contrasena'
+export { ConfirmarEnlaceDeEmailUseCase } from './casos-de-uso/autenticacion/confirmar-enlace-de-email'
+export {
+  LONGITUD_MAXIMA_DE_CONTRASENA,
+  LONGITUD_MINIMA_DE_CONTRASENA,
+  esContrasenaValida,
+} from './casos-de-uso/autenticacion/politica-de-contrasena'
 export type {
   ServicioDeAdministracionDeUsuarios,
   ResultadoDeRestablecimiento,

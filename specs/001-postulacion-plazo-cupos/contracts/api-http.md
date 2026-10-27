@@ -24,6 +24,9 @@ actuales, con el error tipado.
 | `PATCH /api/documentos/:id` `{ estado, observaciones? }` o `{ tipo?, vigencia?, nombreArchivo? }` | `RevisarDocumento` / `ActualizarDocumento` | `SECRETARIA`, `DIRECCION` | `ConflictoDeEstado` → 409 |
 | `DELETE /api/documentos/:id` | `EliminarDocumento` | el aspirante dueño o `SECRETARIA` / `DIRECCION` | `ConflictoDeEstado` → 409 |
 | `POST /api/perfiles/:id/contrasena` | `RestablecerContrasena` | `SECRETARIA`, `DIRECCION` (Dirección también a sus pares) | `NoAutorizado` → 403, `NoEncontrado` → 404 |
+| `POST /api/auth/recuperar-contrasena` `{ email }` | `SolicitarRecuperacionDeContrasena` | público (no revela si el email existe) | `ENVIO_FALLIDO` → 503 |
+| `GET /auth/confirmar?code=` o `?token_hash=&type=&destino=` | `ConfirmarEnlaceDeEmail` | público (canjea el enlace del email) | redirige a `/login?error=enlace` o `/recuperar-contrasena?error=enlace` |
+| `POST /api/auth/cambiar-contrasena` `{ contrasena, confirmacion }` | `CambiarContrasena` | con sesión (solo la cuenta propia) | `NoAutorizado` → 401, `SolicitudInvalida` → 400 |
 | `POST /api/pagos/acreditaciones` `{ pagos: PagoInformado[] }` | `ImportarInformeDePagos` | `TESORERIA` | — (el resumen informa por fila) |
 | `GET /api/pagos?estado=A_DECIDIR\|NO_IMPUTADO\|DEVUELTO` | `ListarBandeja` | según el estado (ver puertos.md) | `NoAutorizado` → 403 |
 | `POST /api/pagos/:id/decision` `{ decision, comentario? }` | `DecidirPagoExcepcional` | `DIRECCION` | `conflicto` → 409 |
@@ -42,6 +45,16 @@ mismo caso de uso y por eso el permiso es idéntico. Tesorería y cualquier otro
 (`nombre` + `dni`, sin acentos, espacios ni puntos) y devuelve `{ perfilId, contrasenaTemporal }` para dictarla. No
 pide la contraseña anterior ni envía email, y necesita la service role key de Supabase Auth. Una `SECRETARIA` no
 puede restablecer la contraseña de `DIRECCION` ni de otra `SECRETARIA`: solo `DIRECCION` lo hace.
+
+La recuperación por email es el camino que usa la persona sin pasar por la mesa de entrada:
+`POST /api/auth/recuperar-contrasena` manda un enlace de Supabase Auth (SMTP del proyecto, por ejemplo Resend) y
+responde **siempre** lo mismo, exista o no la cuenta, para no filtrar qué emails están registrados. El enlace vuelve
+a `GET /auth/confirmar` con `?code=` (flujo PKCE de `@supabase/ssr`) o con `?token_hash=&type=` si la plantilla del
+email usa `{{ .TokenHash }}`; el endpoint canjea el enlace por una sesión y redirige a `/recuperar-contrasena/nueva`
+(cuando `destino=recuperar`) o a `/panel`. Ahí `POST /api/auth/cambiar-contrasena` recibe la contraseña dos veces y
+la cambia en la cuenta de la sesión: nunca acepta un email ni un id, así que no puede tocar otra cuenta. La misma
+pantalla sirve para que alguien con sesión abierta cambie su contraseña, y al terminar cierra las demás sesiones de
+esa cuenta.
 
 `POST /api/pagos/acreditaciones` recibe filas ya parseadas (JSON). El adaptador que lee el archivo de SysAdmin queda
 fuera de esta feature (research R9). Cuando llegue el formato, ese adaptador produce `PagoInformado[]` y llama al
