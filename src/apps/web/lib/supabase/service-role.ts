@@ -5,7 +5,9 @@ export function crearClienteServiceRole() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url || !key) {
-    throw new Error('Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY para el webhook')
+    throw new Error(
+      'Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY para las operaciones con service role',
+    )
   }
 
   return createClient(url, key, {
