@@ -25,7 +25,7 @@ export function HeaderInstitucional({ pasoActual, dniPostulante }: HeaderProps) 
           </div>
           <div className="mx-2 hidden h-6 w-px bg-border md:block" />
           <div className="hidden text-xs text-muted-foreground md:block">
-            <span className="font-semibold text-foreground">Portal de Ingresantes</span> · Cohorte 2026
+            <span className="font-semibold text-foreground">Portal de Ingresantes</span>
           </div>
         </Link>
 
