@@ -138,8 +138,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
 .site-header__barra { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 5rem; }
 
 .marca { display: inline-flex; align-items: center; gap: .9rem; text-decoration: none; color: var(--slate-900); flex: none; }
-.marca__logo { height: 2.75rem; width: auto; }
-.marca.tiene-imagen .marca__fallback { display: none; }
+.marca__logo { height: 3.5rem; width: auto; }
+.marca.tiene-imagen .marca__sello { display: none; }
 .marca__fallback { display: inline-flex; align-items: center; gap: .6rem; }
 .marca__sello {
     display: grid; place-items: center; width: 2.5rem; height: 2.5rem;
@@ -526,11 +526,13 @@ html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
     padding: 1.5rem; background: var(--white); border: 1px solid var(--slate-200); border-radius: var(--radius-l);
 }
 .persona__foto {
-    position: relative; width: min(100%, 12rem); aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-l);
-    background: var(--utn); color: #fff; display: grid; place-items: center;
+    position: relative; width: min(100%, 12rem); display: grid; place-items: center;
+    color: #fff; background: var(--utn); border-radius: var(--radius-l); aspect-ratio: 1; overflow: hidden;
 }
 .persona__inicial { font: 800 4rem var(--font-display); }
-.persona__foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.persona__foto.tiene-imagen { aspect-ratio: auto; background: none; border-radius: 0; overflow: visible; }
+.persona__foto.tiene-imagen .persona__inicial { display: none; }
+.persona__foto img { position: static; width: 100%; height: 14rem; object-fit: contain; }
 .persona__cuerpo > * + * { margin-top: .75rem; }
 .persona h3 { font-size: 1.6rem; font-weight: 700; }
 .persona__resumen { max-width: 52ch; color: var(--slate-600); }
