@@ -30,23 +30,39 @@ export interface ItemDeMenu {
   icono: IconoDeMenu
   /** Bandeja de pagos cuyo total de pendientes se muestra al lado del ítem. */
   contador?: 'A_DECIDIR' | 'NO_IMPUTADO' | 'DEVUELTO'
+  /** Grupo de la barra lateral: los pagos van aparte; el resto, bajo el nombre del rol. */
+  area?: 'pagos'
+}
+
+export type AreaDeMenu = 'rol' | 'pagos'
+
+export interface GrupoDeMenu {
+  area: AreaDeMenu
+  items: readonly ItemDeMenu[]
 }
 
 const PERIODOS: ItemDeMenu = { href: '/personal/periodos', etiqueta: 'Períodos', icono: 'periodos' }
 // Los pagos se parten por tarea de Tesorería: importar el informe del día, resolver los pagos que no se pudieron
 // imputar y devolver los que rechazó Dirección.
-const INFORMES: ItemDeMenu = { href: '/personal/pagos', etiqueta: 'Informes de pagos', icono: 'informes' }
+const INFORMES: ItemDeMenu = {
+  href: '/personal/pagos',
+  etiqueta: 'Informes de pagos',
+  icono: 'informes',
+  area: 'pagos',
+}
 const NO_IMPUTADOS: ItemDeMenu = {
   href: '/personal/pagos/no-imputados',
   etiqueta: 'No imputados',
   icono: 'no-imputados',
   contador: 'NO_IMPUTADO',
+  area: 'pagos',
 }
 const DEVOLUCIONES: ItemDeMenu = {
   href: '/personal/pagos/devoluciones',
   etiqueta: 'Devoluciones',
   icono: 'devoluciones',
   contador: 'DEVUELTO',
+  area: 'pagos',
 }
 const POSTULACIONES: ItemDeMenu = {
   href: '/personal/postulaciones',
@@ -73,4 +89,25 @@ export const MENU_DE_ROL: Record<RolDelPersonal, readonly ItemDeMenu[]> = {
   TESORERIA: [INFORMES, NO_IMPUTADOS, DEVOLUCIONES, POSTULACIONES],
   SECRETARIA: [PERIODOS, POSTULACIONES, DOCUMENTACION, INFORMES, NO_IMPUTADOS, DEVOLUCIONES],
   DIRECCION: [CASOS, PERIODOS, POSTULACIONES, DOCUMENTACION],
+}
+
+// Los grupos salen en el orden en que aparece su primer ítem, así el panel de cada rol sigue arriba de todo.
+export function agruparMenu(rol: RolDelPersonal): GrupoDeMenu[] {
+  const grupos = new Map<AreaDeMenu, ItemDeMenu[]>()
+  for (const item of MENU_DE_ROL[rol]) {
+    const area = item.area ?? 'rol'
+    grupos.set(area, [...(grupos.get(area) ?? []), item])
+  }
+  return [...grupos].map(([area, items]) => ({ area, items }))
+}
+
+// El ítem del menú que corresponde a la ruta: el de href más largo que la contiene, para que
+// /personal/pagos/no-imputados marque "No imputados" y no "Informes de pagos".
+export function itemActivoDelMenu(rol: RolDelPersonal, pathname: string): ItemDeMenu | undefined {
+  return MENU_DE_ROL[rol]
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .reduce<ItemDeMenu | undefined>(
+      (elegido, item) => (!elegido || item.href.length > elegido.href.length ? item : elegido),
+      undefined,
+    )
 }
