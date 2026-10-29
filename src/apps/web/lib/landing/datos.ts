@@ -8,9 +8,9 @@
 export const PROYECTO_NOMBRE = 'Sistema de Ingreso TUP'
 
 /**
-  * Destino de todos los botones "Ir al sistema de inscripción". Se puede sobrescribir con la variable de
-  * entorno NEXT_PUBLIC_SISTEMA_URL (tiene que llevar ese prefijo para llegar también al navegador).
-  */
+ * Destino de todos los botones "Ir al sistema de inscripción". Se puede sobrescribir con la variable de
+ * entorno NEXT_PUBLIC_SISTEMA_URL (tiene que llevar ese prefijo para llegar también al navegador).
+ */
 export const SISTEMA_URL = process.env.NEXT_PUBLIC_SISTEMA_URL ?? '/login'
 
 /** Navegación principal (encabezado y pie). */
@@ -50,27 +50,57 @@ export const DOCENTE = 'Lic. Leila Coronel'
 
 /** Pasos del flujo propuesto (Home). El que tiene `hito` es el que confirma la vacante. */
 export const PASOS_PROPUESTOS = [
-  { titulo: 'Preinscripción ligera', detalle: 'Datos mínimos y aceptación de las condiciones.', hito: false },
-  { titulo: 'Paga la matrícula', detalle: 'Online o en la ventanilla de Tesorería.', hito: false },
-  { titulo: 'Vacante confirmada', detalle: 'El pago acreditado asegura el lugar.', hito: true },
-  { titulo: 'Carga la documentación', detalle: 'Recién ahora, y Secretaría la revisa.', hito: false },
+  {
+    titulo: 'Preinscripción ligera',
+    detalle: 'Datos mínimos y aceptación de las condiciones.',
+    hito: false,
+  },
+  {
+    titulo: 'Paga la matrícula',
+    detalle: 'Online o en la ventanilla de Tesorería.',
+    hito: false,
+  },
+  {
+    titulo: 'Vacante confirmada',
+    detalle: 'El pago acreditado asegura el lugar.',
+    hito: true,
+  },
+  {
+    titulo: 'Carga la documentación',
+    detalle: 'Recién ahora, y Secretaría la revisa.',
+    hito: false,
+  },
 ] as const
 
 export type ClaveDeRol = 'postulante' | 'secretario' | 'tesoreria' | 'director'
 
 /** Roles del sistema (Home). */
-export const ROLES: readonly { clave: ClaveDeRol; nombre: string; funcion: string }[] = [
-  { clave: 'postulante', nombre: 'Postulante', funcion: 'Maneja su postulación y gestiona sus documentos.' },
+export const ROLES: readonly {
+  clave: ClaveDeRol
+  nombre: string
+  funcion: string
+}[] = [
+  {
+    clave: 'postulante',
+    nombre: 'Postulante',
+    funcion: 'Maneja su postulación y gestiona sus documentos.',
+  },
   {
     clave: 'secretario',
     nombre: 'Secretario',
-    funcion: 'Puede gestionar y ayudar a los postulantes en los pasos de los ingresos.',
+    funcion:
+      'Puede gestionar y ayudar a los postulantes en los pasos de los ingresos.',
   },
-  { clave: 'tesoreria', nombre: 'Tesorería', funcion: 'Puede gestionar la confirmación de los pagos.' },
+  {
+    clave: 'tesoreria',
+    nombre: 'Tesorería',
+    funcion: 'Puede gestionar la confirmación de los pagos.',
+  },
   {
     clave: 'director',
     nombre: 'Director',
-    funcion: 'Puede ver las estadísticas generales y gestionar el ingreso en general.',
+    funcion:
+      'Puede ver las estadísticas generales y gestionar el ingreso en general.',
   },
 ]
 
@@ -88,7 +118,10 @@ export const CAPAS_TECNOLOGICAS = [
   {
     nombre: 'Lo que guarda y protege',
     piezas: [
-      { nombre: 'Supabase', uso: 'base de datos PostgreSQL, usuarios y archivos' },
+      {
+        nombre: 'Supabase',
+        uso: 'base de datos PostgreSQL, usuarios y archivos',
+      },
     ],
   },
   {
@@ -101,7 +134,12 @@ export const CAPAS_TECNOLOGICAS = [
 ] as const
 
 /** Claves válidas de motivo de consulta. La usan la vista y el endpoint. */
-export const CLAVES_DE_ASUNTOS = ['inscripcion', 'proyecto', 'equipo', 'otro'] as const
+export const CLAVES_DE_ASUNTOS = [
+  'inscripcion',
+  'proyecto',
+  'equipo',
+  'otro',
+] as const
 
 export type ClaveDeAsunto = (typeof CLAVES_DE_ASUNTOS)[number]
 
@@ -130,7 +168,8 @@ export const EQUIPO: Integrante[] = [
     nombre: 'Federico De Vivo',
     rol: 'Frontend',
     foto: '/landing/img/federico.jpg',
-    resumen: 'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
+    resumen:
+      'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
     tecnologias: [],
     github: '',
     linkedin: '',
@@ -139,7 +178,8 @@ export const EQUIPO: Integrante[] = [
     nombre: 'Lucia Enriquez Aveiro',
     rol: 'Frontend',
     foto: '/landing/img/lucia.jpg',
-    resumen: 'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
+    resumen:
+      'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
     tecnologias: [],
     github: '',
     linkedin: '',
