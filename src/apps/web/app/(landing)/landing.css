@@ -683,28 +683,6 @@ html {
 .hero {
   padding-block: clamp(3rem, 8vw, 6rem);
 }
-
-/* La portada cambia la trama de planos por la imagen institucional. La foto va en ::before
-   (con el parallax que ya trae data-parallax) y ::after hace de velo azul para que el texto
-   blanco siga siendo legible. El resto de las bandas azules conserva la trama. */
-.hero::before {
-  inset: -20% 0;
-  background-image: url('/landing/img/fondo-hero-utn.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transform: translateY(var(--py, 0px));
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-.hero::after {
-  background: linear-gradient(
-    160deg,
-    rgba(0, 40, 80, 0.7) 0%,
-    rgba(0, 58, 100, 0.5) 55%,
-    rgba(0, 72, 125, 0.4) 100%
-  );
-}
 .hero__grid {
   display: grid;
   gap: 3rem;
@@ -723,7 +701,8 @@ html {
   margin-top: 1.5rem;
   max-width: 44ch;
   font-size: 1.2rem;
-  color: var(--blue-100);
+  color: var(--blue-50);
+  text-shadow: 0 1px 2px rgba(0, 20, 40, 0.45);
 }
 .hero__acciones {
   display: flex;
@@ -731,10 +710,32 @@ html {
   gap: 0.85rem;
   margin-top: 2.25rem;
 }
+/* La foto institucional se usa solo desde 960 px: en mobile el hero vuelve a la trama azul
+   original, que no recorta la imagen y mantiene el texto legible. La foto va en ::before
+   (con el parallax de data-parallax) y ::after concentra el velo sobre la columna de texto. */
 @media (min-width: 960px) {
   .hero__grid {
     grid-template-columns: 1.15fr 0.85fr;
     gap: 4.5rem;
+  }
+  .hero::before {
+    inset: -12% 0;
+    background-image: url('/landing/img/fondo-hero-utn.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: translateY(var(--py, 0px));
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .hero::after {
+    /* Velo más fuerte donde está el texto (izquierda) y más liviano sobre la foto (derecha). */
+    background: linear-gradient(
+      100deg,
+      rgba(0, 30, 60, 0.88) 0%,
+      rgba(0, 42, 78, 0.72) 48%,
+      rgba(0, 64, 110, 0.22) 100%
+    );
   }
 }
 
