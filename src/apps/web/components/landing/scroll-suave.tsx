@@ -9,6 +9,12 @@ import { useEffect } from 'react'
 const SUAVIDAD = 0.07
 
 /**
+ * Evento para que otro componente (por ejemplo, un enlace del encabezado) pueda frenar
+ * la inercia de la rueda antes de iniciar un scroll propio.
+ */
+export const EVENTO_CANCELAR_SCROLL_SUAVE = 'scroll-suave:cancelar'
+
+/**
  * Suaviza la rueda del mouse en la landing con una inercia corta (sin librerías).
  *
  * Decisiones para no secuestrar el scroll:
@@ -145,14 +151,26 @@ export function ScrollSuave() {
       }
     }
 
+    const cancelar = () => {
+      if (!cuadro) return
+      window.cancelAnimationFrame(cuadro)
+      cuadro = 0
+      ultimoTiempo = 0
+      actual = window.scrollY
+      objetivo = actual
+      aplicado = actual
+    }
+
     window.addEventListener('wheel', alRueda, { passive: false })
     window.addEventListener('scroll', alScrollear, { passive: true })
     window.addEventListener('resize', alScrollear)
+    window.addEventListener(EVENTO_CANCELAR_SCROLL_SUAVE, cancelar)
 
     return () => {
       window.removeEventListener('wheel', alRueda)
       window.removeEventListener('scroll', alScrollear)
       window.removeEventListener('resize', alScrollear)
+      window.removeEventListener(EVENTO_CANCELAR_SCROLL_SUAVE, cancelar)
       if (cuadro) window.cancelAnimationFrame(cuadro)
     }
   }, [])
