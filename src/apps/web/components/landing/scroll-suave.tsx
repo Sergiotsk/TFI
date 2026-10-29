@@ -6,7 +6,7 @@ import { useEffect } from 'react'
  * Cuánto del recorrido pendiente se consume por cuadro. Más bajo = más suave y lento;
  * más alto = más directo. Rango recomendado: 0.08 (muy suave) a 0.18 (casi inmediato).
  */
-const SUAVIDAD = 0.1
+const SUAVIDAD = 0.07
 
 /**
  * Suaviza la rueda del mouse en la landing con una inercia corta (sin librerías).
