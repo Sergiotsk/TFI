@@ -63,8 +63,18 @@ const nextSoloEnWeb = nextCoreWebVitals.map((config) => ({
 export default defineConfig([
   globalIgnores(['**/node_modules/', '**/.next/', '**/next-env.d.ts']),
 
+  // Sin comentarios `eslint-disable`: una regla se cambia acá, en un PR que revisa el code owner (CODEOWNERS).
+  { name: 'tfi/sin-config-en-linea', linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: 'error' } },
+
   js.configs.recommended,
   tseslint.configs.recommended, // incluye no-explicit-any como error (Principio IV)
+  {
+    name: 'tfi/composicion-raiz-sin-any',
+    files: ['apps/web/composition-root.ts', 'apps/web/app/api/pagos/webhook/mercadopago/route.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
   ...nextSoloEnWeb,
 
   {

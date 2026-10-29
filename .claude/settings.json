@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(/.github/**)",
+      "Write(/.github/**)",
+      "Edit(/src/eslint.config.mjs)",
+      "Write(/src/eslint.config.mjs)",
+      "Edit(/src/**/tsconfig*.json)",
+      "Write(/src/**/tsconfig*.json)",
+      "Edit(/src/vitest.config.ts)",
+      "Write(/src/vitest.config.ts)",
+      "Edit(/src/scripts/migraciones/**)",
+      "Write(/src/scripts/migraciones/**)",
+      "Edit(/.claude/settings.json)",
+      "Write(/.claude/settings.json)",
+      "Bash(gh pr merge * --admin*)",
+      "Bash(gh pr merge --admin*)",
+      "Bash(gh api *rulesets*)",
+      "Bash(gh ruleset *)"
+    ]
+  }
+}

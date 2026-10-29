@@ -67,6 +67,15 @@ Después: commit, push y PR hacia `develop`. Al terminar el día: `supabase stop
   `supabase migration new`, pasale tu SQL, borrá la vieja y corré `supabase db reset`.
 - **Sin datos personales reales** en migraciones ni en seeds (Ley 25.326).
 
+La CI hace cumplir las reglas de formato, edición y orden en cada PR: falla si una migración nueva tiene un nombre
+que el CLI no aplicaría, repite la versión de otra o queda antes de la última de la base, y también si se edita o
+borra una que ya está en la base. Para chequearlo antes de abrir el PR, desde `src/`:
+
+```bash
+git fetch origin
+pnpm migraciones:verificar            # contra origin/develop; para otra base: pnpm migraciones:verificar origin/main
+```
+
 ## Tests de contrato contra Supabase
 
 `pnpm test` corre solo la suite de unidad, sin red ni base de datos. Los contratos de los adaptadores

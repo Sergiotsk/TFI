@@ -171,7 +171,7 @@ base); al acreditar su pago queda `VACANTE_CONFIRMADA` y la ocupación da 1; si 
 - [ ] T070 [US1] Crear src/packages/infrastructure/supabase/registro-de-pagos.contrato.test.ts y src/packages/infrastructure/supabase/registro-de-cargas.contrato.test.ts (corren los contratos de T055 y T056 contra Supabase local)
 - [ ] T071 [US1] Crear src/apps/web/http/esquemas/pagos.ts (Zod de `PagoInformado[]`: DNI, número, monto en centavos, fecha de pago y referencia)
 - [ ] T072 [US1] Crear src/apps/web/app/api/pagos/acreditaciones/route.ts (POST) y src/apps/web/app/api/pagos/route.ts (GET `?estado=`), según contracts/api-http.md
-- [ ] T073 [US1] Crear la bandeja de pagos de Tesorería y Secretaría en src/apps/web/app/personal/pagos/page.tsx (listados `NO_IMPUTADO` con su motivo y `DEVUELTO`, más las cargas de informe)
+- [ ] T073 [US1] Crear la bandeja de pagos de Tesorería y Secretaría en src/apps/web/app/(paneles)/(personal)/personal/pagos/page.tsx (listados `NO_IMPUTADO` con su motivo y `DEVUELTO`, más las cargas de informe)
 
 **Checkpoint**: US1 funciona sola: importar, acreditar, idempotencia y bandeja.
 
@@ -214,18 +214,18 @@ lo acepta, la ocupación supera el total y queda la decisión registrada; una se
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T083 [P] [US5] Escribir src/packages/application/casos-de-uso/decidir-pago-excepcional.test.ts (aceptar `SIN_CUPO` excede el cupo; rechazar deja `VENCIDO` y `DEVUELTO`; un rol distinto de `DIRECCION` → `NoAutorizado`; doble decisión → `conflicto`)
-- [ ] T084 [P] [US5] Agregar a src/packages/application/puertos/registro-de-pagos/contrato.ts los casos de `registrarDecision` de contracts/puertos.md (aceptar sin cupo, rechazar, doble decisión)
+- [x] T083 [P] [US5] Escribir src/packages/application/casos-de-uso/decidir-pago-excepcional.test.ts (aceptar `SIN_CUPO` excede el cupo; rechazar deja `VENCIDO` y `DEVUELTO`; un rol distinto de `DIRECCION` → `NoAutorizado`; doble decisión → `conflicto`)
+- [x] T084 [P] [US5] Agregar a src/packages/application/puertos/registro-de-pagos/contrato.ts los casos de `registrarDecision` de contracts/puertos.md (aceptar sin cupo, rechazar, doble decisión)
 
 ### Implementation for User Story 5
 
 - [x] T085 [P] [US5] Implementar src/packages/domain/pago/decision-de-direccion.ts y exportarlo en src/packages/domain/index.ts
-- [ ] T086 [US5] Implementar `registrarDecision` en src/packages/application/puertos/registro-de-pagos/fake.ts (hasta que pase el contrato de T084 contra el fake)
-- [ ] T087 [US5] Implementar src/packages/application/casos-de-uso/decidir-pago-excepcional.ts (hasta que pase T083)
-- [ ] T088 [US5] Crear src/supabase/migrations/20261021000700_rpc_decidir_pago_excepcional.sql según contracts/rpc.md (`FOR UPDATE` sobre el pago y la Postulación, exige `rol_actual() = 'DIRECCION'`, inserta en `decisiones_de_direccion`, sin comparar contra el total al aceptar), con `REVOKE` y `GRANT`
-- [ ] T089 [US5] Implementar `registrarDecision` en src/packages/infrastructure/supabase/registro-de-pagos.ts y verificar que src/packages/infrastructure/supabase/registro-de-pagos.contrato.test.ts pasa con los casos nuevos
-- [ ] T090 [US5] Crear src/apps/web/app/api/pagos/[id]/decision/route.ts, con su Zod en src/apps/web/http/esquemas/pagos.ts
-- [ ] T091 [US5] Crear el panel de Dirección en src/apps/web/app/direccion/casos/page.tsx (casos `A_DECIDIR` con motivo, fecha de pago, vencimiento y ocupación actual del período, más los botones aceptar y rechazar con comentario)
+- [x] T086 [US5] Implementar `registrarDecision` en src/packages/application/puertos/registro-de-pagos/fake.ts (hasta que pase el contrato de T084 contra el fake)
+- [x] T087 [US5] Implementar src/packages/application/casos-de-uso/decidir-pago-excepcional.ts (hasta que pase T083)
+- [x] T088 [US5] Crear src/supabase/migrations/20261024120000_rpc_decidir_pago_excepcional.sql según contracts/rpc.md (`FOR UPDATE` sobre el pago y la Postulación, exige `rol_actual() = 'DIRECCION'`, inserta en `decisiones_de_direccion`, sin comparar contra el total al aceptar), con `REVOKE` y `GRANT`
+- [x] T089 [US5] Implementar `registrarDecision` en src/packages/infrastructure/supabase/registro-de-pagos.ts y verificar que src/packages/infrastructure/supabase/registro-de-pagos.contrato.test.ts pasa con los casos nuevos
+- [x] T090 [US5] Crear src/apps/web/app/api/pagos/[id]/decision/route.ts, con su Zod en src/apps/web/http/esquemas/pagos.ts
+- [x] T091 [US5] Crear el panel de Dirección en src/apps/web/app/(paneles)/(personal)/direccion/casos/page.tsx (casos `A_DECIDIR` con motivo, fecha de pago, vencimiento y ocupación actual del período, más los botones aceptar y rechazar con comentario)
 
 **Checkpoint**: las tres historias P1 funcionan; se puede recorrer la sección 5 de quickstart.md hasta el paso 7.
 
@@ -311,7 +311,7 @@ un `signUp` sin DNI falla.
 
 - Los tests (incluido el `contrato.ts`) se escriben primero y tienen que fallar.
 - Dominio → puerto y fake → caso de uso → migración y RPC → adaptador → route handler → UI.
-- El orden de las migraciones es el de sus timestamps: 0100 a 0500 en la fundación, 0600 en US1 y 0700 en US5.
+- El orden de las migraciones es el de sus timestamps: 0100 a 0500 en la fundación, `20261023200000` en US1 y `20261024120000` en US5 (posteriores a las que ya estaban aplicadas en el remoto).
   Difiere del orden escrito en plan.md porque el registro estricto tiene que ir justo después de `NOT NULL
   institucion_id`, y cada RPC va con la historia que la usa.
 

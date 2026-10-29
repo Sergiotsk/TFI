@@ -21,11 +21,9 @@ export interface EntornoDePeriodos {
 
 const UN_DIA = 24 * 60 * 60 * 1000
 
-let contador = 0
-
+// Al azar: con Date.now() + un contador, dos workers de vitest en el mismo milisegundo daban el mismo DNI.
 function dniUnico(): string {
-  contador += 1
-  return String(30_000_000 + ((Date.now() + contador) % 69_000_000))
+  return String(30_000_000 + Math.floor(Math.random() * 69_000_000))
 }
 
 /**

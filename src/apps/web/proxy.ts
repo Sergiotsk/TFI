@@ -5,12 +5,7 @@ import {
 } from '@tfi/infrastructure/supabase/servidor'
 import { leerEntorno } from '@/config/entorno'
 import { redireccionValida } from '@/lib/redireccion'
-
-const RUTAS_PROTEGIDAS_POR_PREFIJO = ['/panel']
-
-function esRutaProtegida(pathname: string): boolean {
-  return RUTAS_PROTEGIDAS_POR_PREFIJO.some((prefijo) => pathname.startsWith(prefijo))
-}
+import { esRutaProtegida } from '@/lib/rutas-protegidas'
 
 export async function proxy(request: NextRequest) {
   const entorno = leerEntorno()

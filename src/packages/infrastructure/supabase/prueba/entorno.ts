@@ -1,19 +1,31 @@
-import { randomUUID } from 'node:crypto'
+import { randomInt, randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PeriodoDeIngreso, Postulacion } from '@tfi/domain'
 import type { DatosDePostulacionSembrada } from '@tfi/application'
-import type {
-  DatosDePeriodoDePrueba,
-  EntornoDeDocumentos,
-  EntornoDePostulaciones,
-  EntornoDePeriodos,
+import {
+  MATRICULA_DE_PRUEBA_CENTAVOS,
+  type DatosDePeriodoDePrueba,
+  type EntornoDeDocumentos,
+  type EntornoDeIntencionesDePago,
+  type EntornoDePostulaciones,
+  type EntornoDePeriodos,
+  type EntornoDeRegistroDeCargas,
+  type EntornoDeRegistroDePagos,
 } from '@tfi/application/contratos'
-import { claveDeServicioDePrueba, emailDePrueba, urlDePrueba } from '../entorno-de-prueba'
+import {
+  claveDeServicioDePrueba,
+  clavePublicaDePrueba,
+  emailDePrueba,
+  urlDePrueba,
+} from '../entorno-de-prueba'
 import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
 import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
+import { RepositorioDeIntencionesDePagoSupabase } from '../repositorio-de-intenciones-de-pago'
 import { RepositorioDePeriodosSupabase } from '../repositorio-de-periodos'
+import { RegistroDeCargasSupabase } from '../registro-de-cargas'
+import { RegistroDePagosSupabase } from '../registro-de-pagos'
 import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulaciones'
 
 /**
@@ -27,18 +39,16 @@ import { RepositorioDePostulacionesSupabase } from '../repositorio-de-postulacio
 
 const UN_DIA = 24 * 60 * 60 * 1000
 
-let contador = 0
+// Al azar y no con Date.now() + un contador: vitest corre cada archivo en su propio worker, cada uno con su
+// contador desde 0, y dos workers en el mismo milisegundo generaban el mismo código o DNI.
 
+/** 12 caracteres hex: entra en `instituciones.codigo` (VARCHAR(20)) con el prefijo `PRUEBA-`. */
 function marcaUnica(): string {
-  contador += 1
-  return `${Date.now().toString(36)}${contador.toString(36)}`
+  return randomUUID().replace(/-/g, '').slice(0, 12)
 }
 
-let contadorDni = 0
-
 function dniUnico(): string {
-  contadorDni += 1
-  return String(10_000_000 + ((Date.now() + contadorDni * 7919) % 89_000_000))
+  return String(randomInt(10_000_000, 99_000_000))
 }
 
 export function clienteDeServicio(): SupabaseClient {
@@ -83,10 +93,21 @@ async function crearInstitucionInactiva(cliente: SupabaseClient): Promise<string
   return data.id as string
 }
 
+const CLAVE_DE_PRUEBA = 'solo-local-123'
+
 async function crearAspirante(cliente: SupabaseClient, dni: string): Promise<string> {
+  const { id } = await crearUsuario(cliente, dni)
+  return id
+}
+
+async function crearUsuario(
+  cliente: SupabaseClient,
+  dni: string,
+): Promise<{ id: string; email: string }> {
+  const email = emailDePrueba('aspirante')
   const { data, error } = await cliente.auth.admin.createUser({
-    email: emailDePrueba('aspirante'),
-    password: 'solo-local-123',
+    email,
+    password: CLAVE_DE_PRUEBA,
     email_confirm: true,
     user_metadata: {
       nombre: 'Aspirante',
@@ -102,7 +123,18 @@ async function crearAspirante(cliente: SupabaseClient, dni: string): Promise<str
   }
 
   // El perfil lo crea el trigger `crear_perfil_al_registrarse`.
-  return data.user.id
+  return { id: data.user.id, email }
+}
+
+/** Cliente con la sesión del usuario: pasa por los grants y RLS de `authenticated`. */
+async function clienteConSesion(email: string): Promise<SupabaseClient> {
+  const cliente = createClient(urlDePrueba(), clavePublicaDePrueba(), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  const { error } = await cliente.auth.signInWithPassword({ email, password: CLAVE_DE_PRUEBA })
+  if (error) throw new Error(`No se pudo iniciar sesión: ${error.message}`)
+
+  return cliente
 }
 
 async function crearPeriodo(
@@ -176,6 +208,27 @@ export async function prepararEntornoDePostulaciones(): Promise<EntornoDePostula
   }
 }
 
+export async function prepararEntornoDeIntenciones(): Promise<EntornoDeIntencionesDePago> {
+  const cliente = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(cliente)
+  const periodo = await crearPeriodo(cliente, institucionId)
+  const aspiranteId = await crearAspirante(cliente, dniUnico())
+  const postulacion = await sembrarPostulacion(cliente, {
+    aspiranteId,
+    periodoId: periodo.id,
+    estado: 'PAGO_PENDIENTE',
+  })
+
+  return {
+    repositorio: new RepositorioDeIntencionesDePagoSupabase(cliente),
+    postulacionId: postulacion.id,
+    periodoId: periodo.id,
+    institucionId,
+    crearExternalId: () => `int_contrato_${marcaUnica()}`,
+    ahora: () => new Date(),
+  }
+}
+
 export async function prepararEntornoDePeriodos(): Promise<EntornoDePeriodos> {
   const cliente = clienteDeServicio()
   // La suite de períodos necesita una institución propia: si usa FRH, el seed y
@@ -216,5 +269,149 @@ export async function prepararEntornoDeDocumentos(): Promise<EntornoDeDocumentos
     repositorio: new RepositorioDeDocumentosSupabase(cliente),
     crearPostulacion: () => crearPostulacionDeDocumentos(cliente, institucionId),
     crearIdDocumento: () => randomUUID(),
+  }
+}
+
+export interface EntornoDeDocumentosConSesion {
+  postulacionId: string
+  /** Adaptador con la sesión del aspirante dueño de la Postulación. */
+  delAspirante: RepositorioDeDocumentosSupabase
+  aspiranteId: string
+  /** Adaptador con la sesión de Secretaría de la misma institución. */
+  delPersonal: RepositorioDeDocumentosSupabase
+  personalId: string
+}
+
+/**
+ * Entorno para verificar los grants y RLS de `documentos`: a diferencia de
+ * `prepararEntornoDeDocumentos`, el adaptador usa sesiones reales y no la clave
+ * de servicio, que se saltea los permisos.
+ */
+export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeDocumentosConSesion> {
+  const servicio = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(servicio)
+
+  const periodo = await crearPeriodo(servicio, institucionId)
+  const aspirante = await crearUsuario(servicio, dniUnico())
+  const postulacion = await sembrarPostulacion(servicio, {
+    aspiranteId: aspirante.id,
+    periodoId: periodo.id,
+    estado: 'ESPERANDO_DOCUMENTACION',
+  })
+
+  const personal = await crearUsuario(servicio, dniUnico())
+  const { error } = await servicio
+    .from('perfiles')
+    .update({ rol: 'SECRETARIA', institucion_id: institucionId })
+    .eq('id', personal.id)
+  if (error) throw new Error(`No se pudo dar el rol de Secretaría: ${error.message}`)
+
+  return {
+    postulacionId: postulacion.id,
+    delAspirante: new RepositorioDeDocumentosSupabase(await clienteConSesion(aspirante.email)),
+    aspiranteId: aspirante.id,
+    delPersonal: new RepositorioDeDocumentosSupabase(await clienteConSesion(personal.email)),
+    personalId: personal.id,
+  }
+}
+
+interface PersonalConSesion {
+  id: string
+  cliente: SupabaseClient
+}
+
+let personalDePagosDeLaCorrida:
+  | Promise<{ institucionId: string; tesoreria: PersonalConSesion; direccion: PersonalConSesion }>
+  | undefined
+
+/**
+ * Tesorería y Dirección con su sesión, una vez por corrida, en una institución de
+ * prueba propia: así los pagos, las cargas y los casos de los contratos no
+ * aparecen en los paneles de FRH.
+ */
+function personalDePagosConSesion(
+  servicio: SupabaseClient,
+): Promise<{ institucionId: string; tesoreria: PersonalConSesion; direccion: PersonalConSesion }> {
+  personalDePagosDeLaCorrida ??= (async () => {
+    const institucionId = await crearInstitucionInactiva(servicio)
+
+    const conRol = async (rol: 'TESORERIA' | 'DIRECCION'): Promise<PersonalConSesion> => {
+      const usuario = await crearUsuario(servicio, dniUnico())
+      const { error } = await servicio
+        .from('perfiles')
+        .update({ rol, institucion_id: institucionId })
+        .eq('id', usuario.id)
+      if (error) throw new Error(`No se pudo dar el rol ${rol}: ${error.message}`)
+
+      return { id: usuario.id, cliente: await clienteConSesion(usuario.email) }
+    }
+
+    return { institucionId, tesoreria: await conRol('TESORERIA'), direccion: await conRol('DIRECCION') }
+  })()
+
+  return personalDePagosDeLaCorrida
+}
+
+/**
+ * Entorno del contrato de `RegistroDePagos`: el adaptador usa la sesión de
+ * Tesorería para acreditar y la de Dirección para decidir, así pasa por la
+ * verificación de rol e institución de cada RPC.
+ * Todo se siembra en la institución de prueba de la Tesorería, y los períodos
+ * ya cerrados (la RPC no mira el cierre).
+ */
+export async function prepararEntornoDeRegistroDePagos(): Promise<EntornoDeRegistroDePagos> {
+  const servicio = clienteDeServicio()
+  const { institucionId, tesoreria, direccion } = await personalDePagosConSesion(servicio)
+  const periodos = new RepositorioDePeriodosSupabase(servicio)
+  const cargas = new RegistroDeCargasSupabase(tesoreria.cliente)
+
+  return {
+    registro: new RegistroDePagosSupabase(tesoreria.cliente),
+    registroDeDireccion: new RegistroDePagosSupabase(direccion.cliente),
+    direccionId: direccion.id,
+    institucionId,
+    ahora: () => new Date(),
+    sembrar: async (datos) => {
+      const periodoId =
+        datos.periodoId ??
+        (
+          await crearPeriodo(servicio, institucionId, {
+            totalCupos: datos.totalCupos ?? 10,
+            cierraEl: new Date(Date.now() - UN_DIA),
+            montoMatriculaCentavos: MATRICULA_DE_PRUEBA_CENTAVOS,
+          })
+        ).id
+      const aspiranteId = await crearAspirante(servicio, dniUnico())
+      const postulacion = await sembrarPostulacion(servicio, {
+        aspiranteId,
+        periodoId,
+        estado: datos.estado,
+        venceEl: datos.venceEl,
+      })
+
+      return { postulacionId: postulacion.id, periodoId }
+    },
+    sembrarCarga: async () => (await cargas.iniciar(institucionId, tesoreria.id, 'contrato.csv')).id,
+    estadoDe: async (postulacionId) => {
+      const { data, error } = await servicio
+        .from('postulaciones')
+        .select('*')
+        .eq('id', postulacionId)
+        .single()
+      if (error) throw new Error(`No se pudo leer la Postulación: ${error.message}`)
+      return mapearPostulacion(data).estado
+    },
+    contarOcupados: (periodoId) => periodos.contarOcupados(periodoId),
+  }
+}
+
+/** Entorno del contrato de `RegistroDeCargas`, con la sesión de Tesorería. */
+export async function prepararEntornoDeRegistroDeCargas(): Promise<EntornoDeRegistroDeCargas> {
+  const { institucionId, tesoreria } = await personalDePagosConSesion(clienteDeServicio())
+
+  return {
+    cargas: new RegistroDeCargasSupabase(tesoreria.cliente),
+    institucionId,
+    cargadaPor: tesoreria.id,
   }
 }

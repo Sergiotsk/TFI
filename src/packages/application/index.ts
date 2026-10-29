@@ -1,4 +1,4 @@
-// API pública de @tfi/application: lo que no se exporta acá no se puede importar desde otros paquetes.
+﻿// API pública de @tfi/application: lo que no se exporta acá no se puede importar desde otros paquetes.
 export type { Pagina, Paginacion } from './paginacion'
 export {
   MAXIMO_POR_PAGINA,
@@ -36,6 +36,11 @@ export type {
   DatosDeRegistro,
   ResultadoDeRegistro,
   ResultadoDeInicioDeSesion,
+  ResultadoDeSolicitudDeRecuperacion,
+  ResultadoDeCambioDeContrasena,
+  ResultadoDeConfirmacionDeEnlace,
+  ConfirmacionDeEnlace,
+  TipoDeEnlaceDeEmail,
 } from './puertos/servicio-de-autenticacion/puerto'
 export { ServicioDeAutenticacionFake } from './puertos/servicio-de-autenticacion/fake'
 export { RegistrarAspiranteUseCase } from './casos-de-uso/autenticacion/registrar-aspirante'
@@ -44,6 +49,25 @@ export { CerrarSesionUseCase } from './casos-de-uso/autenticacion/cerrar-sesion'
 export { ConsultarPerfilPropioUseCase } from './casos-de-uso/autenticacion/consultar-perfil-propio'
 export { ObtenerActorUseCase } from './casos-de-uso/autenticacion/obtener-actor'
 export type { ResultadoDeActor } from './casos-de-uso/autenticacion/obtener-actor'
+export { SolicitarRecuperacionDeContrasenaUseCase } from './casos-de-uso/autenticacion/solicitar-recuperacion-de-contrasena'
+export { CambiarContrasenaUseCase } from './casos-de-uso/autenticacion/cambiar-contrasena'
+export { ConfirmarEnlaceDeEmailUseCase } from './casos-de-uso/autenticacion/confirmar-enlace-de-email'
+export {
+  LONGITUD_MAXIMA_DE_CONTRASENA,
+  LONGITUD_MINIMA_DE_CONTRASENA,
+  esContrasenaValida,
+} from './casos-de-uso/autenticacion/politica-de-contrasena'
+export type {
+  ServicioDeAdministracionDeUsuarios,
+  ResultadoDeRestablecimiento,
+} from './puertos/servicio-de-administracion-de-usuarios/puerto'
+export { ServicioDeAdministracionDeUsuariosFake } from './puertos/servicio-de-administracion-de-usuarios/fake'
+export {
+  RestablecerContrasenaUseCase,
+  ROLES_QUE_RESTABLECEN_CONTRASENAS,
+} from './casos-de-uso/autenticacion/restablecer-contrasena'
+export type { ResultadoDeRestablecimientoDeContrasena } from './casos-de-uso/autenticacion/restablecer-contrasena'
+export { contrasenaInicialDe } from './casos-de-uso/autenticacion/contrasena-inicial'
 export {
   NoAutorizado,
   NoEncontrado,
@@ -93,3 +117,27 @@ export { RepositorioDePostulacionesFake } from './puertos/repositorio-de-postula
 export type { DatosDePostulacionSembrada } from './puertos/repositorio-de-postulaciones/fake'
 export type { RepositorioDePeriodos } from './puertos/repositorio-de-periodos/puerto'
 export { RepositorioDePeriodosFake } from './puertos/repositorio-de-periodos/fake'
+export type { RegistroDePagos, ResultadoDeAcreditacion, ResultadoDeDecision } from './puertos/registro-de-pagos/puerto'
+export { RegistroDePagosFake } from './puertos/registro-de-pagos/fake'
+export type { RegistroDeCargas } from './puertos/registro-de-cargas/puerto'
+export { RegistroDeCargasFake } from './puertos/registro-de-cargas/fake'
+export { AcreditarPagoUseCase } from './casos-de-uso/acreditar-pago'
+export type { ResultadoDeAcreditacionDePago } from './casos-de-uso/acreditar-pago'
+export { ImportarInformeDePagosUseCase } from './casos-de-uso/importar-informe-de-pagos'
+export type { FilaImportada, ResultadoDeImportacion } from './casos-de-uso/importar-informe-de-pagos'
+export { DecidirPagoExcepcionalUseCase } from './casos-de-uso/decidir-pago-excepcional'
+export { ListarBandejaUseCase } from './casos-de-uso/listar-bandeja'
+export { ListarCasosADecidirUseCase, type CasoADecidir } from './casos-de-uso/listar-casos-a-decidir'
+export type { EstadoDeBandeja } from './casos-de-uso/listar-bandeja'
+export { ListarCargasDeInformeUseCase } from './casos-de-uso/listar-cargas-de-informe'
+export type {
+  ErrorDeLectura,
+  LectorDeInformeDePagos,
+  ResultadoDeLectura,
+} from './puertos/lector-de-informe-de-pagos/puerto'
+
+// Mercado Pago (pasarela)
+export { IniciarPagoConPasarelaUseCase, type IniciarPagoConPasarelaResultado } from './casos-de-uso/iniciar-pago-con-pasarela'
+export { ProcesarWebhookMercadoPagoUseCase, type ResultadoWebhookPago } from './casos-de-uso/procesar-webhook-mercadopago'
+export * from './puertos/pasarela-de-pago'
+export * from './puertos/repositorio-de-intenciones-de-pago'
