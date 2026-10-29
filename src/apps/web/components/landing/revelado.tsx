@@ -55,9 +55,14 @@ export function Revelado() {
       if (barra) barra.style.setProperty('--progreso', String(largo > 0 ? Math.min(1, y / largo) : 0))
       conParallax.forEach((el) => {
         const velocidad = Number(el.dataset.parallax ?? 0)
-        el.style.setProperty('--py', `${Math.round(y * velocidad)}px`)
+        const desplazamiento = `${Math.round(y * velocidad)}px`
+        if (el.style.getPropertyValue('--py') !== desplazamiento) {
+          el.style.setProperty('--py', desplazamiento)
+        }
       })
-      raiz.dataset.desplazado = y > 8 ? 'si' : 'no'
+      // Solo se toca el DOM cuando cambia el estado, no en cada cuadro.
+      const desplazado = y > 8 ? 'si' : 'no'
+      if (raiz.dataset.desplazado !== desplazado) raiz.dataset.desplazado = desplazado
     }
     const alScrollear = () => {
       if (pendiente) return

@@ -35,7 +35,7 @@ export default function LandingLayout({ children }: { children: ReactNode }) {
       <a className="skip-link" href="#contenido">
         Saltar al contenido
       </a>
-      <Encabezado />
+      <Encabezado sistemaUrl={SISTEMA_URL} />
       <main id="contenido">{children}</main>
       <Pie />
       {/* Botón fijo para celulares: el acceso al sistema siempre está a mano */}

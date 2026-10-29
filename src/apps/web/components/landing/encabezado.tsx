@@ -4,9 +4,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { IMG_LOGO, NAVEGACION, PROYECTO_NOMBRE, SISTEMA_URL } from '@/lib/landing/datos'
+import { IMG_LOGO, NAVEGACION, PROYECTO_NOMBRE } from '@/lib/landing/datos'
 import { FlechaDerecha } from './flecha'
 import { useImagenCargada } from './use-imagen-cargada'
 
@@ -51,20 +51,49 @@ function Marca() {
   )
 }
 
-export function Encabezado() {
+/**
+ * El destino del sistema se recibe desde el layout (servidor): así el valor de la variable de
+ * entorno es el mismo en el HTML inicial y en la hidratación del cliente.
+ */
+export function Encabezado({ sistemaUrl }: { sistemaUrl: string }) {
   const [abierto, setAbierto] = useState(false)
   const rutaActual = usePathname()
+  const barra = useRef<HTMLElement>(null)
+  const botonMenu = useRef<HTMLButtonElement>(null)
+
+  // Cerrar con Escape (devolviendo el foco al botón) o al tocar fuera del encabezado.
+  useEffect(() => {
+    if (!abierto) return
+
+    const alTeclear = (evento: KeyboardEvent) => {
+      if (evento.key !== 'Escape') return
+      setAbierto(false)
+      botonMenu.current?.focus()
+    }
+    const alTocarFuera = (evento: PointerEvent) => {
+      if (!barra.current?.contains(evento.target as Node)) setAbierto(false)
+    }
+
+    document.addEventListener('keydown', alTeclear)
+    document.addEventListener('pointerdown', alTocarFuera)
+    return () => {
+      document.removeEventListener('keydown', alTeclear)
+      document.removeEventListener('pointerdown', alTocarFuera)
+    }
+  }, [abierto])
 
   return (
-    <header className="site-header">
+    <header className="site-header" ref={barra}>
       <div className="container site-header__barra">
         <Marca />
 
         <button
+          ref={botonMenu}
           className="nav-toggle"
           type="button"
           aria-expanded={abierto}
           aria-controls="menu-principal"
+          aria-label={abierto ? 'Cerrar menú' : 'Abrir menú'}
           onClick={() => setAbierto((v) => !v)}
         >
           Menú
@@ -88,7 +117,7 @@ export function Encabezado() {
               </li>
             ))}
           </ul>
-          <a className="btn btn--primary btn--chico" href={SISTEMA_URL}>
+          <a className="btn btn--primary btn--chico" href={sistemaUrl}>
             Ir al sistema de inscripción
             <FlechaDerecha />
           </a>
