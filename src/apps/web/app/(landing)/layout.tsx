@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { PROYECTO_NOMBRE, SISTEMA_URL } from '@/lib/landing/datos'
 import { Encabezado } from '@/components/landing/encabezado'
 import { Pie } from '@/components/landing/pie'
+import { ScrollSuave } from '@/components/landing/scroll-suave'
 import './landing.css'
 
 const display = Bricolage_Grotesque({
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
 export default function LandingLayout({ children }: { children: ReactNode }) {
   return (
     <div className={cn('landing', display.variable, cuerpo.variable)}>
+      <ScrollSuave />
       <a className="skip-link" href="#contenido">
         Saltar al contenido
       </a>
