@@ -12,15 +12,15 @@ export function TablaDePagos({ pagos, vacio }: TablaDePagosProps) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-xs">
       <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="border-b border-border text-xs text-muted-foreground">
+        <thead className="border-b border-border bg-muted text-xs tracking-wide text-primary uppercase">
           <tr>
-            <th className="px-4 py-3 font-medium">Referencia</th>
-            <th className="px-4 py-3 font-medium">DNI informado</th>
-            <th className="px-4 py-3 font-medium">Nº informado</th>
-            <th className="px-4 py-3 font-medium">Monto</th>
-            <th className="px-4 py-3 font-medium">Pagó el</th>
-            <th className="px-4 py-3 font-medium">Motivo</th>
-            <th className="px-4 py-3 font-medium">Estado</th>
+            <th className="px-4 py-3 font-bold">Referencia</th>
+            <th className="px-4 py-3 font-bold">DNI informado</th>
+            <th className="px-4 py-3 font-bold">Nº informado</th>
+            <th className="px-4 py-3 font-bold">Monto</th>
+            <th className="px-4 py-3 font-bold">Pagó el</th>
+            <th className="px-4 py-3 font-bold">Motivo</th>
+            <th className="px-4 py-3 font-bold">Estado</th>
           </tr>
         </thead>
         <tbody>

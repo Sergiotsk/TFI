@@ -21,3 +21,48 @@
   --sidebar-accent-foreground: #003f6e;
   --sidebar-ring: #005a9c;
 }
+
+/*
+ * Panel del personal con el sistema de diseño "UTN Haedo" (tokens del kit de frh.utn.edu.ar): azul petróleo de
+ * marca, cian de acento, texto gris oscuro y esquinas rectas. Se acota con data-panel="personal", que pone
+ * (personal)/layout.tsx: el panel del aspirante sigue con los valores de arriba. Va después para ganarle al
+ * :root:has() de arriba, que tiene la misma especificidad.
+ */
+[data-institucion='FRH'] [data-panel='personal'],
+:root:has([data-institucion='FRH'] [data-panel='personal']) {
+  --background: #f3f7f8;
+  --foreground: #454545;
+  --card: #ffffff;
+  --card-foreground: #454545;
+  --popover: #ffffff;
+  --popover-foreground: #454545;
+  --primary: #00455c;
+  --primary-foreground: #ffffff;
+  --secondary: #e6f0f3;
+  --secondary-foreground: #00455c;
+  --muted: #eef3f5;
+  --muted-foreground: #454545;
+  --accent: #e6f0f3;
+  --accent-foreground: #00455c;
+  --destructive: #d1243c;
+  --border: #d8e2e6;
+  --input: #7d9fab;
+  --ring: #157feb;
+  /* El sitio es de esquinas rectas: botones, tarjetas e inputs sin redondeo. */
+  --radius: 0rem;
+
+  /* Barra lateral en azul petróleo, con el cian marcando el ítem activo. */
+  --sidebar: #00455c;
+  --sidebar-foreground: rgb(255 255 255 / 0.86);
+  --sidebar-primary: #00d2f2;
+  --sidebar-primary-foreground: #00455c;
+  --sidebar-accent: rgb(255 255 255 / 0.12);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.18);
+  --sidebar-ring: #00d2f2;
+}
+
+/* La tipografía va solo en el div del panel: la variable de next/font la define la clase de ese mismo div. */
+[data-institucion='FRH'] [data-panel='personal'] {
+  --font-sans: var(--font-public-sans);
+}

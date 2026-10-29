@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FileUp,
   Gavel,
+  KeyRound,
   LogOut,
   Undo2,
   type LucideIcon,
@@ -27,8 +28,15 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { iniciales } from '@/components/panel/formato'
 import { ETIQUETAS_DE_ROL, INSTITUCION } from '@/config/institucion'
-import { MENU_DE_ROL, type IconoDeMenu, type ItemDeMenu, type RolDelPersonal } from '@/config/paneles'
+import {
+  agruparMenu,
+  itemActivoDelMenu,
+  type IconoDeMenu,
+  type ItemDeMenu,
+  type RolDelPersonal,
+} from '@/config/paneles'
 
 const ICONOS: Record<IconoDeMenu, LucideIcon> = {
   periodos: CalendarRange,
@@ -49,49 +57,89 @@ interface BarraLateralProps {
 }
 
 export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps) {
-  const pathname = usePathname()
+  const activo = itemActivoDelMenu(rol, usePathname())
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="px-2 py-1.5 group-data-[collapsible=icon]:hidden">
-          <span className="block text-sm font-bold text-sidebar-primary">{INSTITUCION.nombre}</span>
-          <span className="block text-xs text-muted-foreground">{INSTITUCION.carrera}</span>
+        <div className="flex items-center gap-2.5 px-1 py-1.5">
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center bg-sidebar-primary text-[0.7rem] font-extrabold tracking-wide text-sidebar-primary-foreground group-data-[collapsible=icon]:size-8"
+          >
+            UTN
+          </span>
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <span className="block text-sm font-bold text-sidebar-primary">{INSTITUCION.nombre}</span>
+            <span className="block text-xs leading-tight text-sidebar-foreground">{INSTITUCION.carrera}</span>
+          </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{ETIQUETAS_DE_ROL[rol]}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {MENU_DE_ROL[rol].map((item) => {
-                const Icono = ICONOS[item.icono]
-                const pendientes = item.contador ? (contadores[item.contador] ?? 0) : 0
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      render={<Link href={item.href} />}
-                      isActive={pathname === item.href}
-                      tooltip={item.etiqueta}
-                    >
-                      <Icono />
-                      <span>{item.etiqueta}</span>
-                    </SidebarMenuButton>
-                    {pendientes > 0 ? (
-                      <SidebarMenuBadge aria-label={`${pendientes} pendientes`}>{pendientes}</SidebarMenuBadge>
-                    ) : null}
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {agruparMenu(rol).map(({ area, items }) => (
+          <SidebarGroup key={area}>
+            <SidebarGroupLabel className="font-semibold tracking-wider uppercase">
+              {area === 'pagos' ? 'Pagos' : ETIQUETAS_DE_ROL[rol]}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => {
+                  const Icono = ICONOS[item.icono]
+                  const pendientes = item.contador ? (contadores[item.contador] ?? 0) : 0
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        render={<Link href={item.href} />}
+                        isActive={item === activo}
+                        tooltip={item.etiqueta}
+                        className="h-9 data-active:font-semibold data-active:shadow-[inset_3px_0_0_var(--sidebar-primary)]"
+                      >
+                        <Icono />
+                        <span>{item.etiqueta}</span>
+                      </SidebarMenuButton>
+                      {pendientes > 0 ? (
+                        <SidebarMenuBadge
+                          aria-label={`${pendientes} pendientes`}
+                          className="top-2! bg-sidebar-primary text-sidebar-primary-foreground peer-hover/menu-button:text-sidebar-primary-foreground peer-data-active/menu-button:text-sidebar-primary-foreground"
+                        >
+                          {pendientes}
+                        </SidebarMenuBadge>
+                      ) : null}
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       {/* Con la barra colapsada se ocultan los textos, no el cierre de sesión: queda el ícono con su tooltip. */}
       <SidebarFooter>
-        <span className="truncate px-2 text-sm font-medium group-data-[collapsible=icon]:hidden">{nombre}</span>
+        <div className="flex items-center gap-3 px-2 py-1 group-data-[collapsible=icon]:hidden">
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center bg-sidebar-primary text-xs font-extrabold text-sidebar-primary-foreground"
+          >
+            {iniciales(nombre)}
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-semibold text-sidebar-accent-foreground">{nombre}</span>
+            <span className="truncate text-xs">{ETIQUETAS_DE_ROL[rol]}</span>
+          </span>
+        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link href="/recuperar-contrasena/nueva" />}
+              tooltip="Cambiar contraseña"
+            >
+              <KeyRound />
+              <span>Cambiar contraseña</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <form action={cerrarSesion}>
           <SidebarMenu>
             <SidebarMenuItem>

@@ -1,11 +1,17 @@
 import type { ReactNode } from 'react'
+import { Public_Sans } from 'next/font/google'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { BarraLateral, type ContadoresDeMenu } from '@/components/panel/barra-lateral'
+import { MigaDelPanel } from '@/components/panel/miga-del-panel'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { crearDependencias } from '@/composition-root'
 import { esDelPersonal, PANEL_DE_ROL } from '@/config/paneles'
 import { crearCliente } from '@/lib/supabase/servidor'
+import { cn } from '@/lib/utils'
+
+// La tipografía de FRH para el personal. Solo define la variable: temas/frh.css la elige como --font-sans.
+const publicSans = Public_Sans({ subsets: ['latin'], variable: '--font-public-sans' })
 
 // Paneles del personal (Secretaría, Tesorería y Dirección): trabajan en varias áreas, así que van con barra lateral.
 // El grupo (personal) no aparece en la URL.
@@ -41,15 +47,23 @@ export default async function LayoutDelPersonal({ children }: { children: ReactN
   const barraAbierta = (await cookies()).get('sidebar_state')?.value !== 'false'
 
   return (
-    <SidebarProvider defaultOpen={barraAbierta}>
+    // data-panel acota el sistema de diseño del personal (temas/frh.css): el aspirante no lo hereda. El fondo y la
+    // fuente se repiten acá porque el div de (paneles)/layout.tsx los resuelve con los valores de afuera.
+    <SidebarProvider
+      defaultOpen={barraAbierta}
+      data-panel="personal"
+      className={cn(publicSans.variable, 'bg-background font-sans text-foreground')}
+    >
       <BarraLateral
         rol={perfil.rol}
         nombre={`${perfil.nombre} ${perfil.apellido}`}
         contadores={contadores}
       />
       <SidebarInset>
-        <div className="flex h-12 items-center border-b border-border bg-card px-4">
+        <div className="flex h-13 items-center gap-3 border-b border-border bg-card px-4">
           <SidebarTrigger className="-ml-1" />
+          <span aria-hidden="true" className="h-4 w-px bg-border" />
+          <MigaDelPanel rol={perfil.rol} />
         </div>
         {children}
       </SidebarInset>
