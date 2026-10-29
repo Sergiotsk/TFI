@@ -683,6 +683,28 @@ html {
 .hero {
   padding-block: clamp(3rem, 8vw, 6rem);
 }
+
+/* La portada cambia la trama de planos por la imagen institucional. La foto va en ::before
+   (con el parallax que ya trae data-parallax) y ::after hace de velo azul para que el texto
+   blanco siga siendo legible. El resto de las bandas azules conserva la trama. */
+.hero::before {
+  inset: -20% 0;
+  background-image: url('/landing/img/fondo-hero-utn.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: translateY(var(--py, 0px));
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.hero::after {
+  background: linear-gradient(
+    160deg,
+    rgba(0, 40, 80, 0.7) 0%,
+    rgba(0, 58, 100, 0.5) 55%,
+    rgba(0, 72, 125, 0.4) 100%
+  );
+}
 .hero__grid {
   display: grid;
   gap: 3rem;
