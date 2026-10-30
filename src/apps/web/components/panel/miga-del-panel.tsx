@@ -9,14 +9,14 @@ export function MigaDelPanel({ rol }: { rol: RolDelPersonal }) {
   const activo = itemActivoDelMenu(rol, usePathname())
 
   return (
-    <nav aria-label="Ubicación" className="min-w-0 truncate text-sm text-muted-foreground">
+    <nav aria-label="Ubicación" className="min-w-0 truncate text-sm text-foreground">
       {ETIQUETAS_DE_ROL[rol]}
       {activo ? (
         <>
-          <span aria-hidden="true" className="mx-1.5">
+          <span aria-hidden="true" className="mx-2">
             ›
           </span>
-          <span aria-current="page" className="font-medium text-foreground">
+          <span aria-current="page" className="font-semibold text-primary">
             {activo.etiqueta}
           </span>
         </>
