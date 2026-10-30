@@ -183,8 +183,24 @@ interface RegistroDeCargas {
 }
 ```
 
-**Casos de contrato**: `cerrar` persiste el resumen; `listar` ordena de la más reciente a la más vieja y no
-mezcla instituciones.
+**Casos de contrato**: `cerrar` persiste el resumen (incluidos los `ignorados`); `listar` ordena de la más
+reciente a la más vieja y no mezcla instituciones.
+
+## LectorDeInformeDePagos
+
+```ts
+interface LectorDeInformeDePagos {
+  leer(contenido: Uint8Array): Promise<ResultadoDeLectura>
+}
+
+type ResultadoDeLectura =
+  | { ok: true; pagos: PagoInformado[]; descartadas: number }
+  | { ok: false; errores: { linea: number; mensaje: string }[] }
+```
+
+Recibe los bytes del archivo tal como lo sube Tesorería (ADR 0011). El adaptador es `LectorDeInformesXlsx` con el
+perfil de la institución; `descartadas` cuenta las filas que dejó afuera el filtro de concepto del perfil. Una fila
+inválida rechaza el archivo entero.
 
 ## Casos de uso (consumen los puertos)
 
@@ -204,6 +220,10 @@ mezcla instituciones.
 | `ListarDocumentos` / `ConsultarDocumento` | personal de la institución; el aspirante solo los propios | Documentos, Almacén, Postulaciones, Periodos |
 | `RevisarDocumento` / `ActualizarDocumento` | `SECRETARIA` o `DIRECCION` | Documentos, Acciones, Postulaciones, Periodos, Reloj |
 | `EliminarDocumento` | el aspirante dueño o `SECRETARIA` / `DIRECCION` | Documentos, Almacén, Postulaciones, Periodos |
+
+`AcreditarPago` devuelve `IGNORADO` (sin registrar nada) para una fila de `INFORME_SYSADMIN` imputada por DNI cuando
+ese DNI no tiene Postulaciones (`SIN_POSTULACION`) o todas ocupan cupo (`YA_ADMITIDO`); el chequeo de duplicado va
+antes, así reimportar una seña ya acreditada sigue dando `DUPLICADO` (ADR 0011).
 
 `AcreditarPago` reintenta hasta 3 veces ante un `CONFLICTO` (research R2). Si se agotan los intentos, falla con un
 error inesperado y el informe marca esa fila para reprocesar (la idempotencia hace seguro el reproceso).

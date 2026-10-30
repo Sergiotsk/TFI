@@ -34,9 +34,9 @@ es `PAGO_PENDIENTE`, el aviso "tu lugar no está reservado hasta que se acredite
 privado `documentos`; la fila de `public.documentos` guarda solo la ruta y los metadatos. La autorización se valida
 en el caso de uso antes de firmar la URL (ADR 0010).
 
-`POST /api/pagos/acreditaciones` recibe filas ya parseadas (JSON). El adaptador que lee el archivo de SysAdmin queda
-fuera de esta feature (research R9). Cuando llegue el formato, ese adaptador produce `PagoInformado[]` y llama al
-mismo caso de uso.
+`POST /api/pagos/acreditaciones` recibe filas ya parseadas (JSON). La planilla de SysAdmin la lee el panel de
+Tesorería con `LectorDeInformesXlsx` (ADR 0011), que produce `PagoInformado[]` y llama al mismo caso de uso. El
+resumen de la carga suma `ignorados`.
 
 Se eliminan `app/api/procedure/**` y `app/api/document/**` (reemplazado por `app/api/documentos/**`). `app/api/users/**`
 pasó a `app/api/perfiles/**`.
