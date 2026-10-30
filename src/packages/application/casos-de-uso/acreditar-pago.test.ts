@@ -6,7 +6,9 @@ import {
   Perfil,
   PeriodoDeIngreso,
   ReferenciaDePago,
+  type Pago,
   type PagoInformado,
+  type ProveedorDePago,
 } from '@tfi/domain'
 import { RegistroDeCargasFake } from '../puertos/registro-de-cargas/fake'
 import { RegistroDePagosFake } from '../puertos/registro-de-pagos/fake'
@@ -15,7 +17,7 @@ import { RelojFijo } from '../puertos/reloj/fake'
 import { RepositorioDePerfilesFake } from '../puertos/repositorio-de-perfiles/fake'
 import { RepositorioDePeriodosFake } from '../puertos/repositorio-de-periodos/fake'
 import { RepositorioDePostulacionesFake } from '../puertos/repositorio-de-postulaciones/fake'
-import { AcreditarPagoUseCase } from './acreditar-pago'
+import { AcreditarPagoUseCase, type ResultadoDeAcreditacionDePago } from './acreditar-pago'
 import type { Actor } from './actor'
 import { ConflictoDeEstado, NoAutorizado } from './errores'
 
@@ -28,15 +30,23 @@ const tesoreria: Actor = { perfilId: 'tesoreria-1', rol: 'TESORERIA', institucio
 
 let referencias = 0
 
-function pago(datos: { dni?: string; numero?: number; pagadoEl?: Date; centavos?: number } = {}): PagoInformado {
+function pago(
+  datos: { dni?: string; numero?: number; pagadoEl?: Date; centavos?: number; proveedor?: ProveedorDePago } = {},
+): PagoInformado {
   referencias += 1
   return {
-    referencia: new ReferenciaDePago('INFORME_SYSADMIN', `ref-${referencias}`),
+    referencia: new ReferenciaDePago(datos.proveedor ?? 'INFORME_SYSADMIN', `ref-${referencias}`),
     monto: new Monto(datos.centavos ?? MATRICULA),
     pagadoEl: datos.pagadoEl ?? AHORA,
     dni: datos.dni !== undefined ? new Dni(datos.dni) : undefined,
     numero: datos.numero !== undefined ? NumeroDePostulacion.desde(datos.numero) : undefined,
   }
+}
+
+/** El pago que quedó registrado: una fila ignorada no registra ninguno. */
+function registrado(resultado: ResultadoDeAcreditacionDePago): Pago {
+  if (resultado.resultado === 'IGNORADO') throw new Error(`La fila se ignoró: ${resultado.motivo}`)
+  return resultado.pago
 }
 
 function perfilDeAspirante(id: string, dni: string): Perfil {
@@ -97,6 +107,7 @@ async function armarMundo(opciones: { totalCupos?: number; registro?: (real: Reg
     caso: new AcreditarPagoUseCase(postulaciones, periodos, perfiles, registro),
     postulaciones,
     sembrar,
+    registro: real,
     estadoDe: async (id: string) => (await postulaciones.obtenerPorId(id))?.estado,
   }
 }
@@ -109,7 +120,7 @@ describe('AcreditarPago', () => {
     const resultado = await caso.ejecutar(tesoreria, pago({ numero: postulacion.numero.valor, dni: '30111222' }))
 
     expect(resultado.resultado).toBe('ACREDITADO')
-    expect(resultado.pago.postulacionId).toBe(postulacion.id)
+    expect(registrado(resultado).postulacionId).toBe(postulacion.id)
     expect(await estadoDe(postulacion.id)).toBe('VACANTE_CONFIRMADA')
   })
 
@@ -141,7 +152,7 @@ describe('AcreditarPago', () => {
     const resultado = await caso.ejecutar(tesoreria, pago({ numero: postulacion.numero.valor, dni: '40999888' }))
 
     expect(resultado.resultado).toBe('NO_IMPUTADO')
-    expect(resultado.pago.motivoNoImputado).toBe('DNI_NO_COINCIDE')
+    expect(registrado(resultado).motivoNoImputado).toBe('DNI_NO_COINCIDE')
     expect(await estadoDe(postulacion.id)).toBe('PAGO_PENDIENTE')
   })
 
@@ -157,10 +168,10 @@ describe('AcreditarPago', () => {
   it('sin ninguna Postulación que coincida queda como referencia desconocida', async () => {
     const { caso } = await armarMundo()
 
-    const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222' }))
+    const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222', proveedor: 'MANUAL' }))
 
     expect(resultado.resultado).toBe('NO_IMPUTADO')
-    expect(resultado.pago.motivoNoImputado).toBe('REFERENCIA_DESCONOCIDA')
+    expect(registrado(resultado).motivoNoImputado).toBe('REFERENCIA_DESCONOCIDA')
   })
 
   it('un DNI con dos Postulaciones pendientes es ambiguo', async () => {
@@ -179,7 +190,7 @@ describe('AcreditarPago', () => {
     const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222' }))
 
     expect(resultado.resultado).toBe('NO_IMPUTADO')
-    expect(resultado.pago.motivoNoImputado).toBe('AMBIGUA')
+    expect(registrado(resultado).motivoNoImputado).toBe('AMBIGUA')
   })
 
   it('un pago con fecha posterior al vencimiento pasa a revisión de Dirección', async () => {
@@ -190,7 +201,7 @@ describe('AcreditarPago', () => {
     const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222', pagadoEl: AHORA }))
 
     expect(resultado.resultado).toBe('A_DECIDIR')
-    expect(resultado.pago.motivoRevision).toBe('FUERA_DE_PLAZO')
+    expect(registrado(resultado).motivoRevision).toBe('FUERA_DE_PLAZO')
     expect(await estadoDe(postulacion.id)).toBe('PAGO_EN_REVISION')
   })
 
@@ -198,10 +209,86 @@ describe('AcreditarPago', () => {
     const { caso, sembrar } = await armarMundo()
     sembrar('30111222', 'VACANTE_CONFIRMADA')
 
-    const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222' }))
+    const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222', proveedor: 'MANUAL' }))
 
     expect(resultado.resultado).toBe('NO_IMPUTADO')
-    expect(resultado.pago.motivoNoImputado).toBe('YA_TIENE_PAGO')
+    expect(registrado(resultado).motivoNoImputado).toBe('YA_TIENE_PAGO')
+  })
+
+  describe('filas del informe de SysAdmin que no son de la admisión (ADR 0011)', () => {
+    it('un DNI sin Postulaciones se ignora y no se registra ningún pago', async () => {
+      const { caso, registro } = await armarMundo()
+      const informado = pago({ dni: '30111222' })
+
+      const resultado = await caso.ejecutar(tesoreria, informado)
+
+      expect(resultado).toEqual({ resultado: 'IGNORADO', motivo: 'SIN_POSTULACION' })
+      expect(await registro.existe(informado.referencia)).toBeNull()
+    })
+
+    it('una fila sin DNI se ignora', async () => {
+      const { caso } = await armarMundo()
+
+      const resultado = await caso.ejecutar(tesoreria, pago())
+
+      expect(resultado).toEqual({ resultado: 'IGNORADO', motivo: 'SIN_POSTULACION' })
+    })
+
+    it('un DNI con todas sus Postulaciones admitidas se ignora (las cuotas de quien ya cursa)', async () => {
+      const { caso, sembrar } = await armarMundo()
+      sembrar('30111222', 'VACANTE_CONFIRMADA')
+
+      const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222' }))
+
+      expect(resultado).toEqual({ resultado: 'IGNORADO', motivo: 'YA_ADMITIDO' })
+    })
+
+    it('un DNI admitido en un período y con el pago pendiente en otro se acredita', async () => {
+      const reloj = new RelojFijo(AHORA)
+      const postulaciones = new RepositorioDePostulacionesFake()
+      const periodos = new RepositorioDePeriodosFake(postulaciones)
+      const registro = new RegistroDePagosFake(postulaciones, periodos, new RegistroDeCargasFake(reloj), reloj)
+      for (const id of ['periodo-a', 'periodo-b']) {
+        await periodos.guardar(
+          new PeriodoDeIngreso(id, INSTITUCION, id, 10, new Date(AHORA.getTime() + 30 * UN_DIA), 3, MATRICULA),
+        )
+      }
+      postulaciones.sembrar({ aspiranteId: 'aspirante-1', periodoId: 'periodo-a', estado: 'VACANTE_CONFIRMADA', dni: '30111222' })
+      const pendiente = postulaciones.sembrar({
+        aspiranteId: 'aspirante-1',
+        periodoId: 'periodo-b',
+        estado: 'PAGO_PENDIENTE',
+        dni: '30111222',
+        venceEl: new Date(AHORA.getTime() + UN_DIA),
+      })
+      const caso = new AcreditarPagoUseCase(postulaciones, periodos, new RepositorioDePerfilesFake(), registro)
+
+      const resultado = await caso.ejecutar(tesoreria, pago({ dni: '30111222' }))
+
+      expect(resultado.resultado).toBe('ACREDITADO')
+      expect((await postulaciones.obtenerPorId(pendiente.id))?.estado).toBe('VACANTE_CONFIRMADA')
+    })
+
+    it('un pago que trae un número existente no se ignora', async () => {
+      const { caso, sembrar } = await armarMundo()
+      const admitida = sembrar('30111222', 'VACANTE_CONFIRMADA')
+
+      const resultado = await caso.ejecutar(tesoreria, pago({ numero: admitida.numero.valor, dni: '30111222' }))
+
+      expect(resultado.resultado).toBe('NO_IMPUTADO')
+      expect(registrado(resultado).motivoNoImputado).toBe('YA_TIENE_PAGO')
+    })
+
+    it('reimportar una seña ya acreditada da DUPLICADO, no YA_ADMITIDO', async () => {
+      const { caso, sembrar } = await armarMundo()
+      sembrar('30111222')
+      const informado = pago({ dni: '30111222' })
+
+      await caso.ejecutar(tesoreria, informado)
+      const segunda = await caso.ejecutar(tesoreria, informado)
+
+      expect(segunda.resultado).toBe('DUPLICADO')
+    })
   })
 
   it('ante un conflicto relee y vuelve a decidir: si se ocupó el último cupo, va a revisión SIN_CUPO', async () => {
@@ -226,7 +313,7 @@ describe('AcreditarPago', () => {
     const resultado = await mundo.caso.ejecutar(tesoreria, pago({ dni: '30111222' }))
 
     expect(resultado.resultado).toBe('A_DECIDIR')
-    expect(resultado.pago.motivoRevision).toBe('SIN_CUPO')
+    expect(registrado(resultado).motivoRevision).toBe('SIN_CUPO')
     expect(await mundo.estadoDe(postulacion.id)).toBe('PAGO_EN_REVISION')
   })
 
