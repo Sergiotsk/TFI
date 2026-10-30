@@ -111,24 +111,3 @@ export function itemActivoDelMenu(rol: RolDelPersonal, pathname: string): ItemDe
       undefined,
     )
 }
-
-// Los grupos salen en el orden en que aparece su primer ítem, así el panel de cada rol sigue arriba de todo.
-export function agruparMenu(rol: RolDelPersonal): GrupoDeMenu[] {
-  const grupos = new Map<AreaDeMenu, ItemDeMenu[]>()
-  for (const item of MENU_DE_ROL[rol]) {
-    const area = item.area ?? 'rol'
-    grupos.set(area, [...(grupos.get(area) ?? []), item])
-  }
-  return [...grupos].map(([area, items]) => ({ area, items }))
-}
-
-// El ítem del menú que corresponde a la ruta: el de href más largo que la contiene, para que
-// /personal/pagos/no-imputados marque "No imputados" y no "Informes de pagos".
-export function itemActivoDelMenu(rol: RolDelPersonal, pathname: string): ItemDeMenu | undefined {
-  return MENU_DE_ROL[rol]
-    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
-    .reduce<ItemDeMenu | undefined>(
-      (elegido, item) => (!elegido || item.href.length > elegido.href.length ? item : elegido),
-      undefined,
-    )
-}
