@@ -60,9 +60,79 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgb(255 255 255 / 0.18);
   --sidebar-ring: #00d2f2;
+
+  /* Paleta de señal del sitio: estados y categorías. Los textos encima están medidos (sistema "UTN Haedo"). */
+  --senal-verde: #8dcc3d;
+  --senal-ambar: #ffab00;
+  --senal-violeta: #b047b3;
+  --senal-rojo: #d1243c;
+  --senal-neutro: #eeeeee;
+
+  /* Las tarjetas no llevan borde: se despegan del fondo con esta sombra. */
+  --sombra-tarjeta: 0 0 10px 0 rgb(0 0 0 / 0.13);
+  /* Alto de la barra superior: el fondo temático arranca debajo. */
+  --alto-barra-superior: 58px;
 }
 
 /* La tipografía va solo en el div del panel: la variable de next/font la define la clase de ese mismo div. */
 [data-institucion='FRH'] [data-panel='personal'] {
   --font-sans: var(--font-public-sans);
+}
+
+/*
+ * Fondo del contenido del personal, debajo de la barra superior blanca. Cuatro capas, de arriba hacia abajo:
+ * trazos inclinados en los colores de señal (el eco de los trazos de "HAEDO" en el logo), una trama de X y una
+ * grilla de puntos en azul petróleo al 9 %, sobre el color base. Las opacidades ya vienen bajas en los SVG: el fondo
+ * tiene que quedar sutil para que resalten las tarjetas blancas.
+ */
+[data-institucion='FRH'] [data-panel='personal'] [data-slot='sidebar-inset'] {
+  background-color: var(--background);
+  background-image:
+    url('/instituciones/frh/fondo-trazos.svg'), url('/instituciones/frh/trama-x.svg'),
+    radial-gradient(rgb(0 69 92 / 0.09) 1px, transparent 1.5px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position:
+    right 0 top var(--alto-barra-superior),
+    0 0,
+    0 0;
+  background-size:
+    600px auto,
+    48px 48px,
+    24px 24px;
+}
+
+/*
+ * Insignias de estado del personal: colores llenos de la paleta de señal, esquinas de 3 px y sin el punto. Las
+ * clases de insignia-de-estado.tsx siguen siendo las del aspirante; acá se pisan por el tono (data-tono), porque
+ * esta hoja no está en una capa y le gana a las utilidades de Tailwind.
+ */
+[data-institucion='FRH'] [data-panel='personal'] [data-tono] {
+  gap: 0;
+  border-radius: 3px;
+  border-color: transparent;
+  padding: 3px 8px;
+  font-weight: 700;
+  color: var(--primary);
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-tono] > [aria-hidden='true'] {
+  display: none;
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-tono='exito'] {
+  background: var(--senal-verde);
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-tono='aviso'] {
+  background: var(--senal-ambar);
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-tono='revision'] {
+  background: var(--senal-violeta);
+  color: #ffffff;
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-tono='error'] {
+  border-color: var(--senal-rojo);
+  background: #ffffff;
+  color: var(--senal-rojo);
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-tono='neutro'] {
+  background: var(--senal-neutro);
+  color: var(--foreground);
 }
