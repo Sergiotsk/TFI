@@ -3,9 +3,11 @@ export interface ResumenDeCarga {
   readonly aDecidir: number
   readonly noImputados: number
   readonly duplicados: number
+  /** Filas que la admisión no toma (ADR 0011): no se guardan como pago. */
+  readonly ignorados: number
 }
 
-const RESUMEN_VACIO: ResumenDeCarga = { acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0 }
+const RESUMEN_VACIO: ResumenDeCarga = { acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0, ignorados: 0 }
 
 // Una carga del informe de pagos que hace Tesorería (`cargadaPor` es el perfil TESORERIA) y su resumen.
 export class CargaDeInforme {
