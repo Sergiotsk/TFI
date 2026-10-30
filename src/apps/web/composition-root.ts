@@ -10,7 +10,8 @@ import {
   AccionesDelPersonalSupabase,
   RegistroDePagosSupabase,
   RegistroDeCargasSupabase,
-  LectorDeInformeProvisorio,
+  LectorDeInformesXlsx,
+  PERFIL_SYSADMIN_UTN_HAEDO,
   RelojDeSistema,
   GeneradorDeIdsCrypto,
 } from '@tfi/infrastructure'
@@ -110,8 +111,8 @@ export function crearDependencias(supabase: SupabaseClient) {
       accionesDelPersonal,
       reloj,
     ),
-    // Informe de pagos (US1). El lector es el del formato provisorio hasta que llegue el real (T04).
-    lectorDeInforme: new LectorDeInformeProvisorio(),
+    // Informe de pagos (US1): la planilla de SysAdmin UTN Haedo (ADR 0011).
+    lectorDeInforme: new LectorDeInformesXlsx(PERFIL_SYSADMIN_UTN_HAEDO),
     acreditarPago,
     importarInformeDePagos: new ImportarInformeDePagosUseCase(registroDeCargas, acreditarPago),
     listarBandeja: new ListarBandejaUseCase(registroDePagos),

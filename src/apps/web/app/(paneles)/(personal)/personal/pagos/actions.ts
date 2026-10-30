@@ -15,6 +15,10 @@ export type EstadoDeImportacion =
       resumen: ResumenDeCarga
       /** Las filas que no se acreditaron directo: para que Tesorería vea qué revisar. */
       pendientes: FilaImportada[]
+      /** Las filas que la admisión no toma (sin Postulación o ya admitidos, ADR 0011). */
+      ignoradas: FilaImportada[]
+      /** Filas que el filtro de concepto del informe dejó afuera. */
+      descartadas: number
       conError: number
     }
   | { ok: false; mensaje: string; errores?: ErrorDeLectura[] }
@@ -33,18 +37,28 @@ export async function importarInformeAccion(
   if (archivo.size > TAMANO_MAXIMO) {
     return { ok: false, mensaje: 'El archivo supera 1 MB.' }
   }
+  if (!archivo.name.toLowerCase().endsWith('.xlsx')) {
+    return { ok: false, mensaje: 'El informe tiene que ser la planilla de Excel (.xlsx) tal como sale de SysAdmin.' }
+  }
 
-  const contenido = await archivo.text()
+  const contenido = new Uint8Array(await archivo.arrayBuffer())
 
   try {
     const estado = await conActorDePanel(
       async ({ lectorDeInforme, importarInformeDePagos }, actor): Promise<EstadoDeImportacion> => {
-        const lectura = lectorDeInforme.leer(contenido)
+        const lectura = await lectorDeInforme.leer(contenido)
         if (!lectura.ok) {
           return {
             ok: false,
             mensaje: 'El informe tiene errores y no se importó ningún pago. Corregilo y volvé a subirlo.',
             errores: lectura.errores,
+          }
+        }
+
+        if (lectura.pagos.length === 0) {
+          return {
+            ok: false,
+            mensaje: `El informe no tiene pagos de admisión: el filtro de concepto descartó las ${lectura.descartadas} filas.`,
           }
         }
 
@@ -56,9 +70,11 @@ export async function importarInformeAccion(
 
         return {
           ok: true,
-          mensaje: `Informe importado: ${filas.length} pago(s) procesados.`,
+          mensaje: `Informe importado: ${filas.length} pago(s) procesados, ${resumen.ignorados} ignorado(s) por no ser de la admisión.`,
           resumen,
-          pendientes: filas.filter((fila) => fila.resultado !== 'ACREDITADO'),
+          pendientes: filas.filter((fila) => fila.resultado !== 'ACREDITADO' && fila.resultado !== 'IGNORADO'),
+          ignoradas: filas.filter((fila) => fila.resultado === 'IGNORADO'),
+          descartadas: lectura.descartadas,
           conError,
         }
       },
