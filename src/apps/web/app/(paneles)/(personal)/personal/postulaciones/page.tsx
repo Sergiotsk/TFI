@@ -107,12 +107,12 @@ export default async function PostulacionesDelPersonalPage({
             </p>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs tracking-wide text-muted-foreground uppercase">
+                <thead className="bg-muted text-xs tracking-wide text-primary uppercase">
                   <tr>
-                    <th className="px-5 py-3 font-semibold">Número</th>
-                    <th className="px-5 py-3 font-semibold">Estado</th>
-                    <th className="px-5 py-3 font-semibold">Vence el</th>
-                    <th className="px-5 py-3 text-right font-semibold">Acciones</th>
+                    <th className="px-5 py-3 font-bold">Número</th>
+                    <th className="px-5 py-3 font-bold">Estado</th>
+                    <th className="px-5 py-3 font-bold">Vence el</th>
+                    <th className="px-5 py-3 text-right font-bold">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>

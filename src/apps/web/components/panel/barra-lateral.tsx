@@ -67,13 +67,13 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
         <div className="flex items-center gap-2.5 px-1 py-1.5">
           <span
             aria-hidden="true"
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-[0.7rem] font-bold tracking-wide text-sidebar-primary-foreground group-data-[collapsible=icon]:size-8"
+            className="flex size-9 shrink-0 items-center justify-center bg-sidebar-primary text-[0.7rem] font-extrabold tracking-wide text-sidebar-primary-foreground group-data-[collapsible=icon]:size-8"
           >
             UTN
           </span>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <span className="block text-sm font-bold text-sidebar-primary">{INSTITUCION.nombre}</span>
-            <span className="block text-xs leading-tight text-muted-foreground">{INSTITUCION.carrera}</span>
+            <span className="block text-xs leading-tight text-sidebar-foreground">{INSTITUCION.carrera}</span>
           </div>
         </div>
       </SidebarHeader>
@@ -95,7 +95,7 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
                         render={<Link href={item.href} />}
                         isActive={item === activo}
                         tooltip={item.etiqueta}
-                        className="h-9 rounded-lg data-active:font-semibold"
+                        className="h-9 data-active:font-semibold data-active:shadow-[inset_3px_0_0_var(--sidebar-primary)]"
                       >
                         <Icono />
                         <span>{item.etiqueta}</span>
@@ -103,7 +103,7 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
                       {pendientes > 0 ? (
                         <SidebarMenuBadge
                           aria-label={`${pendientes} pendientes`}
-                          className="top-2! rounded-full bg-sidebar-primary text-sidebar-primary-foreground peer-hover/menu-button:text-sidebar-primary-foreground peer-data-active/menu-button:text-sidebar-primary-foreground"
+                          className="top-2! bg-sidebar-primary text-sidebar-primary-foreground peer-hover/menu-button:text-sidebar-primary-foreground peer-data-active/menu-button:text-sidebar-primary-foreground"
                         >
                           {pendientes}
                         </SidebarMenuBadge>
@@ -119,17 +119,17 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
 
       {/* Con la barra colapsada se ocultan los textos, no el cierre de sesión: queda el ícono con su tooltip. */}
       <SidebarFooter>
-        <div className="flex items-center gap-2.5 rounded-xl border border-sidebar-border bg-background/60 p-2 group-data-[collapsible=icon]:hidden">
+        <div className="flex items-center gap-3 px-2 py-1 group-data-[collapsible=icon]:hidden">
           <span
             aria-hidden="true"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground"
+            className="flex size-9 shrink-0 items-center justify-center bg-sidebar-primary text-xs font-extrabold text-sidebar-primary-foreground"
           >
             {iniciales(nombre)}
           </span>
-          <div className="min-w-0">
-            <span className="block truncate text-sm font-semibold">{nombre}</span>
-            <span className="block truncate text-xs text-muted-foreground">{ETIQUETAS_DE_ROL[rol]}</span>
-          </div>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-semibold text-sidebar-accent-foreground">{nombre}</span>
+            <span className="truncate text-xs">{ETIQUETAS_DE_ROL[rol]}</span>
+          </span>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>

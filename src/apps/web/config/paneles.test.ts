@@ -132,6 +132,7 @@ describe('itemActivoDelMenu', () => {
   test('una subruta marca el ítem más específico', () => {
     expect(itemActivoDelMenu('SECRETARIA', '/personal/pagos/no-imputados')?.etiqueta).toBe('No imputados')
     expect(itemActivoDelMenu('SECRETARIA', '/personal/documentacion/abc')?.etiqueta).toBe('Documentación')
+    expect(itemActivoDelMenu('SECRETARIA', '/personal/postulaciones/abc')?.etiqueta).toBe('Postulaciones')
   })
 
   test('un prefijo que no termina en "/" no cuenta', () => {
