@@ -17,7 +17,7 @@ const publicSans = Public_Sans({ subsets: ['latin'], variable: '--font-public-sa
 // El grupo (personal) no aparece en la URL.
 export default async function LayoutDelPersonal({ children }: { children: ReactNode }) {
   const supabase = await crearCliente()
-  const { consultarPerfilPropio, listarBandeja } = crearDependencias(supabase)
+  const { consultarPerfilPropio, listarBandeja, listarPeriodosAbiertos } = crearDependencias(supabase)
   const perfil = await consultarPerfilPropio.ejecutar()
 
   // /panel resuelve los dos casos: sin sesión manda al login, y sin perfil muestra el aviso.
@@ -43,6 +43,9 @@ export default async function LayoutDelPersonal({ children }: { children: ReactN
     contadores = { A_DECIDIR: (await listarBandeja.ejecutar(actor, 'A_DECIDIR')).length }
   }
 
+  // El período en curso, para el chip de la barra de arriba: todo el panel trabaja sobre él.
+  const [periodoAbierto] = await listarPeriodosAbiertos.ejecutar(actor)
+
   // shadcn guarda en esta cookie si la barra quedó abierta o colapsada.
   const barraAbierta = (await cookies()).get('sidebar_state')?.value !== 'false'
 
@@ -60,10 +63,15 @@ export default async function LayoutDelPersonal({ children }: { children: ReactN
         contadores={contadores}
       />
       <SidebarInset>
-        <div className="flex h-13 items-center gap-3 border-b border-border bg-card px-4">
+        <div className="flex h-(--alto-barra-superior,3.25rem) items-center gap-3 border-b border-border bg-white px-4 md:px-6">
           <SidebarTrigger className="-ml-1" />
           <span aria-hidden="true" className="h-4 w-px bg-border" />
           <MigaDelPanel rol={perfil.rol} />
+          {periodoAbierto ? (
+            <span className="ml-auto shrink-0 truncate rounded-[3px] bg-accent px-2.5 py-1.5 text-[13px] font-semibold text-accent-foreground">
+              {periodoAbierto.nombre}
+            </span>
+          ) : null}
         </div>
         {children}
       </SidebarInset>

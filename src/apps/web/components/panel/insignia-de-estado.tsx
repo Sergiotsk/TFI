@@ -1,11 +1,14 @@
 import { cn } from '@/lib/utils'
 import type { EstadoDePago, EstadoPostulacion, MotivoNoImputado, MotivoRevision } from '@tfi/domain'
 
-type Tono = 'neutro' | 'aviso' | 'exito' | 'error'
+// "revision" es algo que espera que alguien lo mire. El tema de la institución puede pintarlo aparte (data-tono); por
+// defecto se ve como un aviso.
+type Tono = 'neutro' | 'aviso' | 'revision' | 'exito' | 'error'
 
 const tonos: Record<Tono, string> = {
   neutro: 'border-border bg-muted text-muted-foreground',
   aviso: 'border-secondary/30 bg-accent text-accent-foreground',
+  revision: 'border-secondary/30 bg-accent text-accent-foreground',
   exito: 'border-primary/30 bg-primary/10 text-primary',
   error: 'border-destructive/30 bg-destructive/10 text-destructive',
 }
@@ -14,6 +17,7 @@ const tonos: Record<Tono, string> = {
 const puntos: Record<Tono, string> = {
   neutro: 'bg-muted-foreground/60',
   aviso: 'bg-secondary',
+  revision: 'bg-secondary',
   exito: 'bg-primary',
   error: 'bg-destructive',
 }
@@ -21,11 +25,11 @@ const puntos: Record<Tono, string> = {
 const estadosDePostulacion: Record<EstadoPostulacion, { etiqueta: string; tono: Tono }> = {
   PREINSCRIPTO: { etiqueta: 'Preinscripto', tono: 'neutro' },
   PAGO_PENDIENTE: { etiqueta: 'Pago pendiente', tono: 'aviso' },
-  PAGO_EN_REVISION: { etiqueta: 'Pago en revisión', tono: 'aviso' },
+  PAGO_EN_REVISION: { etiqueta: 'Pago en revisión', tono: 'revision' },
   VACANTE_CONFIRMADA: { etiqueta: 'Vacante confirmada', tono: 'exito' },
   VENCIDO: { etiqueta: 'Vencido', tono: 'error' },
   ESPERANDO_DOCUMENTACION: { etiqueta: 'Esperando documentación', tono: 'neutro' },
-  DOCUMENTACION_EN_REVISION: { etiqueta: 'Documentación en revisión', tono: 'aviso' },
+  DOCUMENTACION_EN_REVISION: { etiqueta: 'Documentación en revisión', tono: 'revision' },
   OBSERVADO: { etiqueta: 'Observado', tono: 'error' },
   DOCUMENTACION_VALIDADA: { etiqueta: 'Documentación validada', tono: 'exito' },
   CONFIRMADO_PARA_EXPORTAR: { etiqueta: 'Confirmado', tono: 'exito' },
@@ -33,7 +37,7 @@ const estadosDePostulacion: Record<EstadoPostulacion, { etiqueta: string; tono: 
 
 const estadosDePago: Record<EstadoDePago, { etiqueta: string; tono: Tono }> = {
   ACREDITADO: { etiqueta: 'Acreditado', tono: 'exito' },
-  A_DECIDIR: { etiqueta: 'A decidir', tono: 'aviso' },
+  A_DECIDIR: { etiqueta: 'A decidir', tono: 'revision' },
   NO_IMPUTADO: { etiqueta: 'No imputado', tono: 'error' },
   DEVUELTO: { etiqueta: 'Devuelto', tono: 'neutro' },
 }
@@ -55,6 +59,7 @@ export const motivosDeNoImputado: Record<MotivoNoImputado, string> = {
 function Insignia({ etiqueta, tono }: { etiqueta: string; tono: Tono }) {
   return (
     <span
+      data-tono={tono}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap',
         tonos[tono],
