@@ -34,7 +34,8 @@ export const UTN_SITIO = 'https://www.utn.edu.ar'
 export const IMG_LOGO = '/landing/img/logo-utn-frh.png'
 
 /** Imagen del encabezado de Institución (se ve del lado derecho, con degradado hacia el azul). */
-export const IMG_SEDE_PORTADA = '/landing/img/sede-portada.jpg'
+export const IMG_SEDE_PORTADA = '/landing/img/utn-desde-arriba.webp'
+export const IMG_SEDE_PORTADA_MOBILE = '/landing/img/utn-desde-arriba-mobbile.webp'
 
 /** Fotos del carrusel de la sede: se muestran solo las que existan, en este orden (hasta 6). */
 export const FOTOS_SEDE: readonly string[] = [

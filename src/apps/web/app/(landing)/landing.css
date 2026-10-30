@@ -1380,6 +1380,62 @@ html {
   z-index: 1;
 }
 
+/* Institución: portada con imagen a lo hero */
+.institucion-hero {
+  margin-top: calc(-1 * var(--header-alto));
+  padding-top: calc(var(--header-alto) + clamp(4rem, 14vw, 10rem));
+  padding-bottom: clamp(4rem, 14vw, 10rem);
+  min-height: min(100svh, 920px);
+  display: flex;
+  align-items: center;
+}
+.institucion-hero .container {
+  width: 100%;
+  margin-left: 4rem;
+}
+.institucion-hero::before {
+  inset: -20% 0 -15% 0;
+  background-image: var(--institucion-fondo-mobile, var(--institucion-fondo));
+  background-size: cover;
+  background-position: center 60%;
+  background-repeat: no-repeat;
+  transform: translateY(var(--py, 0px));
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+@media (min-width: 640px) {
+  .institucion-hero::before {
+    background-image: var(--institucion-fondo);
+  }
+}
+.institucion-hero::after {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 30, 60, 0.92) 0%,
+    rgba(0, 42, 78, 0.78) 40%,
+    rgba(0, 64, 110, 0.52) 100%
+  );
+}
+.institucion-hero h1 {
+  max-width: 12ch;
+  font-size: clamp(3.2rem, 8vw, 6rem);
+}
+.institucion-hero .hero__bajada {
+  max-width: 56ch;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+}
+@media (min-width: 960px) {
+  .institucion-hero::after {
+    background: linear-gradient(
+      100deg,
+      rgba(0, 30, 60, 0.94) 0%,
+      rgba(0, 42, 78, 0.72) 32%,
+      rgba(0, 64, 110, 0.34) 68%,
+      rgba(0, 72, 125, 0.16) 100%
+    );
+  }
+}
+
 /* Institución: imagen de la sede a la derecha, fundida con el azul por un degradado */
 .cabecera-vista__imagen {
   position: absolute;

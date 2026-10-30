@@ -1,8 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { FOTOS_SEDE, FRH_SITIO, SEDE_DIRECCION, UTN_SITIO } from '@/lib/landing/datos'
+import {
+  FOTOS_SEDE,
+  FRH_SITIO,
+  IMG_SEDE_PORTADA,
+  IMG_SEDE_PORTADA_MOBILE,
+  SEDE_DIRECCION,
+  UTN_SITIO,
+} from '@/lib/landing/datos'
 import { CarruselSede } from '@/components/landing/carrusel-sede'
-import { PortadaSede } from '@/components/landing/portada-sede'
 import { Revelado } from '@/components/landing/revelado'
 
 export const metadata: Metadata = {
@@ -13,15 +19,29 @@ export default function Institucion() {
   return (
     <>
       <Revelado />
-      <PortadaSede>
-        <h1 id="institucion-titulo" tabIndex={-1}>
-          La institución
-        </h1>
-        <p className="cabecera-vista__bajada">
-          Este sistema nace dentro de la UTN Facultad Regional Haedo y está pensado para que lo
-          use <strong>la propia Facultad</strong>.
-        </p>
-      </PortadaSede>
+      <section
+        className="banda-azul hero institucion-hero"
+        aria-labelledby="institucion-titulo"
+        data-parallax="0.06"
+        style={
+          {
+            '--institucion-fondo': `url('${IMG_SEDE_PORTADA}')`,
+            '--institucion-fondo-mobile': `url('${IMG_SEDE_PORTADA_MOBILE}')`,
+          } as React.CSSProperties
+        }
+      >
+        <div className="container hero__grid">
+          <div className="hero__texto">
+            <h1 id="institucion-titulo" tabIndex={-1}>
+              La institución
+            </h1>
+            <p className="hero__bajada">
+              Este sistema nace dentro de la UTN Facultad Regional Haedo y está pensado para que lo
+              use <strong>la propia Facultad</strong>.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <section className="section" aria-labelledby="utn-titulo">
         <div className="container split">

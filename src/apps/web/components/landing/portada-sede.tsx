@@ -16,15 +16,18 @@ export function PortadaSede({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={cn('banda-azul cabecera-vista', hayImagen && 'cabecera-vista--con-imagen')}
-      data-parallax="0.06"
+      className={cn(
+        'banda-azul cabecera-vista',
+        hayImagen && 'cabecera-vista--con-imagen',
+      )}
+      data-parallax='0.06'
     >
       {hayImagen ? (
-        <div className="cabecera-vista__imagen" aria-hidden="true">
-          <img src={IMG_SEDE_PORTADA} alt="" />
+        <div className='cabecera-vista__imagen' aria-hidden='true'>
+          <img src={IMG_SEDE_PORTADA} alt='' />
         </div>
       ) : null}
-      <div className="container cabecera-vista__contenido">{children}</div>
+      <div className='container cabecera-vista__contenido'>{children}</div>
     </div>
   )
 }
