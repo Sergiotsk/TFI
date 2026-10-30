@@ -63,10 +63,11 @@ const esquemaFilaDeCarga = z.object({
   a_decidir: z.number().int().nonnegative(),
   no_imputados: z.number().int().nonnegative(),
   duplicados: z.number().int().nonnegative(),
+  ignorados: z.number().int().nonnegative(),
 })
 
 export const COLUMNAS_DE_CARGA =
-  'id, institucion_id, cargada_por, cargada_el, nombre_archivo, acreditados, a_decidir, no_imputados, duplicados'
+  'id, institucion_id, cargada_por, cargada_el, nombre_archivo, acreditados, a_decidir, no_imputados, duplicados, ignorados'
 
 export function mapearCarga(fila: unknown): CargaDeInforme {
   const datos = esquemaFilaDeCarga.parse(fila)
@@ -82,6 +83,7 @@ export function mapearCarga(fila: unknown): CargaDeInforme {
       aDecidir: datos.a_decidir,
       noImputados: datos.no_imputados,
       duplicados: datos.duplicados,
+      ignorados: datos.ignorados,
     },
   )
 }
