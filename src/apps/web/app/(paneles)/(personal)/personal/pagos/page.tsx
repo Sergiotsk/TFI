@@ -45,7 +45,7 @@ export default async function InformesDePagosPage() {
                         <span className="font-mono text-xs break-all">{carga.nombreArchivo}</span>
                         <span className="text-xs text-muted-foreground">{formatearFecha(carga.cargadaEl)}</span>
                       </div>
-                      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
                         <div>
                           <dt className="text-muted-foreground">Acreditados</dt>
                           <dd className="font-semibold">{carga.resumen.acreditados}</dd>
@@ -61,6 +61,10 @@ export default async function InformesDePagosPage() {
                         <div>
                           <dt className="text-muted-foreground">Duplicados</dt>
                           <dd className="font-semibold">{carga.resumen.duplicados}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-muted-foreground">Ignorados</dt>
+                          <dd className="font-semibold">{carga.resumen.ignorados}</dd>
                         </div>
                       </dl>
                     </li>

@@ -1,9 +1,11 @@
 import {
   Dni,
   evaluarPago,
+  motivoParaIgnorar,
   type Candidata,
   type DecisionDeAcreditacion,
   type Imputacion,
+  type MotivoIgnorado,
   type Pago,
   type PagoInformado,
   type Postulacion,
@@ -23,6 +25,13 @@ const INTENTOS = 3
 export type ResultadoDeAcreditacionDePago =
   | { resultado: 'ACREDITADO' | 'A_DECIDIR' | 'NO_IMPUTADO'; pago: Pago }
   | { resultado: 'DUPLICADO'; pago: Pago }
+  | { resultado: 'IGNORADO'; motivo: MotivoIgnorado }
+
+/** La imputación y, si se buscó por DNI, todas las Postulaciones de ese DNI. */
+interface ImputacionDelPago {
+  imputacion: Imputacion
+  delDni: readonly Postulacion[] | null
+}
 
 /**
  * Acredita un pago informado (una fila del informe de pagos).
@@ -38,6 +47,10 @@ export type ResultadoDeAcreditacionDePago =
  * existe, por DNI. Por DNI se prefieren las Postulaciones con un pago iniciado
  * (`PAGO_PENDIENTE` o `VENCIDO`); si no hay ninguna se usan todas las del
  * aspirante, así un pago doble queda `YA_TIENE_PAGO` y no como desconocido.
+ *
+ * El informe de SysAdmin trae también las cuotas de quienes ya cursan. Si una
+ * fila de ese informe se imputa por DNI y el DNI no tiene Postulaciones, o todas
+ * ya ocupan cupo, se ignora: no se registra ningún pago (ADR 0011).
  */
 export class AcreditarPagoUseCase {
   constructor(
@@ -54,7 +67,11 @@ export class AcreditarPagoUseCase {
     if (existente) return { resultado: 'DUPLICADO', pago: existente }
 
     for (let intento = 0; intento < INTENTOS; intento += 1) {
-      const decision = await this.decidir(pago)
+      const { imputacion, delDni } = await this.imputar(pago)
+      const motivo = pago.referencia.proveedor === 'INFORME_SYSADMIN' && delDni ? motivoParaIgnorar(delDni) : null
+      if (motivo) return { resultado: 'IGNORADO', motivo }
+
+      const decision = await this.decidir(pago, imputacion)
       const registro = await this.pagos.registrarAcreditacion(pago, decision, cargaId)
 
       if (registro.tipo === 'REGISTRADO') {
@@ -70,8 +87,7 @@ export class AcreditarPagoUseCase {
     )
   }
 
-  private async decidir(pago: PagoInformado): Promise<DecisionDeAcreditacion> {
-    const imputacion = await this.imputar(pago)
+  private async decidir(pago: PagoInformado, imputacion: Imputacion): Promise<DecisionDeAcreditacion> {
     const [primera] = imputacion.candidatas
     if (primera === undefined) return { tipo: 'NO_IMPUTAR', motivo: 'REFERENCIA_DESCONOCIDA' }
 
@@ -82,14 +98,14 @@ export class AcreditarPagoUseCase {
     return evaluarPago(pago, imputacion, periodo, ocupados)
   }
 
-  private async imputar(pago: PagoInformado): Promise<Imputacion> {
+  private async imputar(pago: PagoInformado): Promise<ImputacionDelPago> {
     if (pago.numero !== undefined) {
       const postulacion = await this.postulaciones.obtenerPorNumero(pago.numero)
       const candidata = postulacion ? await this.conDniDelAspirante(postulacion) : null
-      if (candidata) return { via: 'NUMERO', candidatas: [candidata] }
+      if (candidata) return { imputacion: { via: 'NUMERO', candidatas: [candidata] }, delDni: null }
     }
 
-    if (pago.dni === undefined) return { via: 'DNI', candidatas: [] }
+    if (pago.dni === undefined) return { imputacion: { via: 'DNI', candidatas: [] }, delDni: [] }
 
     const { items } = await this.postulaciones.buscarPorDni(pago.dni.valor, {
       pagina: 1,
@@ -99,7 +115,10 @@ export class AcreditarPagoUseCase {
     const elegidas = conPagoIniciado.length > 0 ? conPagoIniciado : items
     const dni = pago.dni
 
-    return { via: 'DNI', candidatas: elegidas.map((postulacion) => ({ postulacion, dniDelAspirante: dni })) }
+    return {
+      imputacion: { via: 'DNI', candidatas: elegidas.map((postulacion) => ({ postulacion, dniDelAspirante: dni })) },
+      delDni: items,
+    }
   }
 
   private async conDniDelAspirante(postulacion: Postulacion): Promise<Candidata | null> {

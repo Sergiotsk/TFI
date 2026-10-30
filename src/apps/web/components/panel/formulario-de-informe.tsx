@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import type { MotivoNoImputado, MotivoRevision } from '@tfi/domain'
+import type { MotivoIgnorado, MotivoNoImputado, MotivoRevision } from '@tfi/domain'
 import { Button } from '@/components/ui/button'
 import { motivosDeNoImputado, motivosDeRevision } from '@/components/panel/insignia-de-estado'
 import type { EstadoDeImportacion } from '@/app/(paneles)/(personal)/personal/pagos/actions'
@@ -15,13 +15,20 @@ const resultados = {
   A_DECIDIR: 'A decidir por Dirección',
   NO_IMPUTADO: 'No imputado',
   DUPLICADO: 'Ya estaba cargado',
+  IGNORADO: 'Ignorado',
   ERROR: 'Error: volvé a subir el informe',
 } as const
+
+const motivosDeIgnorado: Record<MotivoIgnorado, string> = {
+  SIN_POSTULACION: 'El DNI no tiene Postulaciones',
+  YA_ADMITIDO: 'Ya tiene la vacante: es una cuota',
+}
 
 function motivoLegible(motivo: string | undefined): string {
   if (motivo === undefined) return ''
   if (motivo in motivosDeNoImputado) return motivosDeNoImputado[motivo as MotivoNoImputado]
   if (motivo in motivosDeRevision) return motivosDeRevision[motivo as MotivoRevision]
+  if (motivo in motivosDeIgnorado) return motivosDeIgnorado[motivo as MotivoIgnorado]
   return motivo
 }
 
@@ -34,8 +41,8 @@ export function FormularioDeInforme({ accion }: FormularioDeInformeProps) {
       <div>
         <h2 className="text-base font-semibold">Importar el informe de pagos</h2>
         <p className="text-sm text-muted-foreground">
-          CSV con las columnas referencia, dni o numero, monto y fecha_pago. Si el mismo pago ya se cargó, no se
-          vuelve a acreditar.
+          La planilla de Excel tal como sale de SysAdmin. Las filas de quien no tiene Postulación o ya tiene la
+          vacante (las cuotas) se ignoran. Si el mismo pago ya se cargó, no se vuelve a acreditar.
         </p>
       </div>
 
@@ -45,7 +52,7 @@ export function FormularioDeInforme({ accion }: FormularioDeInformeProps) {
           <input
             type="file"
             name="informe"
-            accept=".csv,text/csv"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             required
             className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-primary-foreground"
           />
@@ -73,13 +80,14 @@ export function FormularioDeInforme({ accion }: FormularioDeInformeProps) {
 
           {estado.ok ? (
             <>
-              <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
                 {(
                   [
                     ['Acreditados', estado.resumen.acreditados],
                     ['A decidir', estado.resumen.aDecidir],
                     ['No imputados', estado.resumen.noImputados],
                     ['Duplicados', estado.resumen.duplicados],
+                    ['Ignorados', estado.resumen.ignorados],
                   ] as const
                 ).map(([etiqueta, valor]) => (
                   <div key={etiqueta} className="rounded-lg border border-border p-2">
@@ -107,6 +115,22 @@ export function FormularioDeInforme({ accion }: FormularioDeInformeProps) {
                     </li>
                   ))}
                 </ul>
+              ) : null}
+
+              {estado.ignoradas.length > 0 ? (
+                <details className="text-xs">
+                  <summary className="cursor-pointer font-medium text-muted-foreground">
+                    Ver las {estado.ignoradas.length} filas ignoradas
+                  </summary>
+                  <ul className="mt-2 max-h-60 space-y-1 overflow-y-auto">
+                    {estado.ignoradas.map((fila) => (
+                      <li key={fila.referencia} className="flex flex-wrap gap-x-2">
+                        <span className="font-mono">{fila.referencia}</span>
+                        <span className="text-muted-foreground">{motivoLegible(fila.motivo)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               ) : null}
             </>
           ) : null}

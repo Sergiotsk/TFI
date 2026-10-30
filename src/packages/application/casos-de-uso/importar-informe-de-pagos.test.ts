@@ -58,9 +58,9 @@ describe('ImportarInformeDePagos', () => {
       pago('r-3', '30999999'),
     ])
 
-    expect(resultado.resumen).toEqual({ acreditados: 1, aDecidir: 1, noImputados: 1, duplicados: 0 })
-    expect(resultado.filas.map((f) => f.resultado)).toEqual(['ACREDITADO', 'A_DECIDIR', 'NO_IMPUTADO'])
-    expect(resultado.filas[2]?.motivo).toBe('REFERENCIA_DESCONOCIDA')
+    expect(resultado.resumen).toEqual({ acreditados: 1, aDecidir: 1, noImputados: 0, duplicados: 0, ignorados: 1 })
+    expect(resultado.filas.map((f) => f.resultado)).toEqual(['ACREDITADO', 'A_DECIDIR', 'IGNORADO'])
+    expect(resultado.filas[2]?.motivo).toBe('SIN_POSTULACION')
 
     const [guardada] = await cargas.listar(INSTITUCION)
     expect(guardada?.nombreArchivo).toBe('informe-20-10.csv')
@@ -85,7 +85,30 @@ describe('ImportarInformeDePagos', () => {
     await caso.ejecutar(tesoreria, 'informe.csv', filas)
     const segunda = await caso.ejecutar(tesoreria, 'informe.csv', filas)
 
-    expect(segunda.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 2 })
+    // La fila ignorada no se guardó: vuelve a ignorarse, no es un duplicado.
+    expect(segunda.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 1, ignorados: 1 })
+  })
+
+  it('un pago por menos de la matrícula queda no imputado, como siempre', async () => {
+    const { caso, sembrar } = await armarMundo()
+    sembrar('a-1', '30111001')
+
+    const resultado = await caso.ejecutar(tesoreria, 'informe.xlsx', [
+      { ...pago('r-1', '30111001'), monto: new Monto(MATRICULA / 2) },
+    ])
+
+    expect(resultado.resumen.noImputados).toBe(1)
+    expect(resultado.filas[0]?.motivo).toBe('MONTO_INSUFICIENTE')
+  })
+
+  it('un informe con todas las filas ignoradas igual cierra la carga', async () => {
+    const { caso, cargas } = await armarMundo()
+
+    const resultado = await caso.ejecutar(tesoreria, 'cuotas.xlsx', [pago('r-1', '30999991'), pago('r-2', '30999992')])
+
+    expect(resultado.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0, ignorados: 2 })
+    const [guardada] = await cargas.listar(INSTITUCION)
+    expect(guardada?.resumen.ignorados).toBe(2)
   })
 
   it('una fila que falla se marca para reprocesar y no corta el resto', async () => {

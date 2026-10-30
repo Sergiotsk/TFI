@@ -190,7 +190,8 @@ riesgo de un `ADMIN` autoasignado convertido en `TESORERIA` no existe en este re
 **Decision**: quedan fuera, cada uno como feature propia:
 
 - **Adaptador del informe de SysAdmin** (el parser del archivo): el formato no fue entregado. Esta feature expone
-  el caso de uso `ImportarInformeDePagos`, que recibe filas ya validadas (`PagoInformado[]`).
+  el caso de uso `ImportarInformeDePagos`, que recibe filas ya validadas (`PagoInformado[]`). *Actualización
+  (2026-10-30)*: el formato llegó y el adaptador es `LectorDeInformesXlsx` (ADR 0011).
 - **Adaptador y webhook de Pagos360**: esta feature deja el caso de uso `AcreditarPago` listo para que el webhook
   lo invoque con `proveedor = PAGOS360`.
 - **Flujo de documentación** (`ESPERANDO_DOCUMENTACION` en adelante): el enum incluye esos estados, pero sus
