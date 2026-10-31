@@ -106,7 +106,7 @@ export default function Institucion() {
           </div>
           <div className="texto-largo reveal">
             <p>
-              Para entender el problema, el Equipo 5 habló con la Dirección de la carrera, con
+              Para entender el problema, el equipo habló con la Dirección de la carrera, con
               Secretaría y con el área de Sistemas y Administración. De esas entrevistas salió la
               regla central del sistema: <strong>el pago acreditado confirma la vacante</strong>, y
               la documentación se revisa después.
