@@ -10,7 +10,7 @@ export default async function NoImputadosPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <EncabezadoDePanel
         area="Tesorería TUP"
         titulo="Pagos no imputados"

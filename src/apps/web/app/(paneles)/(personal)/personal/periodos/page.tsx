@@ -3,6 +3,7 @@ import { AccionPendiente } from '@/components/maqueta/accion-pendiente'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { EstadoVacio } from '@/components/panel/estado-vacio'
 import { formatearFecha, formatearMontoEnCentavos, porcentaje } from '@/components/panel/formato'
+import { InsigniaDePeriodo } from '@/components/panel/insignia-de-estado'
 import { cn } from '@/lib/utils'
 import { conActorDePanel } from '../../../sesion-de-panel'
 
@@ -30,9 +31,10 @@ export default async function PeriodosPage() {
     }),
     { cupos: 0, ocupados: 0, pendientes: 0, libres: 0 },
   )
+  const abiertos = periodos.filter(({ periodo }) => periodo.estaAbierto(ahora)).length
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <EncabezadoDePanel
         area="Secretaría TUP"
         titulo="Períodos de ingreso"
@@ -40,7 +42,7 @@ export default async function PeriodosPage() {
         acciones={<AccionPendiente>Nuevo período</AccionPendiente>}
       />
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-6xl space-y-7 px-4 py-8 sm:px-6 lg:px-8">
         {periodos.length === 0 ? (
           <EstadoVacio
             icono={CalendarRange}
@@ -48,62 +50,58 @@ export default async function PeriodosPage() {
             descripcion="Cuando Dirección cargue un período, vas a ver acá sus cupos y su ocupación."
           />
         ) : (
-          <section aria-label="Resumen de cupos" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Resumen icono={Users} etiqueta="Cupos totales" valor={totales.cupos} tono="suave" />
-            <Resumen icono={Check} etiqueta="Vacantes ocupadas" valor={totales.ocupados} tono="fuerte" />
-            <Resumen icono={Clock} etiqueta="Pendientes de pago" valor={totales.pendientes} tono="aviso" />
-            <Resumen icono={SquarePlus} etiqueta="Libres para iniciar pago" valor={totales.libres} tono="neutro" />
-          </section>
+          <>
+            <section aria-label="Resumen de cupos" className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+              <Resumen icono={Users} etiqueta="Cupos totales" valor={totales.cupos} tono="suave" />
+              <Resumen icono={Check} etiqueta="Vacantes ocupadas" valor={totales.ocupados} tono="fuerte" />
+              <Resumen icono={Clock} etiqueta="Pendientes de pago" valor={totales.pendientes} tono="aviso" />
+              <Resumen icono={SquarePlus} etiqueta="Libres para iniciar pago" valor={totales.libres} tono="suave" />
+            </section>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <h2 className="text-xl font-semibold text-primary">Todos los períodos</h2>
+              <span className="text-sm">
+                {periodos.length} {periodos.length === 1 ? 'período' : 'períodos'} · {abiertos}{' '}
+                {abiertos === 1 ? 'abierto' : 'abiertos'}
+              </span>
+            </div>
+          </>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
           {periodos.map(({ periodo, ocupacion }) => {
             const excedido = ocupacion.ocupados > ocupacion.totalCupos
-            const abierto = periodo.cierraEl > ahora
+            const abierto = periodo.estaAbierto(ahora)
 
             return (
-              <article key={periodo.id} className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
-                <div className="flex items-start justify-between gap-3 border-b border-border px-6 py-5">
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-semibold">{periodo.nombre}</h2>
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold',
-                          abierto
-                            ? 'border-primary/30 bg-primary/10 text-primary'
-                            : 'border-border bg-muted text-muted-foreground',
-                        )}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={cn('size-1.5 rounded-full', abierto ? 'bg-primary' : 'bg-muted-foreground/60')}
-                        />
-                        {abierto ? 'Abierto' : 'Cerrado'}
-                      </span>
+              <article key={periodo.id} className="flex flex-col bg-card shadow-(--sombra-tarjeta)">
+                <div className="flex items-start justify-between gap-3 px-6 py-5">
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h3 className="text-lg font-semibold text-primary">{periodo.nombre}</h3>
+                      <InsigniaDePeriodo abierto={abierto} />
                     </div>
-                    <span className="block text-sm text-muted-foreground">
-                      Cierra el {formatearFecha(periodo.cierraEl)}
+                    <span className="block text-sm">
+                      {abierto ? 'Cierra' : 'Cerró'} el {formatearFecha(periodo.cierraEl)}
                     </span>
                   </div>
-                  <AccionPendiente variant="outline" size="sm">
-                    Editar
-                  </AccionPendiente>
+                  <AccionPendiente variant="outline">{abierto ? 'Editar' : 'Ver detalle'}</AccionPendiente>
                 </div>
 
-                <div className="space-y-4 px-6 py-5">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <div className="space-y-3.5 border-t border-border px-6 py-5">
+                  <div className="flex flex-wrap items-baseline justify-between gap-3">
                     <div className="flex items-baseline gap-2">
                       <span
-                        className={cn('text-4xl font-bold tracking-tight', excedido ? 'text-destructive' : 'text-foreground')}
+                        className={cn(
+                          'text-[38px] leading-11 font-bold',
+                          excedido ? 'text-destructive' : 'text-primary',
+                        )}
                       >
                         {ocupacion.ocupados}
                       </span>
-                      <span className="text-base font-medium text-muted-foreground">
-                        / {ocupacion.totalCupos} cupos ocupados
-                      </span>
+                      <span className="text-base">/ {ocupacion.totalCupos} cupos ocupados</span>
                     </div>
-                    <span className="text-sm font-semibold text-primary">
+                    <span className="text-[15px] font-bold text-primary">
                       {porcentaje(ocupacion.ocupados, ocupacion.totalCupos)} % de ocupación
                     </span>
                   </div>
@@ -111,30 +109,30 @@ export default async function PeriodosPage() {
                   <div
                     role="img"
                     aria-label={`${ocupacion.ocupados} ocupados, ${ocupacion.pendientesVigentes} pendientes de pago y ${ocupacion.libres} libres sobre ${ocupacion.totalCupos} cupos`}
-                    className="flex h-3 gap-0.5 overflow-hidden rounded-full bg-muted"
+                    className="flex h-2.5 overflow-hidden bg-border/70"
                   >
                     <span
                       className={excedido ? 'bg-destructive' : 'bg-primary'}
                       style={{ width: `${porcentaje(ocupacion.ocupados, ocupacion.totalCupos)}%` }}
                     />
                     <span
-                      className="bg-secondary/60"
+                      className="bg-(--senal-cian,var(--secondary))"
                       style={{ width: `${porcentaje(ocupacion.pendientesVigentes, ocupacion.totalCupos)}%` }}
                     />
                   </div>
 
-                  <ul className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground">
-                    <li className="flex items-center gap-2">
-                      <span aria-hidden="true" className="size-2.5 rounded-sm bg-primary" />
-                      Ocupados <strong className="text-foreground">{ocupacion.ocupados}</strong>
+                  <ul className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                    <li className="flex items-center gap-1.5">
+                      <span aria-hidden="true" className="size-2.5 bg-primary" />
+                      Ocupados <strong className="text-primary">{ocupacion.ocupados}</strong>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <span aria-hidden="true" className="size-2.5 rounded-sm bg-secondary/60" />
-                      Pendientes de pago <strong className="text-foreground">{ocupacion.pendientesVigentes}</strong>
+                    <li className="flex items-center gap-1.5">
+                      <span aria-hidden="true" className="size-2.5 bg-(--senal-cian,var(--secondary))" />
+                      Pendientes de pago <strong className="text-primary">{ocupacion.pendientesVigentes}</strong>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <span aria-hidden="true" className="size-2.5 rounded-sm border border-input bg-muted" />
-                      Libres <strong className="text-foreground">{ocupacion.libres}</strong>
+                    <li className="flex items-center gap-1.5">
+                      <span aria-hidden="true" className="size-2.5 bg-border/70 ring-1 ring-input ring-inset" />
+                      Libres <strong className="text-primary">{ocupacion.libres}</strong>
                     </li>
                   </ul>
 
@@ -145,19 +143,10 @@ export default async function PeriodosPage() {
                   ) : null}
                 </div>
 
-                <dl className="grid grid-cols-3 divide-x divide-border border-t border-border bg-muted/40">
-                  <div className="space-y-1 px-6 py-4">
-                    <dt className="text-xs text-muted-foreground">Plazo de pago</dt>
-                    <dd className="text-sm font-semibold">{periodo.diasPlazoPago} días</dd>
-                  </div>
-                  <div className="space-y-1 px-6 py-4">
-                    <dt className="text-xs text-muted-foreground">Matrícula</dt>
-                    <dd className="text-sm font-semibold">{formatearMontoEnCentavos(periodo.montoMatriculaCentavos)}</dd>
-                  </div>
-                  <div className="space-y-1 px-6 py-4">
-                    <dt className="text-xs text-muted-foreground">Libres</dt>
-                    <dd className="text-sm font-semibold">{ocupacion.libres}</dd>
-                  </div>
+                <dl className="mt-auto grid grid-cols-3 divide-x divide-border border-t border-border bg-muted/60">
+                  <Dato etiqueta="Plazo de pago" valor={`${periodo.diasPlazoPago} días`} />
+                  <Dato etiqueta="Matrícula" valor={formatearMontoEnCentavos(periodo.montoMatriculaCentavos)} />
+                  <Dato etiqueta="Libres" valor={ocupacion.libres} />
                 </dl>
               </article>
             )
@@ -170,9 +159,8 @@ export default async function PeriodosPage() {
 
 const TONOS_DE_RESUMEN = {
   fuerte: 'bg-primary text-primary-foreground',
-  suave: 'bg-primary/10 text-primary',
-  aviso: 'bg-accent text-accent-foreground',
-  neutro: 'bg-muted text-muted-foreground',
+  suave: 'bg-accent text-accent-foreground',
+  aviso: 'bg-(--senal-ambar,var(--accent)) text-primary',
 } as const
 
 // Tarjeta de un total del resumen de cupos.
@@ -188,17 +176,24 @@ function Resumen({
   tono: keyof typeof TONOS_DE_RESUMEN
 }) {
   return (
-    <div className="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-4 shadow-xs">
-      <span
-        aria-hidden="true"
-        className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl', TONOS_DE_RESUMEN[tono])}
-      >
+    <div className="flex items-center gap-4 bg-card p-5 shadow-(--sombra-tarjeta)">
+      <span aria-hidden="true" className={cn('flex size-11 shrink-0 items-center justify-center', TONOS_DE_RESUMEN[tono])}>
         <Icono className="size-5" />
       </span>
       <div className="min-w-0">
-        <span className="block text-xs text-muted-foreground">{etiqueta}</span>
-        <span className="block text-2xl font-bold tracking-tight">{valor}</span>
+        <span className="block text-[13px]">{etiqueta}</span>
+        <span className="block text-3xl font-bold text-primary">{valor}</span>
       </div>
+    </div>
+  )
+}
+
+// Un dato del pie de la tarjeta de período.
+function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number }) {
+  return (
+    <div className="space-y-1 px-6 py-3.5">
+      <dt className="text-xs">{etiqueta}</dt>
+      <dd className="text-[15px] font-bold text-primary">{valor}</dd>
     </div>
   )
 }

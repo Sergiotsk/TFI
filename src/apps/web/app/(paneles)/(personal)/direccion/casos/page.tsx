@@ -20,7 +20,7 @@ export default async function CasosDeDireccionPage({
   )
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <EncabezadoDePanel
         area="Director de la TUP"
         titulo="Pagos a decidir"
