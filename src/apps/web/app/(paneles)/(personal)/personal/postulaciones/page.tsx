@@ -52,7 +52,7 @@ export default async function PostulacionesDelPersonalPage({
     `?${new URLSearchParams({ ...(dniIngresado ? { dni: dniIngresado } : {}), pagina: String(destino) })}`
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <EncabezadoDePanel
         area="Personal de la TUP"
         titulo="Postulaciones"
