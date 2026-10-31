@@ -15,7 +15,10 @@ export async function guardarDatosInscripcionAction(datos: CargaDatosInput) {
     // Se ejecuta el caso de uso de registro o actualización de perfil
     // await registrarAspiranteUseCase.ejecutar(validacion.data)
     return { ok: true }
-  } catch (err: any) {
-    return { ok: false, error: err.message || 'Error al guardar los datos' }
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Error al guardar los datos',
+    }
   }
 }
