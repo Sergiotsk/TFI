@@ -78,3 +78,7 @@ export function InsigniaDePostulacion({ estado }: { estado: EstadoPostulacion })
 export function InsigniaDePago({ estado }: { estado: EstadoDePago }) {
   return <Insignia {...estadosDePago[estado]} />
 }
+
+export function InsigniaDePeriodo({ abierto }: { abierto: boolean }) {
+  return <Insignia etiqueta={abierto ? 'Abierto' : 'Cerrado'} tono={abierto ? 'exito' : 'neutro'} />
+}

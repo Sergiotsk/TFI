@@ -67,6 +67,8 @@
   --senal-violeta: #b047b3;
   --senal-rojo: #d1243c;
   --senal-neutro: #eeeeee;
+  /* Cian de los gráficos: lo pendiente, al lado del azul petróleo de lo ya ocupado. */
+  --senal-cian: #00b8d5;
 
   /* Las tarjetas no llevan borde: se despegan del fondo con esta sombra. */
   --sombra-tarjeta: 0 0 10px 0 rgb(0 0 0 / 0.13);
@@ -77,6 +79,25 @@
 /* La tipografía va solo en el div del panel: la variable de next/font la define la clase de ese mismo div. */
 [data-institucion='FRH'] [data-panel='personal'] {
   --font-sans: var(--font-public-sans);
+}
+
+/*
+ * Botones del personal: 44 px de alto (el mínimo táctil del sistema) y el secundario blanco con borde de marca. Se
+ * pisan por data-variant y data-size, como las insignias: button.tsx lo comparte el aspirante. Los de ícono (la
+ * barra superior, por ejemplo) quedan como están.
+ */
+[data-institucion='FRH'] [data-panel='personal'] [data-slot='button']:not([data-size^='icon']) {
+  min-height: 44px;
+  padding-inline: 16px;
+  font-size: 15px;
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-slot='button'][data-variant='outline'] {
+  border-color: var(--primary);
+  background: var(--card);
+  color: var(--primary);
+}
+[data-institucion='FRH'] [data-panel='personal'] [data-slot='button'][data-variant='outline']:hover {
+  background: var(--accent);
 }
 
 /*
