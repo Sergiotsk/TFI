@@ -22,7 +22,7 @@ export interface DocumentoConUrl {
  * Detalle de un documento + URL firmada.
  *
  * La URL se genera recién después de validar el acceso; el bucket es privado y
- * la firma vence a los cinco minutos.
+ * la firma vence en poco tiempo.
  */
 export class ConsultarDocumentoUseCase {
   constructor(

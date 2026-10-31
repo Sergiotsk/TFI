@@ -7,6 +7,7 @@ import {
   MATRICULA_DE_PRUEBA_CENTAVOS,
   type DatosDePeriodoDePrueba,
   type EntornoDeDocumentos,
+  type EntornoDeIntencionesDePago,
   type EntornoDePostulaciones,
   type EntornoDePeriodos,
   type EntornoDeRegistroDeCargas,
@@ -21,6 +22,7 @@ import {
 import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
 import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
+import { RepositorioDeIntencionesDePagoSupabase } from '../repositorio-de-intenciones-de-pago'
 import { RepositorioDePeriodosSupabase } from '../repositorio-de-periodos'
 import { RegistroDeCargasSupabase } from '../registro-de-cargas'
 import { RegistroDePagosSupabase } from '../registro-de-pagos'
@@ -203,6 +205,27 @@ export async function prepararEntornoDePostulaciones(): Promise<EntornoDePostula
     crearAspirante: (dni) => crearAspirante(cliente, dni),
     crearPeriodo: (datos) => crearPeriodo(cliente, institucionId, datos),
     sembrarPostulacion: (datos) => sembrarPostulacion(cliente, datos),
+  }
+}
+
+export async function prepararEntornoDeIntenciones(): Promise<EntornoDeIntencionesDePago> {
+  const cliente = clienteDeServicio()
+  const institucionId = await idDeLaInstitucionFrh(cliente)
+  const periodo = await crearPeriodo(cliente, institucionId)
+  const aspiranteId = await crearAspirante(cliente, dniUnico())
+  const postulacion = await sembrarPostulacion(cliente, {
+    aspiranteId,
+    periodoId: periodo.id,
+    estado: 'PAGO_PENDIENTE',
+  })
+
+  return {
+    repositorio: new RepositorioDeIntencionesDePagoSupabase(cliente),
+    postulacionId: postulacion.id,
+    periodoId: periodo.id,
+    institucionId,
+    crearExternalId: () => `int_contrato_${marcaUnica()}`,
+    ahora: () => new Date(),
   }
 }
 

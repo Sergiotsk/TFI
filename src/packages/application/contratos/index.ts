@@ -19,6 +19,8 @@ export type {
 } from '../puertos/repositorio-de-postulaciones/contrato'
 export { probarContratoDeRepositorioDePeriodos } from '../puertos/repositorio-de-periodos/contrato'
 export type { EntornoDePeriodos } from '../puertos/repositorio-de-periodos/contrato'
+export { probarContratoDeRepositorioDeIntencionesDePago } from '../puertos/repositorio-de-intenciones-de-pago/contrato'
+export type { EntornoDeIntencionesDePago } from '../puertos/repositorio-de-intenciones-de-pago/contrato'
 export {
   MATRICULA_DE_PRUEBA_CENTAVOS,
   probarContratoDeRegistroDePagos,

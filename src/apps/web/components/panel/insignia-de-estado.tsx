@@ -10,6 +10,14 @@ const tonos: Record<Tono, string> = {
   error: 'border-destructive/30 bg-destructive/10 text-destructive',
 }
 
+// El punto refuerza el tono sin depender solo del fondo, que en algunos estados es muy claro.
+const puntos: Record<Tono, string> = {
+  neutro: 'bg-muted-foreground/60',
+  aviso: 'bg-secondary',
+  exito: 'bg-primary',
+  error: 'bg-destructive',
+}
+
 const estadosDePostulacion: Record<EstadoPostulacion, { etiqueta: string; tono: Tono }> = {
   PREINSCRIPTO: { etiqueta: 'Preinscripto', tono: 'neutro' },
   PAGO_PENDIENTE: { etiqueta: 'Pago pendiente', tono: 'aviso' },
@@ -48,10 +56,11 @@ function Insignia({ etiqueta, tono }: { etiqueta: string; tono: Tono }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap',
         tonos[tono],
       )}
     >
+      <span aria-hidden="true" className={cn('size-1.5 rounded-full', puntos[tono])} />
       {etiqueta}
     </span>
   )

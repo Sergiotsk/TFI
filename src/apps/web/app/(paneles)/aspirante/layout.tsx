@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { BotonCerrarSesion } from '@/components/auth/boton-cerrar-sesion'
 import { crearDependencias } from '@/composition-root'
@@ -20,7 +21,7 @@ export default async function LayoutDelAspirante({ children }: { children: React
   }
   // Ubica a cada uno en su panel; no autoriza nada (cada caso de uso exige su rol).
   if (perfil.rol !== 'ASPIRANTE') {
-    redirect(PANEL_DE_ROL[perfil.rol])
+    redirect(PANEL_DE_ROL[perfil.rol as keyof typeof PANEL_DE_ROL])
   }
 
   return (
@@ -33,7 +34,15 @@ export default async function LayoutDelAspirante({ children }: { children: React
               {perfil.nombre} {perfil.apellido}
             </span>
           </div>
-          <BotonCerrarSesion />
+          <div className="flex shrink-0 items-center gap-3">
+            <Link
+              href="/recuperar-contrasena/nueva"
+              className="text-sm font-medium text-primary underline underline-offset-4 hover:no-underline"
+            >
+              Cambiar contraseña
+            </Link>
+            <BotonCerrarSesion />
+          </div>
         </div>
       </div>
       {children}

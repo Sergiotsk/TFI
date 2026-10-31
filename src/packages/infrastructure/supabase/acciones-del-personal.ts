@@ -78,4 +78,25 @@ export class AccionesDelPersonalSupabase implements AccionesDelPersonal {
 
     return { resultado }
   }
+
+  async acreditarPagoPorWebhook(postulacionId: string): Promise<ResultadoDeConfirmacion> {
+    const { data, error } = await this.supabase.rpc('confirmar_vacante_por_webhook', {
+      p_postulacion_id: postulacionId,
+    })
+
+    if (error) {
+      throw new Error(`No se pudo acreditar el pago por webhook: ${error.message}`)
+    }
+
+    const resultado = leerResultado(data)
+    if (resultado === 'OK') {
+      const postulacion = await this.postulaciones.obtenerPorId(postulacionId)
+      if (!postulacion) throw new Error('La Postulación confirmada no se pudo releer')
+
+      return { resultado: 'OK', postulacion }
+    }
+    if (resultado === 'PERIODO_CERRADO') return { resultado: 'CONFLICTO' }
+
+    return { resultado }
+  }
 }

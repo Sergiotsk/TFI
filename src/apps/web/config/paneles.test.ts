@@ -1,7 +1,14 @@
 import { describe, expect, test } from 'vitest'
 import type { Rol } from '@tfi/domain'
 import { esRutaProtegida } from '../lib/rutas-protegidas'
-import { MENU_DE_ROL, PANEL_DE_ROL, type ItemDeMenu, type RolDelPersonal } from './paneles'
+import {
+  agruparMenu,
+  itemActivoDelMenu,
+  MENU_DE_ROL,
+  PANEL_DE_ROL,
+  type ItemDeMenu,
+  type RolDelPersonal,
+} from './paneles'
 
 describe('PANEL_DE_ROL', () => {
   test.each<[Rol, string]>([
@@ -24,6 +31,7 @@ describe('MENU_DE_ROL', () => {
   // Según quién puede usar cada pantalla en contracts/api-http.md y puertos.md (ListarBandeja): la bandeja de pagos
   // es de Tesorería y Secretaría, los períodos de Secretaría y Dirección, y los casos A_DECIDIR solo de Dirección.
   // Las postulaciones (buscar, acreditar pago, prorrogar plazo) las operan los tres roles del personal (ADR 0009).
+  // La documentación la revisan Secretaría y Dirección (ROLES_QUE_GESTIONAN_DOCUMENTOS).
   // Los pagos se parten por tarea: importar el informe, resolver los no imputados y hacer las devoluciones.
   test.each<[RolDelPersonal, string[]]>([
     [
@@ -40,12 +48,16 @@ describe('MENU_DE_ROL', () => {
       [
         '/personal/periodos',
         '/personal/postulaciones',
+        '/personal/documentacion',
         '/personal/pagos',
         '/personal/pagos/no-imputados',
         '/personal/pagos/devoluciones',
       ],
     ],
-    ['DIRECCION', ['/direccion/casos', '/personal/periodos', '/personal/postulaciones']],
+    [
+      'DIRECCION',
+      ['/direccion/casos', '/personal/periodos', '/personal/postulaciones', '/personal/documentacion'],
+    ],
   ])('%s ve %j', (rol, rutas) => {
     expect(MENU_DE_ROL[rol].map((item) => item.href)).toEqual(rutas)
   })
@@ -79,5 +91,54 @@ describe('MENU_DE_ROL', () => {
         expect(esRutaProtegida(item.href)).toBe(true)
       }
     }
+  })
+})
+
+describe('agruparMenu', () => {
+  const rutasPorArea = (rol: RolDelPersonal) =>
+    agruparMenu(rol).map(({ area, items }) => [area, items.map((item) => item.href)])
+
+  test('Secretaría ve primero lo suyo y después los pagos', () => {
+    expect(rutasPorArea('SECRETARIA')).toEqual([
+      ['rol', ['/personal/periodos', '/personal/postulaciones', '/personal/documentacion']],
+      ['pagos', ['/personal/pagos', '/personal/pagos/no-imputados', '/personal/pagos/devoluciones']],
+    ])
+  })
+
+  test('Tesorería arranca por los pagos, que son su panel', () => {
+    expect(rutasPorArea('TESORERIA')).toEqual([
+      ['pagos', ['/personal/pagos', '/personal/pagos/no-imputados', '/personal/pagos/devoluciones']],
+      ['rol', ['/personal/postulaciones']],
+    ])
+  })
+
+  test('un rol sin pagos tiene un solo grupo', () => {
+    expect(rutasPorArea('DIRECCION').map(([area]) => area)).toEqual(['rol'])
+  })
+
+  test('agrupar no pierde ni repite ítems', () => {
+    for (const rol of Object.keys(MENU_DE_ROL) as RolDelPersonal[]) {
+      const agrupados = agruparMenu(rol).flatMap(({ items }) => items)
+      expect([...agrupados].sort()).toEqual([...MENU_DE_ROL[rol]].sort())
+    }
+  })
+})
+
+describe('itemActivoDelMenu', () => {
+  test('la ruta exacta marca su ítem', () => {
+    expect(itemActivoDelMenu('SECRETARIA', '/personal/postulaciones')?.etiqueta).toBe('Postulaciones')
+  })
+
+  test('una subruta marca el ítem más específico', () => {
+    expect(itemActivoDelMenu('SECRETARIA', '/personal/pagos/no-imputados')?.etiqueta).toBe('No imputados')
+    expect(itemActivoDelMenu('SECRETARIA', '/personal/documentacion/abc')?.etiqueta).toBe('Documentación')
+  })
+
+  test('un prefijo que no termina en "/" no cuenta', () => {
+    expect(itemActivoDelMenu('SECRETARIA', '/personal/periodosx')).toBeUndefined()
+  })
+
+  test('una ruta fuera del menú del rol no marca nada', () => {
+    expect(itemActivoDelMenu('TESORERIA', '/personal/periodos')).toBeUndefined()
   })
 })
