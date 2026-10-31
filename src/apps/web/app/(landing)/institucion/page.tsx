@@ -8,8 +8,10 @@ import {
   SEDE_DIRECCION,
   UTN_SITIO,
 } from '@/lib/landing/datos'
-import { CarruselSede } from '@/components/landing/carrusel-sede'
+import { LogoFlotante } from '@/components/landing/logo-flotante'
 import { Revelado } from '@/components/landing/revelado'
+import { SedeApilada } from '@/components/landing/sede-apilada'
+import '../institucion-contacto.css'
 
 export const metadata: Metadata = {
   title: 'Institución',
@@ -41,6 +43,7 @@ export default function Institucion() {
             </p>
           </div>
         </div>
+        <LogoFlotante />
       </section>
 
       <section className="section" aria-labelledby="utn-titulo">
@@ -106,7 +109,7 @@ export default function Institucion() {
           </div>
           <div className="texto-largo reveal">
             <p>
-              Para entender el problema, el equipo habló con la Dirección de la carrera, con
+              Para entender el problema, el Equipo 5 habló con la Dirección de la carrera, con
               Secretaría y con el área de Sistemas y Administración. De esas entrevistas salió la
               regla central del sistema: <strong>el pago acreditado confirma la vacante</strong>, y
               la documentación se revisa después.
@@ -125,9 +128,7 @@ export default function Institucion() {
           <h2 id="sede-titulo" className="reveal">
             La sede
           </h2>
-          <div className="reveal reveal--zoom">
-            <CarruselSede fotos={FOTOS_SEDE} alt="UTN Facultad Regional Haedo" />
-          </div>
+          <SedeApilada fotos={FOTOS_SEDE} alt="UTN Facultad Regional Haedo" />
           <dl className="datos reveal">
             <div className="datos__item">
               <dt>Dirección</dt>
