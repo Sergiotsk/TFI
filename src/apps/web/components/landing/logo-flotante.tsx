@@ -9,8 +9,8 @@ import { IMG_LOGO } from '@/lib/landing/datos'
  */
 const IMG_LOGO_3D = '/landing/img/logo-utn-3d.png'
 
-/** Cantidad de capas apiladas en profundidad: dan el grosor del logo. */
-const CAPAS = 16
+/** Cantidad de capas apiladas en profundidad: dan el grosor del logo (ver --capa en el CSS). */
+const CAPAS = 32
 
 function useLogoDisponible(): string | null {
   const [src, setSrc] = useState<string | null>(null)
@@ -35,11 +35,12 @@ function useLogoDisponible(): string | null {
 }
 
 /**
- * Logo de la UTN con aspecto 3D, flotando y girando apenas. Es decorativo (aria-hidden).
+ * Logo de la UTN con aspecto 3D que da una vuelta de 360° constante. Es decorativo (aria-hidden).
  *
- * El volumen se logra apilando copias del mismo logo en profundidad (cada una un poco más atrás y
- * más oscura) dentro de un contenedor con perspectiva; la copia del frente lleva un brillo suave.
- * Los movimientos (flotar y girar) están en el CSS y se anulan con "reducir movimiento".
+ * El volumen se logra apilando copias del mismo logo en profundidad dentro de un contenedor con
+ * perspectiva: las del medio forman el grosor (más oscuras) y las dos de los extremos son las caras
+ * (frente y dorso), con un brillo suave. La vuelta está en el CSS (--vuelta es lo que tarda) y se
+ * anula con "reducir movimiento": en ese caso el logo queda de frente.
  */
 export function LogoFlotante() {
   const src = useLogoDisponible()
@@ -47,21 +48,21 @@ export function LogoFlotante() {
 
   return (
     <div className='logo3d' aria-hidden='true'>
-      <div className='logo3d__flota'>
+      <div className='logo3d__inclina'>
         <div className='logo3d__gira'>
+          <img className='logo3d__cara logo3d__dorso' src={src} alt='' />
           {Array.from({ length: CAPAS }, (_, i) => (
             <img
               key={i}
               className='logo3d__capa'
               src={src}
               alt=''
-              style={{ '--capa': i + 1 } as CSSProperties}
+              style={{ '--capa': i } as CSSProperties}
             />
           ))}
-          <img className='logo3d__frente' src={src} alt='' />
+          <img className='logo3d__cara logo3d__frente' src={src} alt='' />
         </div>
       </div>
-      <div className='logo3d__sombra' />
     </div>
   )
 }

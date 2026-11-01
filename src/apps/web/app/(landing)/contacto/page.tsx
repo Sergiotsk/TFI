@@ -14,11 +14,7 @@ export default function Contacto() {
   return (
     <>
       <Revelado />
-      <div
-        className="banda-azul cabecera-vista contacto-hero"
-        data-parallax="0.06"
-        style={{ '--contacto-fondo': `url('${IMG_CONTACTO_FONDO}')` } as React.CSSProperties}
-      >
+      <div className="banda-azul cabecera-vista">
         <div className="container">
           <h1 id="contacto-titulo" tabIndex={-1}>
             Contacto
@@ -30,7 +26,11 @@ export default function Contacto() {
         </div>
       </div>
 
-      <section className="section" aria-label="Formulario y ubicación">
+      <section
+        className="section contacto-seccion"
+        aria-label="Formulario y ubicación"
+        style={{ '--contacto-fondo': `url('${IMG_CONTACTO_FONDO}')` } as React.CSSProperties}
+      >
         <div className="container contacto__grid">
           <FormularioContacto />
 

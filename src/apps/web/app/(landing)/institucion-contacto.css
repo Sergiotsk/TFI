@@ -3,18 +3,17 @@
    Todo cuelga de clases propias y de las variables de .landing: no afecta al resto de la app.
    ========================================================================== */
 
-/* ---------- Institución: logo de la UTN en 3D, flotando ---------- */
+/* ---------- Institución: logo de la UTN en 3D, dando una vuelta constante ---------- */
+/* Va dentro de .hero__grid (segunda columna), así queda centrado en vertical con el texto de la izquierda. */
 .logo3d {
+  --vuelta: 12s; /* lo que tarda en dar una vuelta completa */
   display: none;
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  right: clamp(2rem, 8vw, 8rem);
-  width: clamp(13rem, 24vw, 22rem);
+  position: relative;
+  justify-self: center;
+  align-self: center;
+  height: clamp(9rem, 15vw, 14rem);
   aspect-ratio: 242 / 300;
-  margin-top: calc(var(--header-alto) / 2 - 11%);
-  translate: 0 -50%;
-  perspective: 1100px;
+  perspective: 1000px;
   pointer-events: none;
 }
 @media (min-width: 1100px) {
@@ -22,100 +21,59 @@
     display: block;
   }
 }
-.logo3d__flota {
-  position: absolute;
-  inset: 0;
-  animation: logo3d-flota 6.5s ease-in-out infinite;
-}
 /* Halo de luz detrás del logo: levanta el contraste sobre la foto oscura. */
 .logo3d::before {
   content: '';
   position: absolute;
-  inset: -24% -34%;
+  inset: -26% -40%;
   background: radial-gradient(
     closest-side,
-    rgba(219, 234, 254, 0.5),
-    rgba(191, 219, 254, 0.18) 55%,
+    rgba(219, 234, 254, 0.46),
+    rgba(191, 219, 254, 0.16) 55%,
     transparent 78%
   );
-  filter: blur(4px);
-  animation: logo3d-halo 6.5s ease-in-out infinite;
 }
+.logo3d__inclina,
 .logo3d__gira {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  animation: logo3d-gira 13s ease-in-out infinite alternate;
+}
+/* Una leve inclinación fija deja ver un poco la parte de arriba y refuerza el volumen. */
+.logo3d__inclina {
+  transform: rotateX(8deg);
+}
+.logo3d__gira {
+  animation: logo3d-vuelta var(--vuelta) linear infinite;
 }
 .logo3d__capa,
-.logo3d__frente {
+.logo3d__cara {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-/* Cada capa queda más atrás y más oscura que la anterior: es el "grosor" del logo. */
+/* Las capas del medio forman el grosor (de -17 px a +17 px) y son más oscuras que las caras. */
 .logo3d__capa {
-  transform: translateZ(calc(var(--capa) * -2.3px));
-  filter: brightness(calc(1 - var(--capa) * 0.04)) saturate(1.2);
+  transform: translateZ(calc((var(--capa) - 15.5) * 1.1px));
+  filter: brightness(0.62) saturate(1.25);
 }
 .logo3d__frente {
-  transform: translateZ(0);
-  filter: brightness(1.5) saturate(1.1) drop-shadow(0 0 20px rgba(255, 255, 255, 0.35));
+  transform: translateZ(18px);
 }
-.logo3d__sombra {
-  position: absolute;
-  left: 50%;
-  bottom: -7%;
-  width: 62%;
-  height: 7%;
-  translate: -50% 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 20, 50, 0.55),
-    transparent 70%
-  );
-  filter: blur(7px);
-  animation: logo3d-sombra 6.5s ease-in-out infinite;
+.logo3d__dorso {
+  transform: translateZ(-18px);
 }
-@keyframes logo3d-flota {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-1.1rem);
-  }
+.logo3d__cara {
+  filter: brightness(1.5) saturate(1.1) drop-shadow(0 0 18px rgba(255, 255, 255, 0.3));
 }
-@keyframes logo3d-gira {
+@keyframes logo3d-vuelta {
   from {
-    transform: rotateY(-30deg) rotateX(6deg);
+    transform: rotateY(0deg);
   }
   to {
-    transform: rotateY(30deg) rotateX(-4deg);
-  }
-}
-@keyframes logo3d-halo {
-  0%,
-  100% {
-    opacity: 0.85;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.06);
-  }
-}
-@keyframes logo3d-sombra {
-  0%,
-  100% {
-    transform: scaleX(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scaleX(0.82);
-    opacity: 0.55;
+    transform: rotateY(360deg);
   }
 }
 
@@ -185,54 +143,24 @@
   }
 }
 
-/* ---------- Contacto: foto de la Facultad de fondo, con degradado ---------- */
-.contacto-hero {
-  /* Igual que el hero del Home: la foto arranca por detrás de la cápsula del encabezado. */
-  margin-top: calc(-1 * var(--header-alto));
-  padding-top: calc(var(--header-alto) + clamp(3.5rem, 9vw, 6.5rem));
-  padding-bottom: clamp(3.5rem, 9vw, 6.5rem);
-  min-height: clamp(24rem, 56vh, 32rem);
-  display: flex;
-  align-items: center;
+/* ---------- Contacto: foto de la Facultad detrás del formulario, con transparencia ---------- */
+.contacto-seccion {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
 }
-.contacto-hero .container {
-  width: min(100% - 2.5rem, var(--page-ancho));
-}
-.contacto-hero::before {
-  inset: -18% 0 -12% 0;
+.contacto-seccion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background-image: var(--contacto-fondo);
   background-size: cover;
-  background-position: center 50%;
+  background-position: center 40%;
   background-repeat: no-repeat;
-  transform: translateY(var(--py, 0px));
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-/* Degradado: azul de la UTN a la izquierda (para que el texto se lea) que se abre hacia la derecha. */
-.contacto-hero::after {
-  background:
-    linear-gradient(
-      100deg,
-      rgba(0, 42, 78, 0.92) 0%,
-      rgba(0, 56, 100, 0.8) 36%,
-      rgba(0, 72, 125, 0.34) 68%,
-      rgba(0, 72, 125, 0.1) 100%
-    ),
-    linear-gradient(180deg, rgba(0, 30, 60, 0.28) 0%, transparent 38%);
-}
-.contacto-hero h1 {
-  font-size: clamp(2.8rem, 7vw, 5rem);
-}
-.contacto-hero .cabecera-vista__bajada {
-  color: #eaf2fb;
-  text-shadow: 0 1px 14px rgba(0, 25, 55, 0.45);
-}
-@media (max-width: 640px) {
-  .contacto-hero::after {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 42, 78, 0.82) 0%,
-      rgba(0, 58, 102, 0.66) 100%
-    );
-  }
+  /* Transparencia común (sin color encima): la foto se funde con el fondo de la página. */
+  opacity: 0.22;
+  /* Los bordes de arriba y abajo se desvanecen para que no se note el corte. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
 }

@@ -42,8 +42,8 @@ export default function Institucion() {
               use <strong>la propia Facultad</strong>.
             </p>
           </div>
+          <LogoFlotante />
         </div>
-        <LogoFlotante />
       </section>
 
       <section className="section" aria-labelledby="utn-titulo">
