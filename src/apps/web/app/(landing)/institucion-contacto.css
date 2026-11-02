@@ -164,3 +164,37 @@
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
 }
+
+/* ---------- Contacto: imagen semitransparente del lado derecho del hero ---------- */
+.contacto-hero-img .container {
+  position: relative;
+  z-index: 1;
+}
+.hero-imagen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero-imagen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* En celulares queda de fondo y muy tenue, para que el texto se lea. */
+  opacity: 0.26;
+  transform: translateY(var(--py, 0px)) scale(1.12);
+}
+@media (min-width: 900px) {
+  .hero-imagen {
+    inset: 0 0 0 auto;
+    width: 56%;
+    /* Se desvanece hacia la izquierda: no se nota dónde empieza la imagen. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 60%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 60%);
+  }
+  .hero-imagen img {
+    /* Semitransparente: deja ver el azul y la cuadrícula del hero por detrás. */
+    opacity: 0.62;
+  }
+}
