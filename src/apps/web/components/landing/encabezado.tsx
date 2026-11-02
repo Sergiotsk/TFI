@@ -6,17 +6,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { cn } from '@/lib/utils'
-import { IMG_LOGO, NAVEGACION, PROYECTO_NOMBRE } from '@/lib/landing/datos'
+import { NAVEGACION, PROYECTO_NOMBRE } from '@/lib/landing/datos'
 import { FlechaDerecha } from './flecha'
 import { EVENTO_CANCELAR_SCROLL_SUAVE } from './scroll-suave'
 import { useImagenCargada } from './use-imagen-cargada'
+
+const LOGO_BRAND = '/brand/logo-con-nombre-a-la-derecha.webp'
 
 function Marca({
   alNavegar,
 }: {
   alNavegar: (evento: MouseEvent<HTMLAnchorElement>) => void
 }) {
-  const cargada = useImagenCargada(IMG_LOGO)
+  const cargada = useImagenCargada(LOGO_BRAND)
   return (
     <Link
       href='/'
@@ -26,34 +28,10 @@ function Marca({
       aria-label={`${PROYECTO_NOMBRE}, ir al inicio`}
     >
       <img
-        className='marca__logo'
-        src={IMG_LOGO}
-        alt='UTN Facultad Regional Haedo'
-        hidden={!cargada}
+        className='marca__logo marca__logo--brand'
+        src={LOGO_BRAND}
+        alt='Sistema de Ingreso TUP'
       />
-      <span className='marca__fallback'>
-        <span className='marca__sello' aria-hidden='true'>
-          <svg
-            viewBox='0 0 24 24'
-            width='20'
-            height='20'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2.4'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          >
-            <circle cx='12' cy='12' r='3' />
-            <path d='M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1' />
-          </svg>
-        </span>
-        <span className='marca__nombre'>
-          <span className='marca__sigla'>
-            UTN<b>.FRH</b>
-          </span>
-          <small>HAEDO · TUP</small>
-        </span>
-      </span>
     </Link>
   )
 }
