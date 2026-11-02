@@ -1857,15 +1857,16 @@ html {
 }
 
 /* Va después del bloque de .persona a propósito: misma especificidad, gana el que está más abajo.
-   La card ancha toma gap, padding y alto de .persona; acá solo se define el reparto foto/texto. */
+   La card ancha toma gap, padding y alto de .persona; acá solo se define el reparto foto/texto.
+   Las cards se alternan: foto a la derecha y, la siguiente, foto a la izquierda. */
 @media (min-width: 720px) {
   .persona--full {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
   }
 
   .persona--full .persona__foto {
-    order: 1;
-    justify-self: start;
+    order: 2;
+    justify-self: end;
   }
 
   .persona--full .persona__foto img {
@@ -1874,8 +1875,21 @@ html {
   }
 
   .persona--full .persona__cuerpo {
-    order: 2;
+    order: 1;
     max-width: none;
+  }
+
+  .persona--full.persona--invertida {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+  }
+
+  .persona--full.persona--invertida .persona__foto {
+    order: 1;
+    justify-self: start;
+  }
+
+  .persona--full.persona--invertida .persona__cuerpo {
+    order: 2;
   }
 }
 
