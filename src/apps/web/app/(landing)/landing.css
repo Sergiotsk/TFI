@@ -265,11 +265,13 @@ html {
   font-weight: 600;
   text-underline-offset: 3px;
   transition:
-    color 0.2s ease,
+    color 0.3s ease,
     text-decoration-color 0.2s ease;
 }
 .enlace:hover {
   color: var(--utn-deep);
+  scale: 1.2;
+  transition: scale 0.3s ease;
 }
 
 /* ---------- Encabezado flotante en forma de cápsula ---------- */
@@ -546,8 +548,10 @@ html {
 .cierre h2 {
   font-size: clamp(1.8rem, 3.6vw, 2.6rem);
   font-weight: 700;
+  font-size: 4rem;
 }
 .section__bajada {
+  font-size: 2rem;
   margin-top: 1rem;
   max-width: 58ch;
   color: var(--slate-600);
@@ -1853,6 +1857,7 @@ html {
 .persona__resumen {
   max-width: 52ch;
   color: var(--slate-600);
+  margin-bottom: 1rem;
 }
 .chips {
   display: flex;
@@ -1871,6 +1876,8 @@ html {
   display: flex;
   gap: 1rem;
   font-size: 0.95rem;
+  margin-top: 0.5rem;
+  margin-left: 2rem;
 }
 @media (min-width: 720px) {
   /* Todas las cards del equipo comparten el mismo reparto: foto a la izquierda y texto a la derecha */

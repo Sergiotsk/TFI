@@ -35,7 +35,8 @@ export const IMG_LOGO = '/landing/img/logo-utn-frh.png'
 
 /** Imagen del encabezado de Institución (se ve del lado derecho, con degradado hacia el azul). */
 export const IMG_SEDE_PORTADA = '/landing/img/utn-desde-arriba.webp'
-export const IMG_SEDE_PORTADA_MOBILE = '/landing/img/utn-desde-arriba-mobbile.webp'
+export const IMG_SEDE_PORTADA_MOBILE =
+  '/landing/img/utn-desde-arriba-mobbile.webp'
 
 /** Fotos del carrusel de la sede: se muestran solo las que existan, en este orden (hasta 6). */
 export const FOTOS_SEDE: readonly string[] = [
@@ -116,7 +117,10 @@ export const CAPAS_TECNOLOGICAS = [
       { nombre: 'Next.js', uso: 'Páginas, rutas y servidor' },
       { nombre: 'React', uso: 'Componentes e interfaz interactiva' },
       { nombre: 'TypeScript', uso: 'Tipado estricto para mayor seguridad' },
-      { nombre: 'Tailwind CSS y shadcn/ui', uso: 'Sistema de diseño unificado' },
+      {
+        nombre: 'Tailwind CSS y shadcn/ui',
+        uso: 'Sistema de diseño unificado',
+      },
     ],
   },
   {
@@ -151,8 +155,14 @@ export const CAPAS_TECNOLOGICAS = [
     piezas: [
       { nombre: 'Vitest', uso: 'Tests unitarios y de integración rápidos' },
       { nombre: 'Zod', uso: 'Validación de datos en los bordes' },
-      { nombre: 'Fakes en memoria', uso: 'Pruebas aisladas sin red ni base de datos' },
-      { nombre: 'Tests de contrato', uso: 'Verificación contra adaptadores reales' },
+      {
+        nombre: 'Fakes en memoria',
+        uso: 'Pruebas aisladas sin red ni base de datos',
+      },
+      {
+        nombre: 'Tests de contrato',
+        uso: 'Verificación contra adaptadores reales',
+      },
     ],
   },
 ] as const
@@ -177,13 +187,15 @@ export const ASUNTOS = [
 
 export interface Integrante {
   nombre: string
-  rol: 'Frontend' | 'Backend'
+  rol: 'Frontend' | 'Backend' | 'Fullstack + Database'
   /** Nombre del archivo dentro de public/landing/img/ (ej. 'federico.jpg'); si no existe, se muestra la inicial. */
   foto: string
   resumen: string
+  detalle: string
   tecnologias: string[]
   github: string
   linkedin: string
+  portfolio?: string
 }
 
 /** Equipo. Cada integrante completa su resumen, tecnologías y links. */
@@ -194,6 +206,7 @@ export const EQUIPO: Integrante[] = [
     foto: '/landing/img/federico.jpg',
     resumen:
       'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
+    detalle: '',
     tecnologias: [],
     github: '',
     linkedin: '',
@@ -204,24 +217,43 @@ export const EQUIPO: Integrante[] = [
     foto: '/landing/img/lucia.jpg',
     resumen:
       'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
+    detalle: '',
     tecnologias: [],
     github: '',
     linkedin: '',
   },
   {
     nombre: 'Santiago Vadone',
-    rol: 'Backend',
-    foto: '/landing/img/santiago.jpg',
-    resumen: 'Desarrollo de la lógica del sistema y de la base de datos.',
-    tecnologias: [],
-    github: '',
-    linkedin: '',
+    rol: 'Fullstack + Database',
+    foto: '/landing/img/santiago.webp',
+    resumen:
+      'Encargado del desarrollo y diseño del backend, frontend, la base de datos y la integracion de estos.',
+    detalle: `Participa en el diseño, arquitectura y desarrollo del
+                    Sistema GIU, con foco en la funcionalidad, las reglas
+                    de negocio y la experiencia de uso.`,
+    tecnologias: [
+      'NextJS',
+      'NodeJs',
+      'Zod',
+      'Vitest',
+      'TypeScript',
+      'PostgreSQL',
+      'Supabase',
+      'Vitest',
+      'React',
+      'TailwindCSS',
+      'shadcn/ui',
+    ],
+    github: 'https://github.com/SantiGVadone',
+    linkedin: 'https://www.linkedin.com/in/santiago-gabriel-vadone/',
+    portfolio: 'https://vadonedev.com.ar',
   },
   {
     nombre: 'Sergio Tschernitschek',
     rol: 'Backend',
-    foto: '/landing/img/sergio.jpg',
+    foto: '/landing/img/sergio.webp',
     resumen: 'Desarrollo de la lógica del sistema y de la base de datos.',
+    detalle: '',
     tecnologias: [],
     github: '',
     linkedin: '',
