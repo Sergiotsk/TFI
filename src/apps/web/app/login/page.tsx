@@ -29,7 +29,7 @@ export default async function PaginaLogin({
       <p className="mt-6 text-center text-sm text-muted-foreground">
         ¿No tenés cuenta?{' '}
         <Link
-          href="/registro"
+          href="/aspirante/inscripcion"
           className="font-medium text-primary underline underline-offset-4 hover:no-underline"
         >
           Registrate
