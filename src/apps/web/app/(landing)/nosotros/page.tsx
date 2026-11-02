@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { DOCENTE, EQUIPO } from '@/lib/landing/datos'
 import { AvatarPersona } from '@/components/landing/avatar-persona'
+import { EquipoApilado } from '@/components/landing/equipo-apilado'
 import { Revelado } from '@/components/landing/revelado'
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default function Nosotros() {
               Conocé al equipo que diseñó y construyó el Sistema de Ingreso TUP.
             </p>
           </div>
-          <ul className='equipo equipo--full'>
+          <EquipoApilado>
             {EQUIPO.map((persona, i) => (
               <li
                 className={`persona persona--full ${i % 2 === 1 ? 'persona--invertida' : ''}`}
@@ -111,7 +112,7 @@ export default function Nosotros() {
                 </div>
               </li>
             ))}
-          </ul>
+          </EquipoApilado>
         </div>
       </section>
 

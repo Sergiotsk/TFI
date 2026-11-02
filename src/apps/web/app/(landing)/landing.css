@@ -1893,6 +1893,28 @@ html {
   }
 }
 
+/* Cards del equipo apiladas con el scroll (ver components/landing/equipo-apilado.tsx).
+   El componente fija el alto del contenedor y el transform de cada card; acá se define la
+   escena que queda pegada arriba. Sin [data-animado] todo sigue siendo la lista normal. */
+.equipo-pila[data-animado='si'] {
+  overflow: clip;
+}
+
+.equipo-pila[data-animado='si'] .equipo--pila {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  margin-top: 0;
+  gap: 0;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+}
+
+.equipo-pila[data-animado='si'] .equipo--pila > .persona {
+  grid-area: 1 / 1;
+  will-change: transform;
+}
+
 /* ---------- Contacto ---------- */
 .contacto__grid {
   display: grid;
