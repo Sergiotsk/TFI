@@ -72,34 +72,40 @@ export default function Nosotros() {
                   persona.portfolio !== '' ? (
                     <p className='persona__links'>
                       {persona.github !== '' ? (
-                        <a
-                          className='enlace'
-                          href={persona.github}
-                          target='_blank'
-                          rel='noopener'
-                        >
-                          GitHub
-                        </a>
+                        <p className='pill'>
+                          <a
+                            className='enlace'
+                            href={persona.github}
+                            target='_blank'
+                            rel='noopener'
+                          >
+                            GitHub
+                          </a>
+                        </p>
                       ) : null}
                       {persona.linkedin !== '' ? (
-                        <a
-                          className='enlace'
-                          href={persona.linkedin}
-                          target='_blank'
-                          rel='noopener'
-                        >
-                          LinkedIn
-                        </a>
+                        <p className='pill'>
+                          <a
+                            className='enlace'
+                            href={persona.linkedin}
+                            target='_blank'
+                            rel='noopener'
+                          >
+                            LinkedIn
+                          </a>
+                        </p>
                       ) : null}
                       {persona.portfolio !== '' ? (
-                        <a
-                          className='enlace'
-                          href={persona.portfolio}
-                          target='_blank'
-                          rel='noopener'
-                        >
-                          Portfolio
-                        </a>
+                        <p className='pill'>
+                          <a
+                            className='enlace'
+                            href={persona.portfolio}
+                            target='_blank'
+                            rel='noopener'
+                          >
+                            Portfolio
+                          </a>
+                        </p>
                       ) : null}
                     </p>
                   ) : null}

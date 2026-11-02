@@ -1877,7 +1877,6 @@ html {
   gap: 1rem;
   font-size: 0.95rem;
   margin-top: 0.5rem;
-  margin-left: 2rem;
 }
 @media (min-width: 720px) {
   /* Todas las cards del equipo comparten el mismo reparto: foto a la izquierda y texto a la derecha */
@@ -1898,12 +1897,13 @@ html {
 
   .persona--full .persona__foto {
     order: 2;
-    justify-self: end;
+    justify-self: center;
   }
 
   .persona--full .persona__foto img {
     height: 100%;
     object-fit: cover;
+    width: 80%;
   }
 
   .persona--full .persona__cuerpo {

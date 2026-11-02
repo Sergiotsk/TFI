@@ -187,7 +187,7 @@ export const ASUNTOS = [
 
 export interface Integrante {
   nombre: string
-  rol: 'Frontend' | 'Backend' | 'Fullstack + Database'
+  rol: string
   /** Nombre del archivo dentro de public/landing/img/ (ej. 'federico.jpg'); si no existe, se muestra la inicial. */
   foto: string
   resumen: string
@@ -195,7 +195,7 @@ export interface Integrante {
   tecnologias: string[]
   github: string
   linkedin: string
-  portfolio?: string
+  portfolio: string
 }
 
 /** Equipo. Cada integrante completa su resumen, tecnologías y links. */
@@ -210,6 +210,7 @@ export const EQUIPO: Integrante[] = [
     tecnologias: [],
     github: '',
     linkedin: '',
+    portfolio: '',
   },
   {
     nombre: 'Lucia Enriquez Aveiro',
@@ -221,16 +222,16 @@ export const EQUIPO: Integrante[] = [
     tecnologias: [],
     github: '',
     linkedin: '',
+    portfolio: '',
   },
   {
     nombre: 'Santiago Vadone',
-    rol: 'Fullstack + Database',
+    rol: 'Fullstack & Database Developer',
     foto: '/landing/img/santiago.webp',
     resumen:
       'Encargado del desarrollo y diseño del backend, frontend, la base de datos y la integracion de estos.',
-    detalle: `Participa en el diseño, arquitectura y desarrollo del
-                    Sistema GIU, con foco en la funcionalidad, las reglas
-                    de negocio y la experiencia de uso.`,
+    detalle: `Backend & Database Developer
+          Encargado de la arquitectura backend, lógica de negocio y gestión de la base de datos mediante scripts SQL. Diseña endpoints, middlewares y validaciones, integra la pasarela de Mercado Pago y apoya en el desarrollo de la interfaz frontend.`,
     tecnologias: [
       'NextJS',
       'NodeJs',
@@ -257,5 +258,6 @@ export const EQUIPO: Integrante[] = [
     tecnologias: [],
     github: '',
     linkedin: '',
+    portfolio: '',
   },
 ]
