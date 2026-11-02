@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { SEDE_DIRECCION, SEDE_MAPA_LINK, SEDE_MAPA_URL } from '@/lib/landing/datos'
 import { FormularioContacto } from '@/components/landing/formulario-contacto'
+import { ImagenHero } from '@/components/landing/imagen-hero'
 import { Revelado } from '@/components/landing/revelado'
 import '../institucion-contacto.css'
 
@@ -14,7 +15,8 @@ export default function Contacto() {
   return (
     <>
       <Revelado />
-      <div className="banda-azul cabecera-vista">
+      <div className="banda-azul cabecera-vista contacto-hero-img" data-parallax="0.06">
+        <ImagenHero />
         <div className="container">
           <h1 id="contacto-titulo" tabIndex={-1}>
             Contacto
