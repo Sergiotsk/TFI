@@ -105,31 +105,54 @@ export const ROLES: readonly {
   },
 ]
 
-/** Tecnología del sistema, agrupada en capas (Home). */
+/** Tecnología del sistema (Home). */
 export const CAPAS_TECNOLOGICAS = [
   {
-    nombre: 'Lo que ve la persona',
+    nombre: 'Next.js + React',
+    imagen: '/landing/img/react-nextjs.webp',
+    descripcion:
+      'Base del frontend con renderizado híbrido, rutas en el App Router y componentes reutilizables para construir la interfaz del sistema.',
     piezas: [
-      { nombre: 'Next.js', uso: 'las páginas y el servidor' },
-      { nombre: 'React', uso: 'la interfaz' },
-      { nombre: 'TypeScript', uso: 'código más seguro' },
-      { nombre: 'Tailwind CSS y shadcn/ui', uso: 'el diseño' },
+      { nombre: 'Next.js', uso: 'Páginas, rutas y servidor' },
+      { nombre: 'React', uso: 'Componentes e interfaz interactiva' },
+      { nombre: 'TypeScript', uso: 'Tipado estricto para mayor seguridad' },
+      { nombre: 'Tailwind CSS y shadcn/ui', uso: 'Sistema de diseño unificado' },
     ],
   },
   {
-    nombre: 'Lo que guarda y protege',
+    nombre: 'Supabase',
+    imagen: '/landing/img/supabase.webp',
+    descripcion:
+      'Plataforma completa para autenticación, base de datos PostgreSQL, políticas de seguridad y almacenamiento de archivos.',
     piezas: [
       {
-        nombre: 'Supabase',
-        uso: 'base de datos PostgreSQL, usuarios y archivos',
+        nombre: 'PostgreSQL',
+        uso: 'Base de datos relacional con integridad y trazabilidad',
+      },
+      {
+        nombre: 'Auth',
+        uso: 'Gestión de usuarios y roles con seguridad integrada',
+      },
+      {
+        nombre: 'Storage',
+        uso: 'Almacenamiento seguro de documentos de postulación',
+      },
+      {
+        nombre: 'Row Level Security',
+        uso: 'Control de acceso a nivel de fila',
       },
     ],
   },
   {
-    nombre: 'Lo que verifica',
+    nombre: 'Vitest',
+    imagen: '/landing/img/vitest.webp',
+    descripcion:
+      'Suite de pruebas automatizadas para garantizar la calidad, con enfoque en dominio, casos de uso y contratos entre capas.',
     piezas: [
-      { nombre: 'Zod', uso: 'valida los datos que llegan' },
-      { nombre: 'Vitest', uso: 'pruebas automáticas' },
+      { nombre: 'Vitest', uso: 'Tests unitarios y de integración rápidos' },
+      { nombre: 'Zod', uso: 'Validación de datos en los bordes' },
+      { nombre: 'Fakes en memoria', uso: 'Pruebas aisladas sin red ni base de datos' },
+      { nombre: 'Tests de contrato', uso: 'Verificación contra adaptadores reales' },
     ],
   },
 ] as const

@@ -262,25 +262,36 @@ export default function Inicio() {
             </p>
           </div>
 
-          <ol className='pila'>
+          <div className='tech-cards'>
             {CAPAS_TECNOLOGICAS.map((capa, i) => (
-              <li
-                className='pila__capa reveal reveal--der'
+              <article
+                className='tech-card reveal reveal--zoom'
                 key={capa.nombre}
-                style={{ ...retraso(i), '--nivel': i } as CSSProperties}
+                style={{ ...retraso(i), '--index': i } as CSSProperties}
               >
-                <h3 className='pila__nombre'>{capa.nombre}</h3>
-                <ul className='pila__piezas'>
-                  {capa.piezas.map((pieza) => (
-                    <li key={pieza.nombre}>
-                      <strong>{pieza.nombre}</strong>
-                      <span>{pieza.uso}</span>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+                <div
+                  className='tech-card__imagen'
+                  style={{
+                    backgroundImage: `url(${capa.imagen})`,
+                  }}
+                  aria-hidden='true'
+                />
+                <div className='tech-card__overlay' aria-hidden='true' />
+                <div className='tech-card__contenido'>
+                  <h3 className='tech-card__titulo'>{capa.nombre}</h3>
+                  <p className='tech-card__descripcion'>{capa.descripcion}</p>
+                  <ul className='tech-card__lista'>
+                    {capa.piezas.map((pieza) => (
+                      <li key={pieza.nombre}>
+                        <strong>{pieza.nombre}</strong>
+                        <span>{pieza.uso}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
