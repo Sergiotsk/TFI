@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element -- la foto es opcional: si no existe, se ve la inicial */
-
 import { cn } from '@/lib/utils'
 import { useImagenCargada } from './use-imagen-cargada'
 

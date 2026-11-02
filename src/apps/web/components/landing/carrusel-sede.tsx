@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element -- las fotos son opcionales: si no existen, queda el marcador */
-
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useImagenesCargadas } from './use-imagen-cargada'

@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element -- las fotos son opcionales: si no existen, se ve el marcador */
-
 import { cn } from '@/lib/utils'
 import { useImagenCargada } from './use-imagen-cargada'
 
