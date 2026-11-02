@@ -1705,6 +1705,28 @@ html {
 }
 
 /* ---------- Sobre nosotros ---------- */
+/* Fondo de útiles: solo un lavado tenue para que la sección no quede blanca. Va desenfocado y
+   con opacidad baja a propósito, para que no se reconozca lo que hay en la foto. */
+.equipo-section-full {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--white);
+}
+
+.equipo-section-full::before {
+  content: '';
+  position: absolute;
+  /* Se pasa del borde a propósito: el desenfoque se come los bordes y el recorte de la sección
+     los esconde, así el lavado llega hasta el límite sin una franja blanca. */
+  inset: -60px;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/landing/img/fondo-utiles.webp') center / cover no-repeat;
+  filter: blur(20px) saturate(1.5);
+  opacity: 0.18;
+}
+
 .equipo-wrapper {
   width: min(100% - 2rem, 94vw);
   margin-inline: auto;
