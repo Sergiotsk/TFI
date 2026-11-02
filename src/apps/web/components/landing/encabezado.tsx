@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element -- la imagen del logo es opcional: si no existe, se ve el marcador */
-
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState, type MouseEvent } from 'react'

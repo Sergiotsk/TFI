@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element -- la imagen es opcional: si no existe, el encabezado queda solo azul */
-
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { IMG_SEDE_PORTADA } from '@/lib/landing/datos'
