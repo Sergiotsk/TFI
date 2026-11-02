@@ -1922,6 +1922,10 @@ html {
    El componente fija el alto del contenedor y el transform de cada card; acá se define la
    escena que queda pegada arriba. Sin [data-animado] todo sigue siendo la lista normal. */
 .equipo-pila[data-animado='si'] {
+  /* La pila llega hasta los bordes de la ventana: si se queda en el ancho del wrapper (94vw),
+     la card que entra se corta antes y queda una franja sin card contra la derecha. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
   overflow: clip;
 }
 
