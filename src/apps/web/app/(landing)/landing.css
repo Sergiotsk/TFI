@@ -1738,19 +1738,6 @@ html {
   justify-content: space-between;
 }
 
-.persona--full.persona--invertida {
-  grid-template-columns: 3fr 7fr;
-}
-
-.persona--full.persona--invertida .persona__foto {
-  order: 1;
-  justify-self: start;
-}
-
-.persona--full.persona--invertida .persona__cuerpo {
-  order: 2;
-}
-
 .persona__cabecera {
   display: flex;
   flex-wrap: wrap;
@@ -1767,32 +1754,6 @@ html {
   max-width: 90ch;
   font-size: clamp(1rem, 1.8vw, 1.15rem);
   color: var(--slate-600);
-}
-
-@media (min-width: 720px) {
-  .persona--full {
-    grid-template-columns: 7fr 3fr;
-    gap: clamp(2.5rem, 7vw, 5rem);
-    align-items: center;
-  }
-
-  .persona--full .persona__foto {
-    order: 2;
-    width: min(100%, 16rem);
-    height: auto;
-    aspect-ratio: 1;
-    justify-self: end;
-  }
-
-  .persona--full .persona__foto img {
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .persona--full .persona__cuerpo {
-    order: 1;
-    max-width: none;
-  }
 }
 
 .equipo {
@@ -1887,18 +1848,34 @@ html {
   font-size: 0.95rem;
 }
 @media (min-width: 720px) {
-  /* Avatar a la izquierda y descripción a la derecha; en la fila siguiente, al revés */
+  /* Todas las cards del equipo comparten el mismo reparto: foto a la izquierda y texto a la derecha */
   .persona {
     grid-template-columns: 12rem 1fr;
     gap: 2.5rem;
     padding: 1.75rem 2rem;
   }
-  .persona--invertida {
-    grid-template-columns: 1fr 12rem;
+}
+
+/* Va después del bloque de .persona a propósito: misma especificidad, gana el que está más abajo.
+   La card ancha toma gap, padding y alto de .persona; acá solo se define el reparto foto/texto. */
+@media (min-width: 720px) {
+  .persona--full {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
   }
-  .persona--invertida .persona__foto {
+
+  .persona--full .persona__foto {
+    order: 1;
+    justify-self: start;
+  }
+
+  .persona--full .persona__foto img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .persona--full .persona__cuerpo {
     order: 2;
-    justify-self: end;
+    max-width: none;
   }
 }
 

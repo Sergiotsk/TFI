@@ -54,11 +54,8 @@ export default function Nosotros() {
             </p>
           </div>
           <ul className='equipo equipo--full'>
-            {EQUIPO.map((persona, i) => (
-              <li
-                className={`persona persona--full ${i % 2 === 1 ? 'persona--invertida' : ''}`}
-                key={persona.nombre}
-              >
+            {EQUIPO.map((persona) => (
+              <li className='persona persona--full' key={persona.nombre}>
                 <AvatarPersona nombre={persona.nombre} foto={persona.foto} />
                 <div className='persona__cuerpo'>
                   <div className='persona__cabecera'>
