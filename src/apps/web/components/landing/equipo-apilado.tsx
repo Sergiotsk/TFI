@@ -6,8 +6,12 @@ import { useEffect, useRef, type ReactNode } from 'react'
 const PASO = 0.7
 /** Cuántas cards se pueden ver apiladas detrás de la del frente. */
 const CAPAS = 3
-/** Cuánto entra desde la derecha cada card nueva, en % de su propio ancho. */
-const ENTRADA = 60
+/** Cuánto se corre hacia arriba cada capa del mazo, en px. */
+const CORRIMIENTO = 18
+/** Cuánto se achica cada capa del mazo. */
+const REDUCCION = 0.04
+/** Entrada por defecto, en % del ancho de la card, hasta que se mide el contenedor. */
+const ENTRADA = 115
 
 /**
  * Cards del equipo que se apilan al bajar: la sección queda "pegada" arriba y cada card
@@ -39,6 +43,8 @@ export function EquipoApilado({ children }: { children: ReactNode }) {
     let activo = false
     let recorrido = 0
     let pendiente = false
+    // Cuánto hay que correr una card para que quede afuera del recorte, en % de su ancho.
+    let entrada = ENTRADA
     // Último transform escrito por card, para no tocar el DOM si no cambió.
     const ultimo: string[] = []
 
@@ -50,6 +56,12 @@ export function EquipoApilado({ children }: { children: ReactNode }) {
       const paso = Math.round(alto * PASO)
       contenedor.style.height = `${alto + (tarjetas.length - 1) * paso}px`
       recorrido = Math.max(0, contenedor.offsetHeight - alto)
+      const anchoCard = tarjetas[0]?.offsetWidth ?? 0
+      if (anchoCard > 0) {
+        // La card está centrada en el contenedor: para que su borde izquierdo quede justo
+        // en el borde derecho (recortado) hay que correrla media card + medio contenedor.
+        entrada = ((contenedor.clientWidth / 2 + anchoCard / 2) / anchoCard) * 100 + 2
+      }
     }
 
     const pintar = () => {
@@ -60,9 +72,9 @@ export function EquipoApilado({ children }: { children: ReactNode }) {
       const frente = avance * (tarjetas.length - 1)
 
       tarjetas.forEach((tarjeta, i) => {
-        const entrada = i === 0 ? 1 : acotar(frente - (i - 1))
+        const entradaCard = i === 0 ? 1 : acotar(frente - (i - 1))
         const tapada = Math.min(CAPAS, Math.max(0, frente - i))
-        const transform = `translate3d(${((1 - entrada) * ENTRADA).toFixed(2)}%, ${(-tapada * 14).toFixed(1)}px, 0) scale(${((0.92 + 0.08 * entrada) * (1 - 0.02 * tapada)).toFixed(3)})`
+        const transform = `translate3d(${((1 - entradaCard) * entrada).toFixed(2)}%, ${(-tapada * CORRIMIENTO).toFixed(1)}px, 0) scale(${((0.92 + 0.08 * entradaCard) * (1 - REDUCCION * tapada)).toFixed(3)})`
         if (ultimo[i] === transform) return
         ultimo[i] = transform
         tarjeta.style.transform = transform
