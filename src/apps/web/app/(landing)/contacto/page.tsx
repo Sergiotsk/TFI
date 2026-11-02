@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { SEDE_DIRECCION, SEDE_MAPA_LINK, SEDE_MAPA_URL } from '@/lib/landing/datos'
 import { FormularioContacto } from '@/components/landing/formulario-contacto'
 import { Revelado } from '@/components/landing/revelado'
+import '../institucion-contacto.css'
+
+const IMG_CONTACTO_FONDO = '/landing/img/foto-contacto.webp'
 
 export const metadata: Metadata = {
   title: 'Contacto',
@@ -23,7 +26,11 @@ export default function Contacto() {
         </div>
       </div>
 
-      <section className="section" aria-label="Formulario y ubicación">
+      <section
+        className="section contacto-seccion"
+        aria-label="Formulario y ubicación"
+        style={{ '--contacto-fondo': `url('${IMG_CONTACTO_FONDO}')` } as React.CSSProperties}
+      >
         <div className="container contacto__grid">
           <FormularioContacto />
 
