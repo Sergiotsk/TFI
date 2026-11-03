@@ -103,7 +103,7 @@ export default async function PaginaLogin({
                   <div className="mt-6 pt-4 border-t border-border text-center text-xs text-muted-foreground">
                     ¿Todavía no iniciaste tu postulación?{' '}
                     <Link
-                      href="/aspirante/inscripcion"
+                      href="/aspirante-backup/inscripcion"
                       className="font-bold text-primary hover:underline ml-1"
                     >
                       Registrate acá

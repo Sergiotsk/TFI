@@ -123,6 +123,12 @@ export default function InscripcionPage() {
         return
       }
 
+      // Cierra la sesión automática que crea Supabase al registrarse
+      await supabase.auth.signOut()
+
+      // Con la sesión cerrada, te manda al login a autenticarte manualmente
+      router.push(`/login?email=${encodeURIComponent(formData.email)}`)
+
       // Con el usuario creado, redirige a login con el email ya cargado
       router.push(`/login?email=${encodeURIComponent(formData.email)}`)
     } catch (err) {
