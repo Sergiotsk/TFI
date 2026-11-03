@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
-import { CargaDatosSchema, type CargaDatosInput } from '@/http/schemas/carga-datos.schema'
+import { CargaDatosSchema } from '@/http/schemas/carga-datos.schema'
 
 export default function InscripcionPage() {
   const router = useRouter()
@@ -101,7 +101,7 @@ export default function InscripcionPage() {
       const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
 // Registrar la cuenta en auth.users cumpliendo los requisitos del trigger
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -125,8 +125,8 @@ export default function InscripcionPage() {
 
       // Con el usuario creado, redirige a login con el email ya cargado
       router.push(`/login?email=${encodeURIComponent(formData.email)}`)
-    } catch (err: any) {
-      setErrorServidor(err?.message || 'Ocurrió un error al registrar la cuenta')
+    } catch (err) {
+      setErrorServidor(err instanceof Error ? err.message : 'Ocurrió un error al registrar la cuenta')
       setIsSubmitting(false)
     }
   }
