@@ -12,7 +12,7 @@ interface EncabezadoDePanelProps {
 
 export function EncabezadoDePanel({ area, titulo, descripcion, acciones }: EncabezadoDePanelProps) {
   return (
-    <header className="border-b border-border bg-card in-data-[panel=personal]:border-0 in-data-[panel=personal]:bg-transparent">
+    <header className="bg-transparent">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 sm:px-6 lg:px-8 in-data-[panel=personal]:pt-9 in-data-[panel=personal]:pb-2">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1.5">

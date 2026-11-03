@@ -1,14 +1,22 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShieldCheck, User } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { Stepper } from './stepper'
+import { MenuUsuarioHeader } from './menu-usuario-header'
 
 interface HeaderProps {
   pasoActual?: 1 | 2 | 3 | 4
   dniPostulante?: string
+  nombrePostulante?: string
 }
 
-export function HeaderInstitucional({ pasoActual, dniPostulante }: HeaderProps) {
+export function HeaderInstitucional({
+  pasoActual,
+  dniPostulante,
+  nombrePostulante,
+}: HeaderProps) {
+  const tieneUsuario = Boolean(nombrePostulante || dniPostulante)
+
   return (
     <header className="sticky top-0 z-50 h-20 border-b border-border bg-card shadow-xs">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -39,17 +47,14 @@ export function HeaderInstitucional({ pasoActual, dniPostulante }: HeaderProps) 
           </div>
         )}
 
-        <div className="flex items-center space-x-3">
-          {dniPostulante && (
-            <div className="text-right hidden sm:block">
-              <p className="text-[11px] font-medium text-muted-foreground">Postulante</p>
-              <p className="text-xs font-semibold text-foreground">DNI {dniPostulante}</p>
-            </div>
-          )}
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-            <User className="h-4 w-4" />
+        {tieneUsuario && (
+          <div className="flex items-center space-x-3">
+            <MenuUsuarioHeader 
+              nombreCompleto={nombrePostulante ?? ''} 
+              dni={dniPostulante} 
+            />
           </div>
-        </div>
+        )}
       </div>
     </header>
   )
