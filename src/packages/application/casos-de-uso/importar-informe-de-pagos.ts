@@ -8,7 +8,7 @@ import { SolicitudInvalida } from './errores'
 /** Qué pasó con cada fila. `ERROR` es una fila que hay que reprocesar (la idempotencia lo hace seguro). */
 export interface FilaImportada {
   referencia: string
-  resultado: 'ACREDITADO' | 'A_DECIDIR' | 'NO_IMPUTADO' | 'DUPLICADO' | 'ERROR'
+  resultado: 'ACREDITADO' | 'A_DECIDIR' | 'NO_IMPUTADO' | 'DUPLICADO' | 'IGNORADO' | 'ERROR'
   motivo?: string
 }
 
@@ -41,13 +41,20 @@ export class ImportarInformeDePagosUseCase {
     if (pagos.length === 0) throw new SolicitudInvalida('El informe no tiene pagos')
 
     const carga = await this.cargas.iniciar(actor.institucionId, actor.perfilId, nombreArchivo)
-    const resumen = { acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0 }
+    const resumen = { acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0, ignorados: 0 }
     const filas: FilaImportada[] = []
 
     for (const pago of pagos) {
       const referencia = pago.referencia.referenciaExterna
       try {
-        const { resultado, pago: registrado } = await this.acreditarPago.ejecutar(actor, pago, carga.id)
+        const acreditacion = await this.acreditarPago.ejecutar(actor, pago, carga.id)
+        if (acreditacion.resultado === 'IGNORADO') {
+          filas.push({ referencia, resultado: 'IGNORADO', motivo: acreditacion.motivo })
+          resumen.ignorados += 1
+          continue
+        }
+
+        const { resultado, pago: registrado } = acreditacion
         filas.push({ referencia, resultado, motivo: registrado.motivoNoImputado ?? registrado.motivoRevision })
 
         if (resultado === 'ACREDITADO') resumen.acreditados += 1

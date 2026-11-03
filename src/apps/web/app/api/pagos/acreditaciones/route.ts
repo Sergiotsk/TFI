@@ -10,7 +10,7 @@ import { jsonError, jsonOk } from '@/http/respuesta'
  * `POST /api/pagos/acreditaciones` → `ImportarInformeDePagos` (US1).
  *
  * Solo `TESORERIA`. Recibe las filas del informe ya leídas (JSON): el archivo lo
- * lee el panel con el lector del formato provisorio. Devuelve la carga con el
+ * lee el panel con el lector de planillas (ADR 0011). Devuelve la carga con el
  * resumen y el resultado de cada fila; las que fallaron (`ERROR`) se pueden
  * reenviar, porque la idempotencia por referencia hace seguro el reproceso.
  */

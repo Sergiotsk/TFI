@@ -287,6 +287,17 @@ un `signUp` sin DNI falla.
 - [ ] T104 Recorrer specs/001-postulacion-plazo-cupos/quickstart.md completo (secciones 1 a 5), medir que importar un informe de unas 200 filas tarda menos de 30 s (meta de plan.md) y adjuntar la salida de la sección 3 (contratos contra Supabase local) al PR del adaptador
 - [ ] T105 Coordinar con el autor del PR 76 su cierre en favor de los PRs de esta feature (comentario en el PR que enlace a specs/001-postulacion-plazo-cupos/spec.md)
 
+## Phase 9: Informe real de SysAdmin (ADR 0011)
+
+- [x] T106 ADR 0011: lector XLSX con perfil por institución y filas que la admisión ignora
+- [x] T107 [US1] `motivoParaIgnorar` y `ResumenDeCarga.ignorados` en src/packages/domain/pago/
+- [x] T108 [US1] `AcreditarPago` devuelve `IGNORADO` para `INFORME_SYSADMIN` (sin Postulación o ya admitido) e `ImportarInformeDePagos` lo cuenta; el puerto `LectorDeInformeDePagos` recibe bytes
+- [x] T109 [US1] Migración `cargas_de_informe.ignorados` con su `GRANT UPDATE`
+- [x] T110 [US1] `LectorDeInformesXlsx` + `PERFIL_SYSADMIN_UTN_HAEDO` (exceljs) en src/packages/infrastructure/informe-de-pagos/; se borra el lector provisorio
+- [x] T111 [US1] El panel de Tesorería sube el `.xlsx` y muestra las filas ignoradas
+- [ ] T112 Correr `pnpm test:contratos` contra Supabase local (`RegistroDeCargas` con `ignorados`) y probar la carga de punta a punta en el panel
+- [ ] T113 Pedir a SysAdmin el texto con el que registra la seña y, cuando llegue, prender el filtro de concepto del perfil
+
 ---
 
 ## Dependencies & Execution Order

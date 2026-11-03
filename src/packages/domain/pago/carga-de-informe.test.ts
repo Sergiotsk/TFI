@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { CargaDeInforme } from './carga-de-informe'
 
 const cargadaEl = new Date('2027-02-04T20:00:00Z')
-const resumen = { acreditados: 10, aDecidir: 2, noImputados: 3, duplicados: 1 }
+const resumen = { acreditados: 10, aDecidir: 2, noImputados: 3, duplicados: 1, ignorados: 5 }
 
 describe('CargaDeInforme', () => {
   test('expone los datos y el resumen', () => {
@@ -19,12 +19,13 @@ describe('CargaDeInforme', () => {
   test('una carga recién iniciada tiene el resumen en cero', () => {
     const carga = CargaDeInforme.iniciar('c-1', 'inst-1', 'tes-1', cargadaEl, 'informe.csv')
 
-    expect(carga.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0 })
+    expect(carga.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0, ignorados: 0 })
   })
 
   test('rechaza contadores negativos o decimales', () => {
     expect(() => new CargaDeInforme('c-1', 'inst-1', 'tes-1', cargadaEl, 'a.csv', { ...resumen, duplicados: -1 })).toThrow()
     expect(() => new CargaDeInforme('c-1', 'inst-1', 'tes-1', cargadaEl, 'a.csv', { ...resumen, acreditados: 1.5 })).toThrow()
+    expect(() => new CargaDeInforme('c-1', 'inst-1', 'tes-1', cargadaEl, 'a.csv', { ...resumen, ignorados: -2 })).toThrow()
   })
 
   test('conResumen devuelve una carga nueva con el resumen cerrado', () => {

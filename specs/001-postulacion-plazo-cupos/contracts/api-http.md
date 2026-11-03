@@ -56,9 +56,9 @@ la cambia en la cuenta de la sesión: nunca acepta un email ni un id, así que n
 pantalla sirve para que alguien con sesión abierta cambie su contraseña, y al terminar cierra las demás sesiones de
 esa cuenta.
 
-`POST /api/pagos/acreditaciones` recibe filas ya parseadas (JSON). El adaptador que lee el archivo de SysAdmin queda
-fuera de esta feature (research R9). Cuando llegue el formato, ese adaptador produce `PagoInformado[]` y llama al
-mismo caso de uso.
+`POST /api/pagos/acreditaciones` recibe filas ya parseadas (JSON). La planilla de SysAdmin la lee el panel de
+Tesorería con `LectorDeInformesXlsx` (ADR 0011), que produce `PagoInformado[]` y llama al mismo caso de uso. El
+resumen de la carga suma `ignorados`.
 
 Se eliminan `app/api/procedure/**` y `app/api/document/**` (reemplazado por `app/api/documentos/**`). `app/api/users/**`
 pasó a `app/api/perfiles/**`.
