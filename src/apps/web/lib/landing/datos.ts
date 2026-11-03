@@ -202,25 +202,27 @@ export interface Integrante {
 export const EQUIPO: Integrante[] = [
   {
     nombre: 'Federico De Vivo',
-    rol: 'Frontend',
-    foto: '/landing/img/federico.jpg',
+    rol: 'Frontend Developer',
+    foto: '/landing/img/federico.webp',
     resumen:
-      'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
-    detalle: '',
-    tecnologias: [],
-    github: '',
+      'Encargado del diseño, maquetación y desarrollo integral de la landing page y el sitio de presentación.',
+    detalle:
+      'Encargado de la maquetación y desarrollo integral de la landing page del sistema. Participa en el diseño de interfaces visuales, estructura de componentes reutilizables y optimización del diseño responsivo para garantizar una excelente experiencia de usuario en el sitio de presentación.',
+    tecnologias: ['React', 'NextJS', 'TailwindCSS', 'TypeScript', 'shadcn/ui'],
+    github: 'https://github.com/Fededv8',
     linkedin: '',
     portfolio: '',
   },
   {
     nombre: 'Lucia Enriquez Aveiro',
-    rol: 'Frontend',
-    foto: '/landing/img/lucia.jpg',
+    rol: 'Frontend Developer',
+    foto: '/landing/img/lucia.webp',
     resumen:
-      'Desarrollo de las interfaces del sistema y de este sitio de presentación.',
-    detalle: '',
-    tecnologias: [],
-    github: '',
+      'Encargada del diseño de la experiencia de usuario y desarrollo de las interfaces de los paneles del sistema.',
+    detalle:
+      ' Participa en la creación de componentes interactivos, maquetación de vistas complejas y la integración de las pantallas con los servicios e interfaces del backend.',
+    tecnologias: ['React', 'NextJS', 'TailwindCSS', 'TypeScript', 'shadcn/ui'],
+    github: 'https://github.com/luciaesterentiquez',
     linkedin: '',
     portfolio: '',
   },
@@ -229,7 +231,7 @@ export const EQUIPO: Integrante[] = [
     rol: 'Fullstack & Database Developer',
     foto: '/landing/img/santiago.webp',
     resumen:
-      'Encargado del desarrollo y diseño del backend, frontend, la base de datos y la integracion de estos.',
+      'Encargado del desarrollo de la arquitectura backend, gestión de la base de datos e integración de pasarelas de pago.',
     detalle: `Backend & Database Developer
           Encargado de la arquitectura backend, lógica de negocio y gestión de la base de datos mediante scripts SQL. Diseña endpoints, middlewares y validaciones, integra la pasarela de Mercado Pago y apoya en el desarrollo de la interfaz frontend.`,
     tecnologias: [
@@ -240,7 +242,6 @@ export const EQUIPO: Integrante[] = [
       'TypeScript',
       'PostgreSQL',
       'Supabase',
-      'Vitest',
       'React',
       'TailwindCSS',
       'shadcn/ui',
@@ -251,12 +252,22 @@ export const EQUIPO: Integrante[] = [
   },
   {
     nombre: 'Sergio Tschernitschek',
-    rol: 'Backend',
+    rol: 'Fullstack Developer',
     foto: '/landing/img/sergio.webp',
-    resumen: 'Desarrollo de la lógica del sistema y de la base de datos.',
-    detalle: '',
-    tecnologias: [],
-    github: '',
+    resumen:
+      'Encargado de la estructura base del backend, automatización de migraciones en la base de datos y soporte en el frontend.',
+    detalle:
+      'Responsable de la configuración inicial de la arquitectura backend y la automatización del entorno de base de datos en Supabase mediante scripts de migración. Diseña la estructura base del servidor y colabora activamente en el desarrollo frontend de los paneles del sistema.',
+    tecnologias: [
+      'NodeJS',
+      'TypeScript',
+      'Supabase',
+      'PostgreSQL',
+      'React',
+      'TailwindCSS',
+      'Vitest',
+    ],
+    github: 'https://github.com/sergiotsk',
     linkedin: '',
     portfolio: '',
   },
