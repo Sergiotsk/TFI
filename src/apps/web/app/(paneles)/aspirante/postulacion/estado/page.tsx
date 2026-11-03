@@ -50,15 +50,15 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
     : "**.***.***"
 
   return (
-    <div className="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col justify-between font-sans">
+    <div className="min-h-screen flex flex-col justify-between">
       <HeaderInstitucional pasoActual={4} dniPostulante={dniFormateado} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
         {/* Encabezado: Saludo con datos del usuario autenticado */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-[#005a9c] text-xs font-bold rounded-full mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#005a9c] animate-pulse"></span> 
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent text-primary text-xs font-bold rounded-full mb-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span> 
               En Proceso de Auditoría Académica
             </div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -74,7 +74,7 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
               N° de Expediente
             </span>
-            <span className="font-mono text-base font-black text-[#005a9c]">
+            <span className="font-mono text-base font-black text-primary">
               {nroExpediente}
             </span>
             <BotonCopiarExpediente texto={nroExpediente} />
@@ -85,13 +85,13 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
           <div className="flex justify-between items-center text-xs mb-2">
             <span className="font-bold text-slate-800 flex items-center">
-              <ListChecks className="w-4 h-4 text-[#005a9c] mr-1.5" /> 
+              <ListChecks className="w-4 h-4 text-primary mr-1.5" /> 
               Fase 3 de 4 en desarrollo: Auditoría de legajo documental
             </span>
-            <span className="font-bold text-[#005a9c]">75% Completado</span>
+            <span className="font-bold text-primary">75% Completado</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-            <div className="bg-[#005a9c] h-2.5 rounded-full w-3/4"></div>
+            <div className="bg-primary h-2.5 rounded-full w-3/4"></div>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
                       </span>
                       <Link 
                         href="/aspirante/postulacion/pago" 
-                        className="text-xs font-bold text-[#005a9c] hover:underline flex items-center gap-1"
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
                       >
                         Ver Recibo
                       </Link>
@@ -183,7 +183,7 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
                       </span>
                       <Link 
                         href="/aspirante/postulacion/pago" 
-                        className="text-xs font-bold text-[#005a9c] hover:underline flex items-center gap-1"
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
                       >
                         Cambiar método de pago
                       </Link>
@@ -194,14 +194,14 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
             </div>
 
             {/* Hito 3: En Revisión */}
-            <div className="bg-white rounded-xl border-2 border-blue-300 p-5 shadow-xs flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-blue-100 text-[#005a9c] flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
+            <div className="bg-white rounded-xl border-2 border-primary/30 p-5 shadow-xs flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-accent text-primary flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
                 <Search className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-900 text-sm">3. Validación Digital de Legajo</h3>
-                  <span className="text-xs font-bold text-[#005a9c] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                  <span className="text-xs font-bold text-primary bg-accent px-2.5 py-0.5 rounded-full border border-primary/30">
                     En Revisión
                   </span>
                 </div>
@@ -244,7 +244,7 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
               <h4 className="font-bold text-slate-900 text-sm mb-2">Operaciones del Trámite</h4>
-              <button className="w-full py-2.5 px-3 rounded-lg bg-[#005a9c] hover:bg-[#00487d] text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
+              <button className="w-full py-2.5 px-3 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
                 <Download className="w-4 h-4" /> Descargar Certificado (PDF)
               </button>
               <Link
@@ -258,7 +258,7 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
             {/* Charla de Ingreso */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
               <h4 className="font-bold text-slate-900 text-sm mb-1 flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-[#005a9c]" /> Charla de Ingreso
+                <CalendarDays className="w-4 h-4 text-primary" /> Charla de Ingreso
               </h4>
               <p className="text-xs text-slate-500 mb-4">
                 Instancia obligatoria de orientación previa al inicio regular del primer cuatrimestre lectivo 2026.
@@ -295,19 +295,19 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
                 href="https://t.me/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#005a9c] transition"
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-accent text-slate-700 hover:text-primary transition"
               >
                 <span className="font-semibold flex items-center">
-                  <Megaphone className="w-4 h-4 mr-1.5 text-blue-600" /> Canal de Avisos Telegram
+                  <Megaphone className="w-4 h-4 mr-1.5 text-primary" /> Canal de Avisos Telegram
                 </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </a>
               <a
                 href="mailto:alumnos.tup@frh.utn.edu.ar"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#005a9c] transition"
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-accent text-slate-700 hover:text-primary transition"
               >
                 <span className="font-semibold flex items-center">
-                  <Mail className="w-4 h-4 mr-1.5 text-blue-600" /> Bedelía de TUP
+                  <Mail className="w-4 h-4 mr-1.5 text-primary" /> Bedelía de TUP
                 </span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
               </a>

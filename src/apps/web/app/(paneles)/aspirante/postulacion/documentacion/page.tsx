@@ -5,7 +5,7 @@ import { Clock, ShieldAlert, FileText } from 'lucide-react'
 
 export default function DocumentacionPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
+    <div className="min-h-screen flex flex-col justify-between">
       <HeaderInstitucional pasoActual={3} dniPostulante="**.***.***" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">

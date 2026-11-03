@@ -1,10 +1,15 @@
 import type { ReactNode } from 'react'
+import { Public_Sans } from 'next/font/google'
 import { redirect } from 'next/navigation'
 import { BotonCerrarSesion } from '@/components/auth/boton-cerrar-sesion'
 import { crearDependencias } from '@/composition-root'
 import { INSTITUCION } from '@/config/institucion'
 import { PANEL_DE_ROL } from '@/config/paneles'
 import { crearCliente } from '@/lib/supabase/servidor'
+import { cn } from '@/lib/utils'
+
+// La tipografía de FRH para el aspirante. Solo define la variable: temas/frh.css la elige como --font-sans.
+const publicSans = Public_Sans({ subsets: ['latin'], variable: '--font-public-sans' })
 
 // Panel del aspirante: su trámite es un recorrido lineal (inscripción, pago, documentación, estado), así que no
 // lleva barra lateral. Encabezado provisorio: el definitivo, con los pasos, se arma con el encabezado y el stepper
@@ -24,9 +29,14 @@ export default async function LayoutDelAspirante({ children }: { children: React
   }
 
   return (
-    <>
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+    // data-panel le da al aspirante el sistema de diseño de temas/frh.css. El fondo y la fuente se repiten acá porque
+    // el div de (paneles)/layout.tsx los resuelve con los valores de afuera.
+    <div
+      data-panel="aspirante"
+      className={cn(publicSans.variable, 'min-h-screen bg-background font-sans text-foreground')}
+    >
+      <div className="border-b border-border bg-white">
+        <div className="mx-auto flex h-(--alto-barra-superior,3.25rem) max-w-3xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="min-w-0">
             <span className="block text-sm font-bold text-primary">{INSTITUCION.nombre}</span>
             <span className="block truncate text-xs text-muted-foreground">
@@ -37,6 +47,6 @@ export default async function LayoutDelAspirante({ children }: { children: React
         </div>
       </div>
       {children}
-    </>
+    </div>
   )
 }
