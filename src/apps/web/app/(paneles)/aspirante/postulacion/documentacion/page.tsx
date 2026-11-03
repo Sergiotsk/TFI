@@ -1,7 +1,25 @@
 import { UploadDocumentos } from '@/components/postulante/upload-documentos'
 import { Clock, ShieldAlert, FileText } from 'lucide-react'
+import { conActorDePanel } from '@/app/(paneles)/sesion-de-panel'
+import type { PostulacionConsultada } from '@tfi/application'
+
+// Demo: los mismos estados que SubirDocumento acepta (ESTADOS_QUE_ADMITEN_DOCUMENTOS).
+const ADMITEN_DOCUMENTOS = [
+  'VACANTE_CONFIRMADA',
+  'ESPERANDO_DOCUMENTACION',
+  'DOCUMENTACION_EN_REVISION',
+  'OBSERVADO',
+]
 
 export default async function DocumentacionPage() {
+  const postulacionId = await conActorDePanel(async ({ consultarPostulacion }, actor) => {
+    const propias = await consultarPostulacion.listarMias(actor)
+    const enDocumentacion = propias.find((postulacion: PostulacionConsultada) =>
+      ADMITEN_DOCUMENTOS.includes(postulacion.estado),
+    )
+    return enDocumentacion?.id ?? null
+  })
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       {/* Banner de Plazo de 10 días adaptado a señal ámbar institucional */}
@@ -38,7 +56,7 @@ export default async function DocumentacionPage() {
           </div>
 
           <div className="bg-card shadow-(--sombra-tarjeta) p-6">
-            <UploadDocumentos />
+            <UploadDocumentos postulacionId={postulacionId} />
           </div>
         </div>
 
