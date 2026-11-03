@@ -39,8 +39,8 @@ export function FormularioPago() {
       } else {
         throw new Error(data?.error || 'No se pudo generar la orden de pago en Mercado Pago.')
       }
-    } catch (err: any) {
-      setErrorPago(err?.message || 'Ocurrió un error al conectar con Mercado Pago.')
+    } catch (err) {
+      setErrorPago(err instanceof Error ? err.message : 'Ocurrió un error al conectar con Mercado Pago.')
       setProcesando(false)
     }
   }
