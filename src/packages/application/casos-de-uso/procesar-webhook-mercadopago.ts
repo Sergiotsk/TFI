@@ -1,12 +1,27 @@
-﻿import { ocupaCupo } from '@tfi/domain'
+﻿import {
+  Dni,
+  Monto,
+  ReferenciaDePago,
+  evaluarPago,
+  type Candidata,
+  type DecisionDeAcreditacion,
+  type Pago,
+  type PagoInformado,
+} from '@tfi/domain'
 import type { Reloj } from '../puertos/reloj/puerto'
+import type { RegistroDePagos, ResultadoDeAcreditacion } from '../puertos/registro-de-pagos/puerto'
+import type { RepositorioDePerfiles } from '../puertos/repositorio-de-perfiles/puerto'
+import type { RepositorioDePeriodos } from '../puertos/repositorio-de-periodos/puerto'
 import type { RepositorioDePostulaciones } from '../puertos/repositorio-de-postulaciones/puerto'
 import type { PasarelaDePago, DatosPagoPasarela } from '../puertos/pasarela-de-pago/puerto'
-import type { AccionesDelPersonal } from '../puertos/acciones-del-personal/puerto'
 import type {
   IntencionDePago,
   RepositorioDeIntencionesDePago,
 } from '../puertos/repositorio-de-intenciones-de-pago/puerto'
+import { ConflictoDeEstado } from './errores'
+
+/** Reintentos ante un conflicto de concurrencia (research R2). */
+const INTENTOS = 3
 
 export interface ResultadoWebhookPago {
   procesado: boolean
@@ -16,9 +31,13 @@ export interface ResultadoWebhookPago {
 }
 
 /**
- * Procesa webhook de MercadoPago de forma idempotente.
- * Debe validar consultando la API de MP antes de acreditar.
- * Ambos caminos (manual + pasarela) terminan acreditando el pago.
+ * Procesa un webhook de MercadoPago de forma idempotente.
+ *
+ * La notificación no acredita nada por sí sola: se consulta el pago a MP y se
+ * reutiliza el mismo circuito que el informe (`evaluarPago` + `acreditar_pago`).
+ * Eso deja registrado **todo** pago aprobado, incluso cuando no confirma la
+ * vacante (duplicado, monto distinto, fuera de plazo o sin cupo), y mantiene
+ * una única implementación de las reglas de cupo y estados.
  *
  * Los errores de infraestructura se propagan para que el route handler
  * responda 5xx y MercadoPago reintente. Solo se responde 200 cuando la
@@ -28,8 +47,10 @@ export interface ResultadoWebhookPago {
 export class ProcesarWebhookMercadoPagoUseCase {
   constructor(
     private readonly postulaciones: RepositorioDePostulaciones,
+    private readonly periodos: RepositorioDePeriodos,
+    private readonly perfiles: RepositorioDePerfiles,
+    private readonly pagos: RegistroDePagos,
     private readonly pasarela: PasarelaDePago,
-    private readonly accionesDelPersonal: AccionesDelPersonal,
     private readonly reloj: Reloj,
     private readonly intenciones: RepositorioDeIntencionesDePago,
   ) {}
@@ -39,13 +60,17 @@ export class ProcesarWebhookMercadoPagoUseCase {
       return { procesado: false, yaProcesado: false, acreditado: false }
     }
 
-    const yaPorPago = await this.intenciones.obtenerPorPaymentIdMp(params.paymentId)
-    if (yaPorPago?.estado === 'COMPLETADA') {
+    const referencia = new ReferenciaDePago('MERCADOPAGO', params.paymentId)
+
+    // La referencia es única: si el pago ya está registrado, el webhook es un
+    // reintento y no hay que volver a tocar cupos ni estados.
+    const existente = await this.pagos.existe(referencia)
+    if (existente) {
       return {
         procesado: true,
         yaProcesado: true,
-        acreditado: false,
-        postulacionId: yaPorPago.postulacionId,
+        acreditado: existente.estado === 'ACREDITADO',
+        postulacionId: existente.postulacionId,
       }
     }
 
@@ -53,109 +78,234 @@ export class ProcesarWebhookMercadoPagoUseCase {
 
     if (datos.status !== 'approved') {
       if (datos.externalReference) {
-        await this.intenciones.marcarProcesada({
-          externalId: datos.externalReference,
-          paymentIdMp: params.paymentId,
-          webhookEventId: params.webhookEventId,
-        })
+        const intencion = await this.intenciones.obtenerPorExternalId(datos.externalReference)
+        // Una notificación vieja (pending) no debe bajar una intención ya
+        // completada por un pago aprobado.
+        if (intencion && intencion.estado !== 'COMPLETADA') {
+          await this.marcarProcesada(intencion, params, datos)
+        }
       }
       return { procesado: true, yaProcesado: false, acreditado: false }
     }
 
+    const pago = this.aPagoInformado(referencia, datos)
+    if (!pago) {
+      // Un pago aprobado sin monto no se puede registrar con fidelidad. Se
+      // devuelve error para que MP reintente y quede visible en los logs.
+      throw new Error(`El pago ${params.paymentId} está aprobado pero no trae un monto válido`)
+    }
+
     const externalReference = datos.externalReference
     if (!externalReference) {
+      await this.registrarNoImputado(pago, { motivo: 'REFERENCIA_DESCONOCIDA' })
       return { procesado: true, yaProcesado: false, acreditado: false }
     }
 
     const intencion = await this.intenciones.obtenerPorExternalId(externalReference)
     if (!intencion) {
+      await this.registrarNoImputado(pago, { motivo: 'REFERENCIA_DESCONOCIDA' })
       return { procesado: true, yaProcesado: false, acreditado: false }
     }
-    if (intencion.estado === 'COMPLETADA') {
+
+    // La intención fija el monto y la moneda de la preferencia. Si el pago no
+    // coincide, se registra como no imputado en lugar de perderlo.
+    if (datos.currencyId !== 'ARS' || pago.monto.centavos !== intencion.montoCentavos) {
+      await this.registrarNoImputado(pago, {
+        motivo:
+          pago.monto.centavos < intencion.montoCentavos ? 'MONTO_INSUFICIENTE' : 'MONTO_INCORRECTO',
+        postulacionId: intencion.postulacionId,
+      })
+      await this.marcarProcesada(intencion, params, datos)
+      return {
+        procesado: true,
+        yaProcesado: false,
+        acreditado: false,
+        postulacionId: intencion.postulacionId,
+      }
+    }
+
+    const postulacion = await this.postulaciones.obtenerPorId(intencion.postulacionId)
+    if (!postulacion) {
+      await this.registrarNoImputado(pago, { motivo: 'REFERENCIA_DESCONOCIDA' })
+      await this.marcarProcesada(intencion, params, datos)
+      return {
+        procesado: true,
+        yaProcesado: false,
+        acreditado: false,
+        postulacionId: intencion.postulacionId,
+      }
+    }
+
+    const periodo = await this.periodos.obtenerPorId(postulacion.periodoId)
+    if (
+      !periodo ||
+      periodo.id !== intencion.periodoId ||
+      periodo.institucionId !== intencion.institucionId
+    ) {
+      await this.registrarNoImputado(pago, {
+        motivo: 'REFERENCIA_DESCONOCIDA',
+        postulacionId: postulacion.id,
+      })
+      await this.marcarProcesada(intencion, params, datos)
+      return {
+        procesado: true,
+        yaProcesado: false,
+        acreditado: false,
+        postulacionId: postulacion.id,
+      }
+    }
+
+    const perfil = await this.perfiles.obtenerPorId(postulacion.aspiranteId)
+    if (!perfil) {
+      await this.registrarNoImputado(pago, {
+        motivo: 'REFERENCIA_DESCONOCIDA',
+        postulacionId: postulacion.id,
+      })
+      await this.marcarProcesada(intencion, params, datos)
+      return {
+        procesado: true,
+        yaProcesado: false,
+        acreditado: false,
+        postulacionId: postulacion.id,
+      }
+    }
+
+    const resultado = await this.acreditarConReintentos(
+      pago,
+      postulacion.id,
+      new Dni(perfil.dni),
+    )
+
+    if (resultado.tipo === 'DUPLICADO') {
+      const registrado = resultado.pagoExistente
+      await this.marcarSegunPago(intencion, params, datos, registrado)
       return {
         procesado: true,
         yaProcesado: true,
-        acreditado: false,
-        postulacionId: intencion.postulacionId,
+        acreditado: registrado.estado === 'ACREDITADO',
+        postulacionId: registrado.postulacionId,
       }
     }
 
-    const ahora = this.reloj.ahora()
-
-    // Nunca acreditar un pago por un monto distinto al de la preferencia: si
-    // alguien manipuló el checkout, el webhook no puede confirmar la vacante.
-    if (!this.montoValido(datos, intencion)) {
-      await this.intenciones.marcarProcesada({
-        externalId: externalReference,
-        paymentIdMp: params.paymentId,
-        webhookEventId: params.webhookEventId,
-        pagadoEl: datos.dateApproved ?? ahora,
-      })
-      return {
-        procesado: true,
-        yaProcesado: false,
-        acreditado: false,
-        postulacionId: intencion.postulacionId,
-      }
+    if (resultado.tipo !== 'REGISTRADO') {
+      throw new ConflictoDeEstado(
+        `No se pudo acreditar el pago ${pago.referencia.referenciaExterna}`,
+      )
     }
 
-    const confirmacion = await this.accionesDelPersonal.confirmarVacante(intencion.postulacionId)
-    const acreditado =
-      confirmacion.resultado === 'OK' ||
-      (confirmacion.resultado === 'CONFLICTO' && (await this.yaOcupaCupo(intencion.postulacionId, ahora)))
-
-    if (acreditado) {
-      await this.intenciones.marcarCompletada({
-        externalId: externalReference,
-        paymentIdMp: params.paymentId,
-        webhookEventId: params.webhookEventId,
-        pagadoEl: datos.dateApproved ?? ahora,
-      })
-      return {
-        procesado: true,
-        yaProcesado: false,
-        acreditado: true,
-        postulacionId: intencion.postulacionId,
-      }
-    }
-
-    // SIN_CUPO, Postulación inexistente o transición inválida: el webhook quedó
-    // procesado, pero no se acreditó. No se reintenta automáticamente porque
-    // el resultado no cambia; queda para revisión del personal.
-    await this.intenciones.marcarProcesada({
-      externalId: externalReference,
-      paymentIdMp: params.paymentId,
-      webhookEventId: params.webhookEventId,
-      pagadoEl: datos.dateApproved ?? ahora,
-    })
+    const registrado = resultado.pago
+    await this.marcarSegunPago(intencion, params, datos, registrado)
     return {
       procesado: true,
       yaProcesado: false,
-      acreditado: false,
-      postulacionId: intencion.postulacionId,
+      acreditado: registrado.estado === 'ACREDITADO',
+      postulacionId: registrado.postulacionId,
     }
   }
 
-  private montoValido(datos: DatosPagoPasarela, intencion: IntencionDePago): boolean {
-    // Para acreditar, el pago tiene que traer monto y moneda: si faltan, no se
-    // puede demostrar que corresponden a la intención.
-    if (datos.transactionAmountCentavos === undefined || datos.currencyId === undefined) {
-      return false
+  private aPagoInformado(
+    referencia: ReferenciaDePago,
+    datos: DatosPagoPasarela,
+  ): PagoInformado | null {
+    const centavos = datos.transactionAmountCentavos
+    if (centavos === undefined || centavos <= 0) return null
+
+    return {
+      referencia,
+      monto: new Monto(centavos),
+      pagadoEl: datos.dateApproved ?? this.reloj.ahora(),
+    }
+  }
+
+  private async registrarNoImputado(
+    pago: PagoInformado,
+    decision: Omit<Extract<DecisionDeAcreditacion, { tipo: 'NO_IMPUTAR' }>, 'tipo'>,
+  ): Promise<void> {
+    const resultado = await this.pagos.registrarAcreditacion(pago, {
+      tipo: 'NO_IMPUTAR',
+      ...decision,
+    })
+    if (resultado.tipo === 'CONFLICTO') {
+      throw new ConflictoDeEstado(
+        `No se pudo registrar el pago ${pago.referencia.referenciaExterna} como no imputado`,
+      )
+    }
+  }
+
+  private async acreditarConReintentos(
+    pago: PagoInformado,
+    postulacionId: string,
+    dni: Dni,
+  ): Promise<ResultadoDeAcreditacion> {
+    for (let intento = 0; intento < INTENTOS; intento += 1) {
+      const postulacion = await this.postulaciones.obtenerPorId(postulacionId)
+      if (!postulacion) {
+        return this.pagos.registrarAcreditacion(pago, {
+          tipo: 'NO_IMPUTAR',
+          motivo: 'REFERENCIA_DESCONOCIDA',
+        })
+      }
+
+      const periodo = await this.periodos.obtenerPorId(postulacion.periodoId)
+      if (!periodo) {
+        return this.pagos.registrarAcreditacion(pago, {
+          tipo: 'NO_IMPUTAR',
+          motivo: 'REFERENCIA_DESCONOCIDA',
+          postulacionId: postulacion.id,
+        })
+      }
+
+      const candidata: Candidata = { postulacion, dniDelAspirante: dni }
+      const ocupados = await this.periodos.contarOcupados(periodo.id)
+      const decision = evaluarPago(
+        pago,
+        { via: 'NUMERO', candidatas: [candidata] },
+        periodo,
+        ocupados,
+      )
+      const resultado = await this.pagos.registrarAcreditacion(pago, decision)
+      if (resultado.tipo !== 'CONFLICTO') return resultado
     }
 
-    return (
-      datos.transactionAmountCentavos === intencion.montoCentavos && datos.currencyId === 'ARS'
+    throw new ConflictoDeEstado(
+      `No se pudo acreditar el pago ${pago.referencia.referenciaExterna} después de ${INTENTOS} intentos`,
     )
   }
 
-  /**
-   * Si el pago ya se había acreditado pero falló el guardado de la intención,
-   * el reintento de MP recibe CONFLICTO. La Postulación ya confirmada indica
-   * que el pago sí se imputó: se completa la intención para cortar el ciclo.
-   */
-  private async yaOcupaCupo(postulacionId: string, ahora: Date): Promise<boolean> {
-    const postulacion = await this.postulaciones.obtenerPorId(postulacionId)
+  private async marcarProcesada(
+    intencion: IntencionDePago,
+    params: { paymentId: string; webhookEventId?: string },
+    datos: DatosPagoPasarela,
+  ): Promise<void> {
+    if (intencion.estado === 'COMPLETADA') return
 
-    return postulacion !== null && ocupaCupo(postulacion.estadoEn(ahora))
+    await this.intenciones.marcarProcesada({
+      externalId: intencion.externalId,
+      paymentIdMp: params.paymentId,
+      webhookEventId: params.webhookEventId,
+      pagadoEl: datos.dateApproved ?? this.reloj.ahora(),
+    })
+  }
+
+  private async marcarSegunPago(
+    intencion: IntencionDePago,
+    params: { paymentId: string; webhookEventId?: string },
+    datos: DatosPagoPasarela,
+    pago: Pago,
+  ): Promise<void> {
+    // Si la intención ya se completó con otro pago, no se pisa el vínculo.
+    if (intencion.estado === 'COMPLETADA') return
+
+    if (pago.estado === 'ACREDITADO') {
+      await this.intenciones.marcarCompletada({
+        externalId: intencion.externalId,
+        paymentIdMp: params.paymentId,
+        webhookEventId: params.webhookEventId,
+        pagadoEl: datos.dateApproved ?? this.reloj.ahora(),
+      })
+      return
+    }
+
+    await this.marcarProcesada(intencion, params, datos)
   }
 }

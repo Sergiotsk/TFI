@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { urlBaseDeLaApp, urlDeApp } from './url-de-app'
 
 describe('urlDeApp', () => {
@@ -31,6 +31,7 @@ describe('urlBaseDeLaApp', () => {
   const original = process.env.NEXT_PUBLIC_APP_URL
 
   afterEach(() => {
+    vi.unstubAllEnvs()
     if (original === undefined) {
       delete process.env.NEXT_PUBLIC_APP_URL
     } else {
@@ -43,8 +44,15 @@ describe('urlBaseDeLaApp', () => {
     expect(urlBaseDeLaApp()).toBe('https://tfi.example.com')
   })
 
-  it('cae a localhost cuando no está configurada', () => {
+  it('cae a localhost cuando no está configurada y no es producción', () => {
     delete process.env.NEXT_PUBLIC_APP_URL
     expect(urlBaseDeLaApp()).toBe('http://localhost:3000')
+  })
+
+  it('falla en producción si falta la URL', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    delete process.env.NEXT_PUBLIC_APP_URL
+
+    expect(() => urlBaseDeLaApp()).toThrow('NEXT_PUBLIC_APP_URL')
   })
 })

@@ -1,5 +1,6 @@
 // MANUAL: el personal acreditó a mano un pago verificado fuera del sistema (ADR 0009).
-export const PROVEEDORES_DE_PAGO = ['INFORME_SYSADMIN', 'PAGOS360', 'MANUAL'] as const
+// MERCADOPAGO: pago online de la demo/MVP (ADR-0012); no es la pasarela de producción.
+export const PROVEEDORES_DE_PAGO = ['INFORME_SYSADMIN', 'PAGOS360', 'MANUAL', 'MERCADOPAGO'] as const
 
 export type ProveedorDePago = (typeof PROVEEDORES_DE_PAGO)[number]
 

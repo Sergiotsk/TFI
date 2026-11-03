@@ -17,8 +17,9 @@ hay que configurar en Supabase. El código está en `apps/web` (borde), `package
 6. Quien ya tiene sesión abierta llega a la misma pantalla desde **Cambiar contraseña** en la barra
    lateral (personal) o en el encabezado (aspirante).
 
-La recuperación asistida del personal (`POST /api/perfiles/:id/contrasena`, contraseña inicial
-`nombre` + `dni`) sigue existiendo para quien no tiene acceso al email.
+La recuperación asistida del personal (`POST /api/perfiles/:id/contrasena`) sigue existiendo para
+quien no tiene acceso al email. Deja una contraseña temporal aleatoria, la devuelve una sola vez
+para dictarla y no se puede reconstruir desde los datos del perfil.
 
 ## Configuración en Supabase
 
@@ -83,7 +84,8 @@ Supabase limita los emails por hora (por proyecto y por dirección). Si se agota
 ## Entorno
 
 - `NEXT_PUBLIC_APP_URL`: URL pública de la app, sin barra final. Es la base de los enlaces de los
-  emails y de las `back_urls` de MercadoPago. Si falta, se usa `http://localhost:3000`.
+  emails, de las `back_urls` de MercadoPago y del webhook. En desarrollo, si falta, se usa
+  `http://localhost:3000`; en producción es obligatoria.
 - No hay claves nuevas para el correo: el envío lo hace Supabase con el SMTP configurado arriba.
   `SUPABASE_SERVICE_ROLE_KEY` sigue siendo solo para el restablecimiento asistido del personal.
 

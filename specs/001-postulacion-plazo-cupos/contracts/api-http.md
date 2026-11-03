@@ -41,10 +41,10 @@ valida en el caso de uso antes de firmar la URL (ADR 0010). `GET /api/documentos
 `{ documentoId, urlFirmada, expiraEnSegundos }` para refrescar el enlace sin volver a traer los metadatos; usa el
 mismo caso de uso y por eso el permiso es idéntico. Tesorería y cualquier otro aspirante reciben 403.
 
-`POST /api/perfiles/:id/contrasena` es la recuperación asistida: deja la contraseña de la cuenta en la inicial
-(`nombre` + `dni`, sin acentos, espacios ni puntos) y devuelve `{ perfilId, contrasenaTemporal }` para dictarla. No
-pide la contraseña anterior ni envía email, y necesita la service role key de Supabase Auth. Una `SECRETARIA` no
-puede restablecer la contraseña de `DIRECCION` ni de otra `SECRETARIA`: solo `DIRECCION` lo hace.
+`POST /api/perfiles/:id/contrasena` es la recuperación asistida: deja una contraseña temporal aleatoria en la cuenta
+y devuelve `{ perfilId, contrasenaTemporal }` una sola vez para dictarla. No pide la contraseña anterior ni envía
+email, y necesita la service role key de Supabase Auth. Una `SECRETARIA` no puede restablecer la contraseña de
+`DIRECCION` ni de otra `SECRETARIA`: solo `DIRECCION` lo hace.
 
 La recuperación por email es el camino que usa la persona sin pasar por la mesa de entrada:
 `POST /api/auth/recuperar-contrasena` manda un enlace de Supabase Auth (SMTP del proyecto, por ejemplo Resend) y
