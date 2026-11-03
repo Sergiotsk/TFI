@@ -22,7 +22,11 @@ export async function crearPostulacionAccion(
       return 'Postulación creada.'
     }),
   )
-  revalidatePath(RUTA)
+
+  if (estado && estado.ok) {
+    revalidatePath(RUTA)
+    redirect('/aspirante/postulacion/requisitos')
+  }
 
   return estado
 }
@@ -54,7 +58,11 @@ export async function iniciarPagoAccion(
       return 'Pago iniciado.'
     }),
   )
-  revalidatePath(RUTA)
+
+  if (estado && estado.ok) {
+    revalidatePath(RUTA)
+    redirect('/aspirante/postulacion/pago')
+  }
 
   return estado
 }

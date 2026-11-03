@@ -35,7 +35,9 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  if (esRutaProtegida(pathname) && !user) {
+  const esInscripcionPublica = pathname.startsWith('/aspirante/inscripcion')
+
+  if (esRutaProtegida(pathname) && !user && !esInscripcionPublica) {
     const loginUrl = new URL('/login', request.url)
     const redirect = request.nextUrl.pathname + request.nextUrl.search
     if (redireccionValida(redirect)) {

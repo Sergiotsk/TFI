@@ -1,6 +1,5 @@
-'use client'
-
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { 
   Check, 
   Receipt, 
@@ -15,33 +14,55 @@ import {
   ArrowUpRight, 
   ChevronRight, 
   CheckCircle2, 
-  Copy, 
-  ListChecks 
+  ListChecks,
+  Clock,
+  AlertCircle
 } from 'lucide-react'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
+import { BotonCopiarExpediente } from '@/components/postulante/boton-copiar-expediente'
+import { crearDependencias } from '@/composition-root'
+import { crearCliente } from '@/lib/supabase/servidor'
 
-export default function PostulacionPage() {
-  const nroExpediente = "TUP-2026-08492"
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
 
-  const copiarExpediente = () => {
-    navigator.clipboard.writeText(nroExpediente)
+export default async function PostulacionPage({ searchParams }: PageProps) {
+  const supabase = await crearCliente()
+  const { consultarPerfilPropio } = crearDependencias(supabase)
+  const perfil = await consultarPerfilPropio.ejecutar()
+
+  if (!perfil) {
+    redirect('/panel')
   }
 
+  const resolvedParams = await searchParams
+  const metodoParam = resolvedParams.metodo
+  const estadoParam = resolvedParams.estado
+  
+  const esPagoEnEfectivo = metodoParam === 'efectivo' || estadoParam === 'pago_pendiente'
+  const pagoAcreditado = !esPagoEnEfectivo && estadoParam === 'acreditado'
+
+  const nroExpediente = "TUP-2026-08492"
+  const dniFormateado = perfil.dni 
+    ? perfil.dni.replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
+    : "**.***.***"
+
   return (
-    <div className="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col justify-between font-sans">
-      <HeaderInstitucional pasoActual={4} dniPostulante="**.***.***" />
+    <div className="min-h-screen flex flex-col justify-between">
+      <HeaderInstitucional pasoActual={4} dniPostulante={dniFormateado} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
-        {/* Encabezado: Saludo y Expediente */}
+        {/* Encabezado: Saludo con datos del usuario autenticado */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-[#005a9c] text-xs font-bold rounded-full mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#005a9c] animate-pulse"></span> 
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent text-primary text-xs font-bold rounded-full mb-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span> 
               En Proceso de Auditoría Académica
             </div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              ¡Hola, Lucas Rossi!
+              ¡Hola, {perfil.nombre} {perfil.apellido}!
             </h1>
             <p className="text-xs text-slate-600 mt-1">
               Seguimiento en tiempo real de tu trámite de ingreso a la{' '}
@@ -53,15 +74,10 @@ export default function PostulacionPage() {
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
               N° de Expediente
             </span>
-            <span className="font-mono text-base font-black text-[#005a9c]">
+            <span className="font-mono text-base font-black text-primary">
               {nroExpediente}
             </span>
-            <button 
-              onClick={copiarExpediente}
-              className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-800 mt-0.5 md:ml-auto cursor-pointer"
-            >
-              <Copy className="w-3 h-3" /> Copiar
-            </button>
+            <BotonCopiarExpediente texto={nroExpediente} />
           </div>
         </div>
 
@@ -69,13 +85,13 @@ export default function PostulacionPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
           <div className="flex justify-between items-center text-xs mb-2">
             <span className="font-bold text-slate-800 flex items-center">
-              <ListChecks className="w-4 h-4 text-[#005a9c] mr-1.5" /> 
+              <ListChecks className="w-4 h-4 text-primary mr-1.5" /> 
               Fase 3 de 4 en desarrollo: Auditoría de legajo documental
             </span>
-            <span className="font-bold text-[#005a9c]">75% Completado</span>
+            <span className="font-bold text-primary">75% Completado</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-            <div className="bg-[#005a9c] h-2.5 rounded-full w-3/4"></div>
+            <div className="bg-primary h-2.5 rounded-full w-3/4"></div>
           </div>
         </div>
 
@@ -87,7 +103,7 @@ export default function PostulacionPage() {
               <span className="text-xs text-slate-400">Actualizado recientemente</span>
             </div>
 
-            {/* Hito 1: Completado */}
+            {/* Hito 1: Preinscripción */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
                 <Check className="w-5 h-5 stroke-[3]" />
@@ -104,50 +120,88 @@ export default function PostulacionPage() {
                 </p>
                 <div className="mt-2 flex items-center gap-4 text-[11px] text-slate-400">
                   <span className="flex items-center gap-1">
-                    <CalendarDays className="w-3.5 h-3.5" /> Validación DNI OK
+                    <CalendarDays className="w-3.5 h-3.5" /> Validación DNI {dniFormateado} OK
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Hito 2: Acreditado */}
+            {/* Hito 2: Dinámico (Pago Acreditado vs Pendiente en Tesorería) */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                <Receipt className="w-5 h-5" />
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                pagoAcreditado 
+                  ? 'bg-emerald-100 text-emerald-600' 
+                  : 'bg-amber-100 text-amber-600'
+              }`}>
+                {pagoAcreditado ? <Receipt className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-900 text-sm">2. Reserva de Vacante y Pago de Arancel</h3>
-                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-                    Acreditado
-                  </span>
+                  {pagoAcreditado ? (
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                      Acreditado
+                    </span>
+                  ) : (
+                    <span className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                      Pendiente en Tesorería
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs text-slate-600 mt-1">
-                  Monto abonado: <strong>$100.000 ARS</strong> · Comprobante acreditado por Tesorería de Extensión Universitaria.
-                </p>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    Operación #982341239
-                  </span>
-                  <Link 
-                    href="/aspirante/postulacion/pago" 
-                    className="text-xs font-bold text-[#005a9c] hover:underline flex items-center gap-1"
-                  >
-                    Ver Recibo
-                  </Link>
-                </div>
+
+                {pagoAcreditado ? (
+                  <>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Monto abonado: <strong>$100.000 ARS</strong> · Comprobante acreditado por Tesorería de Extensión Universitaria.
+                    </p>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        Expediente #{nroExpediente}
+                      </span>
+                      <Link 
+                        href="/aspirante/postulacion/pago" 
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                      >
+                        Ver Recibo
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Modalidad elegida: <strong>Pago en efectivo en ventanilla</strong>. El arancel de reserva ($100.000 ARS) aún se encuentra pendiente de cobro en Tesorería.
+                    </p>
+                    <div className="flex items-start gap-2 rounded-lg bg-amber-50/70 border border-amber-200 p-2.5 text-[11px] text-amber-900">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>
+                        Presentate en Tesorería con tu DNI y N° de Expediente (<strong>Lunes a Viernes de 09:00 a 13:00 y de 15:00 a 20:00 hs</strong>). El personal acreditará el pago en tu legajo.
+                      </span>
+                    </div>
+                    <div className="pt-1 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        Seña a abonar: $100.000 ARS
+                      </span>
+                      <Link 
+                        href="/aspirante/postulacion/pago" 
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                      >
+                        Cambiar método de pago
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Hito 3: En Revisión */}
-            <div className="bg-white rounded-xl border-2 border-blue-300 p-5 shadow-xs flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-blue-100 text-[#005a9c] flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
+            <div className="bg-white rounded-xl border-2 border-primary/30 p-5 shadow-xs flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-accent text-primary flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
                 <Search className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-900 text-sm">3. Validación Digital de Legajo</h3>
-                  <span className="text-xs font-bold text-[#005a9c] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                  <span className="text-xs font-bold text-primary bg-accent px-2.5 py-0.5 rounded-full border border-primary/30">
                     En Revisión
                   </span>
                 </div>
@@ -180,7 +234,7 @@ export default function PostulacionPage() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Se habilitará automáticamente una vez concluida la auditoría del legajo documental. Podrás elegir o confirmar tu franja horaria preferida según disponibilidad de cupo (Turno Tarde: 14:00 a 18:00 hs / Turno Noche: 18:30 a 22:30 hs).
+                  Se habilitará automáticamente una vez concluida la auditoría del legajo documental y acreditada la seña arancelaria.
                 </p>
               </div>
             </div>
@@ -190,7 +244,7 @@ export default function PostulacionPage() {
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
               <h4 className="font-bold text-slate-900 text-sm mb-2">Operaciones del Trámite</h4>
-              <button className="w-full py-2.5 px-3 rounded-lg bg-[#005a9c] hover:bg-[#00487d] text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
+              <button className="w-full py-2.5 px-3 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
                 <Download className="w-4 h-4" /> Descargar Certificado (PDF)
               </button>
               <Link
@@ -204,7 +258,7 @@ export default function PostulacionPage() {
             {/* Charla de Ingreso */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
               <h4 className="font-bold text-slate-900 text-sm mb-1 flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-[#005a9c]" /> Charla de Ingreso
+                <CalendarDays className="w-4 h-4 text-primary" /> Charla de Ingreso
               </h4>
               <p className="text-xs text-slate-500 mb-4">
                 Instancia obligatoria de orientación previa al inicio regular del primer cuatrimestre lectivo 2026.
@@ -241,19 +295,19 @@ export default function PostulacionPage() {
                 href="https://t.me/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#005a9c] transition"
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-accent text-slate-700 hover:text-primary transition"
               >
                 <span className="font-semibold flex items-center">
-                  <Megaphone className="w-4 h-4 mr-1.5 text-blue-600" /> Canal de Avisos Telegram
+                  <Megaphone className="w-4 h-4 mr-1.5 text-primary" /> Canal de Avisos Telegram
                 </span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </a>
               <a
                 href="mailto:alumnos.tup@frh.utn.edu.ar"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#005a9c] transition"
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-accent text-slate-700 hover:text-primary transition"
               >
                 <span className="font-semibold flex items-center">
-                  <Mail className="w-4 h-4 mr-1.5 text-blue-600" /> Bedelía de TUP
+                  <Mail className="w-4 h-4 mr-1.5 text-primary" /> Bedelía de TUP
                 </span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
               </a>

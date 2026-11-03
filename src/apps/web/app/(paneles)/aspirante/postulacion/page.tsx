@@ -37,7 +37,7 @@ export default async function PostulacionDelAspirantePage() {
   )
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div>
       <EncabezadoDePanel
         area="Aspirante"
         titulo="Mi postulación"

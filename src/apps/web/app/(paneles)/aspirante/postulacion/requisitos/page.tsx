@@ -29,7 +29,7 @@ export default async function RequisitosPage({
   const monto = formatearMontoEnCentavos(periodo.montoMatriculaCentavos)
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
+    <div className="min-h-screen flex flex-col justify-between">
       <HeaderInstitucional pasoActual={1} dniPostulante="**.***.***" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
