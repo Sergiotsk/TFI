@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { conActorDePanel, mensajeDeError } from '../../../sesion-de-panel'
 import { acreditarPagoAccion, prorrogarPlazoAccion } from './actions'
 import { esquemaBusquedaDeDni, esquemaPaginaDeSeguimiento, esquemaPeriodoDeSeguimiento } from './esquemas'
+import type { Pagina, PostulacionConsultada } from '@tfi/application'
 
 const POR_PAGINA = 20
 // Cuántos números de página se muestran alrededor de la actual.
@@ -35,7 +36,7 @@ export default async function PostulacionesDelPersonalPage({
 
   let errorDeBusqueda: string | null =
     dni && !dni.success ? (dni.error.issues[0]?.message ?? 'DNI inválido') : null
-  let resultado = null
+  let resultado: Pagina<PostulacionConsultada> | null = null
   let periodos: { id: string; nombre: string }[] = []
 
   try {

@@ -81,5 +81,38 @@ export function probarContratoServicioDeAutenticacion(
       await servicio.cerrarSesion()
       expect(await servicio.usuarioAutenticado()).toBeNull()
     })
+
+    it('cambiarContrasena() devuelve SIN_SESION cuando no hay sesión', async () => {
+      const servicio = await crearServicio()
+      await servicio.cerrarSesion()
+      const resultado = await servicio.cambiarContrasena('otraContrasena123')
+      expect(resultado.resultado).toBe('SIN_SESION')
+    })
+
+    it('cambiarContrasena() reemplaza la contraseña de la cuenta con sesión', async () => {
+      const servicio = await crearServicio()
+      const email = emailDePrueba()
+      const nueva = 'contrasenaNueva123'
+
+      await servicio.registrarAspirante(datosDe(email))
+      const resultado = await servicio.cambiarContrasena(nueva)
+      expect(resultado.resultado).toBe('CAMBIADA')
+
+      await servicio.cerrarSesion()
+      expect(await servicio.iniciarSesion(email, CONTRASENA)).toEqual({
+        resultado: 'CREDENCIALES_INVALIDAS',
+      })
+      expect((await servicio.iniciarSesion(email, nueva)).resultado).toBe('INICIADA')
+    })
+
+    it('confirmarEnlaceDeEmail() rechaza un código inválido', async () => {
+      const servicio = await crearServicio()
+      const resultado = await servicio.confirmarEnlaceDeEmail({
+        tipo: 'CODIGO',
+        codigo: 'codigo-invalido',
+      })
+      expect(resultado.resultado).toBe('INVALIDO')
+      expect(await servicio.usuarioAutenticado()).toBeNull()
+    })
   })
 }

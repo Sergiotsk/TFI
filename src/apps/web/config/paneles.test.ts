@@ -31,6 +31,7 @@ describe('MENU_DE_ROL', () => {
   // Según quién puede usar cada pantalla en contracts/api-http.md y puertos.md (ListarBandeja): la bandeja de pagos
   // es de Tesorería y Secretaría, los períodos de Secretaría y Dirección, y los casos A_DECIDIR solo de Dirección.
   // Las postulaciones (buscar, acreditar pago, prorrogar plazo) las operan los tres roles del personal (ADR 0009).
+  // La documentación la revisan Secretaría y Dirección (ROLES_QUE_GESTIONAN_DOCUMENTOS).
   // Los pagos se parten por tarea: importar el informe, resolver los no imputados y hacer las devoluciones.
   test.each<[RolDelPersonal, string[]]>([
     [
@@ -47,12 +48,16 @@ describe('MENU_DE_ROL', () => {
       [
         '/personal/periodos',
         '/personal/postulaciones',
+        '/personal/documentacion',
         '/personal/pagos',
         '/personal/pagos/no-imputados',
         '/personal/pagos/devoluciones',
       ],
     ],
-    ['DIRECCION', ['/direccion/casos', '/personal/periodos', '/personal/postulaciones']],
+    [
+      'DIRECCION',
+      ['/direccion/casos', '/personal/periodos', '/personal/postulaciones', '/personal/documentacion'],
+    ],
   ])('%s ve %j', (rol, rutas) => {
     expect(MENU_DE_ROL[rol].map((item) => item.href)).toEqual(rutas)
   })
@@ -95,7 +100,7 @@ describe('agruparMenu', () => {
 
   test('Secretaría ve primero lo suyo y después los pagos', () => {
     expect(rutasPorArea('SECRETARIA')).toEqual([
-      ['rol', ['/personal/periodos', '/personal/postulaciones']],
+      ['rol', ['/personal/periodos', '/personal/postulaciones', '/personal/documentacion']],
       ['pagos', ['/personal/pagos', '/personal/pagos/no-imputados', '/personal/pagos/devoluciones']],
     ])
   })
@@ -127,6 +132,7 @@ describe('itemActivoDelMenu', () => {
   test('una subruta marca el ítem más específico', () => {
     expect(itemActivoDelMenu('SECRETARIA', '/personal/pagos/no-imputados')?.etiqueta).toBe('No imputados')
     expect(itemActivoDelMenu('SECRETARIA', '/personal/postulaciones/abc')?.etiqueta).toBe('Postulaciones')
+    expect(itemActivoDelMenu('SECRETARIA', '/personal/documentacion/abc')?.etiqueta).toBe('Documentación')
   })
 
   test('un prefijo que no termina en "/" no cuenta', () => {

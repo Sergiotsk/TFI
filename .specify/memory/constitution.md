@@ -1,9 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 -> 1.0.1 (PATCH, aclaración): el monorepo pnpm tiene su raíz en `src/`, y
-  los paquetes y apps no llevan un `src/` interno (Principio I y Stack, ADR-0003).
+- Version change: 1.0.1 -> 1.1.0 (MINOR, ampliación material): se habilita Mercado Pago como
+  excepción temporal para la demo/MVP, detrás del puerto `PasarelaDePago` y con revisión obligatoria
+  antes de producción (Principio V, ADR-0012).
 - Historial: (plantilla sin completar) -> 0.1.0 (borrador) -> 1.0.0 (ratificada el 2026-10-10 al
-  aprobarse el PR #19, sin cambios de contenido) -> 1.0.1
+  aprobarse el PR #19, sin cambios de contenido) -> 1.0.1 -> 1.1.0
 - Principios agregados: I a VIII
 - Ajuste previo a la ratificación (2026-10-05): Principio V pasa de "exportación diaria" a
   importación del informe de pagos de SysAdmin por Tesorería (ver docs/architecture/overview.md).
@@ -13,6 +14,9 @@ Sync Impact Report
   (todo apunta a `domain`; puertos ≠ tipos). La revisión de cambios en `domain` y puertos deja de
   depender de un rol individual y pasa a exigir doble aprobación + ADR si cambia un contrato.
   Redacción de la sección Stack corregida (MUST NOT).
+- Ajuste 2026-11-03: el Principio V mantiene la prohibición de Mercado Pago en producción
+  institucional y agrega una excepción temporal para la demo/MVP, con `PAGOS_PASARELA=mercadopago`
+  y revisión obligatoria antes de producción (ADR-0012).
 - Secciones agregadas: Stack y restricciones técnicas; Flujo de desarrollo y calidad
 - Secciones eliminadas: ninguna
 - Pendientes diferidos (TODO):
@@ -36,8 +40,8 @@ paquetes y apps MUST NOT tener un `src/` interno. Capas y dependencias permitida
   runtime externas.
 - `packages/application`: casos de uso y **puertos** (interfaces). MUST depender solo de `domain`.
 - `packages/infrastructure`: **adaptadores** (Supabase, lector de informes, exportador, Pagos360,
-  mail). Implementa los puertos. Los tipos generados por Supabase MUST quedarse acá y mapearse a
-  entidades del dominio.
+  Mercado Pago para la demo, mail). Implementa los puertos. Los tipos generados por Supabase MUST
+  quedarse acá y mapearse a entidades del dominio.
 - `apps/web`: Next.js. Es adaptador de entrada y raíz de composición (conecta puertos con
   adaptadores).
 
@@ -85,9 +89,13 @@ carga en el sistema con su login y su rol (una carga diaria, al final del día, 
 por Administración; el formato del informe todavía no fue entregado). El formato del informe MUST validarse en el borde y estar desacoplado del dominio (un adaptador de importación).
 La entrega de la lista de confirmados al sistema académico no está definida; si es por archivo,
 va en un adaptador de exportación.
-Además: no generar tareas manuales nuevas a los sectores, no duplicar información de sus sistemas,
-y Mercado Pago MUST NOT usarse (prohibido por la institución). El cobro digital va por Pagos360
-detrás del puerto `PasarelaDePago`, de modo que cambiar de pasarela sea cambiar un adaptador.
+Además: no generar tareas manuales nuevas a los sectores, no duplicar información de sus sistemas.
+**Mercado Pago MUST NOT usarse en producción institucional** (prohibido por la institución). Como
+excepción temporal para la demo/MVP, mientras se valida la funcionalidad para la demostración, el
+sistema MAY usar Mercado Pago detrás del puerto `PasarelaDePago`, solo con
+`PAGOS_PASARELA=mercadopago` y en el entorno de demo. La excepción MUST revisarse antes de la puesta
+en producción; la pasarela prevista para producción sigue siendo Pagos360. Cambiar de pasarela MUST
+ser cambiar un adaptador.
 
 ### VI. Simplicidad y MVP (anti-overengineering)
 
@@ -160,4 +168,4 @@ PATCH por aclaraciones. Toda revisión de PR MUST verificar el cumplimiento de e
 la complejidad adicional MUST justificarse. Spec Kit es una herramienta de apoyo; la constitución es
 un artefacto del repositorio y rige para todo el equipo por igual.
 
-**Version**: 1.0.1 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10
+**Version**: 1.1.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-11-03

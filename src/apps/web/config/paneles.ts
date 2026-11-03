@@ -22,6 +22,7 @@ export type IconoDeMenu =
   | 'devoluciones'
   | 'casos'
   | 'postulaciones'
+  | 'documentacion'
 
 export interface ItemDeMenu {
   href: string
@@ -68,6 +69,11 @@ const POSTULACIONES: ItemDeMenu = {
   etiqueta: 'Postulaciones',
   icono: 'postulaciones',
 }
+const DOCUMENTACION: ItemDeMenu = {
+  href: '/personal/documentacion',
+  etiqueta: 'Documentación',
+  icono: 'documentacion',
+}
 const CASOS: ItemDeMenu = {
   href: '/direccion/casos',
   etiqueta: 'Casos a decidir',
@@ -81,8 +87,8 @@ const CASOS: ItemDeMenu = {
 // caso de uso le va a responder NoAutorizado.
 export const MENU_DE_ROL: Record<RolDelPersonal, readonly ItemDeMenu[]> = {
   TESORERIA: [INFORMES, NO_IMPUTADOS, DEVOLUCIONES, POSTULACIONES],
-  SECRETARIA: [PERIODOS, POSTULACIONES, INFORMES, NO_IMPUTADOS, DEVOLUCIONES],
-  DIRECCION: [CASOS, PERIODOS, POSTULACIONES],
+  SECRETARIA: [PERIODOS, POSTULACIONES, DOCUMENTACION, INFORMES, NO_IMPUTADOS, DEVOLUCIONES],
+  DIRECCION: [CASOS, PERIODOS, POSTULACIONES, DOCUMENTACION],
 }
 
 // Los grupos salen en el orden en que aparece su primer ítem, así el panel de cada rol sigue arriba de todo.

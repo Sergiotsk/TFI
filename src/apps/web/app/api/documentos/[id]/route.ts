@@ -14,7 +14,7 @@ type Parametros = { params: Promise<{ id: string }> }
 /**
  * `GET /api/documentos/:id` → `ConsultarDocumento`.
  *
- * Devuelve el documento y una URL firmada de cinco minutos. El acceso se valida
+ * Devuelve el documento y una URL firmada. El acceso se valida
  * antes de firmar: el aspirante solo puede pedir los propios.
  */
 export async function GET(_request: Request, { params }: Parametros) {
