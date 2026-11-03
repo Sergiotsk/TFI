@@ -1,12 +1,27 @@
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { FormularioPago } from '@/components/postulante/formulario-pago'
+import { crearDependencias } from '@/composition-root'
+import { crearCliente } from '@/lib/supabase/servidor'
 import { Info, Receipt } from 'lucide-react'
 
-export default function PagoPage() {
+export default async function PagoPage() {
+  const supabase = await crearCliente()
+  const { consultarPerfilPropio } = crearDependencias(supabase)
+  const perfil = await consultarPerfilPropio.ejecutar()
+
+  const dniFormateado = perfil?.dni
+    ? perfil.dni.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    : ''
+  const nombreCompleto = perfil ? `${perfil.nombre} ${perfil.apellido}` : 'Aspirante'
+
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground">
-      <HeaderInstitucional pasoActual={2} dniPostulante="**.***.***" />
+      <HeaderInstitucional 
+        pasoActual={2} 
+        dniPostulante={dniFormateado} 
+        nombrePostulante={nombreCompleto} 
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         <div className="mb-6">

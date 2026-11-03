@@ -48,10 +48,15 @@ export default async function PostulacionPage({ searchParams }: PageProps) {
   const dniFormateado = perfil.dni 
     ? perfil.dni.replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
     : "**.***.***"
+  const nombreCompleto = `${perfil.nombre} ${perfil.apellido}`
 
   return (
     <div className="bg-[#f0f3ff] text-slate-800 min-h-screen flex flex-col justify-between font-sans">
-      <HeaderInstitucional pasoActual={4} dniPostulante={dniFormateado} />
+      <HeaderInstitucional 
+        pasoActual={4} 
+        dniPostulante={dniFormateado} 
+        nombrePostulante={nombreCompleto} 
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
         {/* Encabezado: Saludo con datos del usuario autenticado */}
