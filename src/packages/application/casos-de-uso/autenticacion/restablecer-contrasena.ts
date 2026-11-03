@@ -1,3 +1,4 @@
+import { ROLES_DEL_PERSONAL } from '@tfi/domain'
 import type { Rol } from '@tfi/domain'
 import type { RepositorioDePerfiles } from '../../puertos/repositorio-de-perfiles/puerto'
 import type { ServicioDeAdministracionDeUsuarios } from '../../puertos/servicio-de-administracion-de-usuarios/puerto'
@@ -8,9 +9,6 @@ import { contrasenaInicialDe } from './contrasena-inicial'
 
 /** Roles del personal que pueden restablecer contraseñas ajenas. */
 export const ROLES_QUE_RESTABLECEN_CONTRASENAS: readonly Rol[] = ['SECRETARIA', 'DIRECCION']
-
-/** Roles que solo Dirección puede resetear: son sus propios pares. */
-const ROLES_DE_DIRECCION: readonly Rol[] = ['SECRETARIA', 'DIRECCION']
 
 export interface ResultadoDeRestablecimientoDeContrasena {
   perfilId: string
@@ -32,8 +30,9 @@ export interface ResultadoDeRestablecimientoDeContrasena {
  * Reglas de autorización (en el caso de uso, no en el borde):
  * - Solo Secretaría y Dirección.
  * - Solo perfiles de su institución (si no, `NoEncontrado` para no filtrar).
- * - Una Secretaría no puede resetear a otro integrante de Secretaría o
- *   Dirección: sería una toma de cuenta de un par o de un superior.
+ * - Las cuentas del personal (Secretaría, Dirección y Tesorería) solo las
+ *   resetea Dirección: si no, una Secretaría podría tomar la cuenta de un par
+ *   o de otro rol con más permisos.
  */
 export class RestablecerContrasenaUseCase {
   constructor(
@@ -50,7 +49,7 @@ export class RestablecerContrasenaUseCase {
       throw new NoEncontrado('El perfil no existe')
     }
 
-    if (actor.rol !== 'DIRECCION' && ROLES_DE_DIRECCION.includes(perfil.rol)) {
+    if (actor.rol !== 'DIRECCION' && ROLES_DEL_PERSONAL.includes(perfil.rol)) {
       throw new NoAutorizado('Solo Dirección puede restablecer la contraseña de ese perfil')
     }
 

@@ -97,6 +97,21 @@ describe('RestablecerContrasenaUseCase', () => {
     expect(usuarios.contrasenaDe('3')).toBe('contrasenaOriginal123')
   })
 
+  it('Secretaría no puede restablecer la contraseña de Tesorería', async () => {
+    const { restablecer, usuarios } = armar()
+
+    await expect(restablecer.ejecutar(secretaria, '4')).rejects.toBeInstanceOf(NoAutorizado)
+    expect(usuarios.contrasenaDe('4')).toBe('contrasenaOriginal123')
+  })
+
+  it('Dirección puede restablecer la contraseña de Tesorería', async () => {
+    const { restablecer } = armar()
+
+    const resultado = await restablecer.ejecutar(direccion, '4')
+
+    expect(resultado.perfilId).toBe('4')
+  })
+
   it('Secretaría no puede restablecer la contraseña de otra Secretaría', async () => {
     const { restablecer } = conOtraSecretaria(armar())
 
