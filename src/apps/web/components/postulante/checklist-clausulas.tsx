@@ -97,7 +97,12 @@ export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps
                 checked ? 'bg-accent/40' : 'hover:bg-muted/50'
               }`}
             >
-              <input type="hidden" name="periodoId" defaultValue={periodoId ?? ''} />
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => handleToggle(clausula.id)}
+                className="mt-0.5 w-4 h-4 text-primary border-input focus:ring-primary"
+              />
               <span className="text-xs text-foreground/90 leading-relaxed">
                 {clausula.texto}
               </span>
