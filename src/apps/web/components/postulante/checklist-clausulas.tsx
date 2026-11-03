@@ -116,7 +116,10 @@ export function ChecklistClausulas() {
             <ArrowRight className="h-4 w-4 shrink-0" />
           </Link>
         ) : (
-          <Button disabled className="w-full sm:w-auto shrink-0 whitespace-nowrap px-5 inline-flex items-center justify-center gap-2">
+          <Button
+            disabled
+            className="w-full sm:w-auto shrink-0 whitespace-nowrap px-5 inline-flex items-center justify-center gap-2"
+          >
             <span>Continuar a Datos y Pago de Reserva</span>
             <ArrowRight className="h-4 w-4 shrink-0" />
           </Button>

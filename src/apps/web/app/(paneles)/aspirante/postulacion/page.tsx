@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { formatearFecha } from '@/components/panel/formato'
@@ -5,8 +7,6 @@ import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { conActorDePanel } from '../../sesion-de-panel'
 import { crearPostulacionAccion, iniciarPagoAccion } from './actions'
 
-// Panel del aspirante conectado a los casos de uso: ConsultarPostulacion.listarMias, ListarPeriodosAbiertos,
-// CrearPostulacion e IniciarPago. Sin pasarela de pago: la acreditación la hace el personal.
 export default async function PostulacionDelAspirantePage() {
   const { postulaciones, periodos } = await conActorDePanel(
     async ({ consultarPostulacion, listarPeriodosAbiertos }, actor) => {
@@ -71,8 +71,6 @@ export default async function PostulacionDelAspirantePage() {
               <InsigniaDePostulacion estado={postulacion.estado} />
             </div>
 
-            {/* El vencimiento se conserva después del pago (auditoría), pero al aspirante solo le sirve mientras
-                tiene que pagar o si el plazo ya se le pasó. */}
             {postulacion.venceEl &&
             (postulacion.estado === 'PAGO_PENDIENTE' || postulacion.estado === 'VENCIDO') ? (
               <div>
@@ -90,10 +88,17 @@ export default async function PostulacionDelAspirantePage() {
             ) : null}
 
             {postulacion.estado === 'PAGO_PENDIENTE' ? (
-              <p className="text-sm text-muted-foreground">
-                Pagá la matrícula en la facultad o por el medio indicado antes de la fecha límite. No hay pago en
-                línea: el personal acredita tu pago y vas a ver la vacante confirmada acá.
-              </p>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Tu postulación está pendiente de pago. Podés abonar la seña oficial en línea para reservar tu lugar en la carrera.
+                </p>
+                <Link
+                  href="/aspirante/postulacion/pago"
+                  className={buttonVariants({ size: 'lg' })}
+                >
+                  Ir a pagar seña
+                </Link>
+              </div>
             ) : null}
 
             {postulacion.estado === 'VACANTE_CONFIRMADA' ? (

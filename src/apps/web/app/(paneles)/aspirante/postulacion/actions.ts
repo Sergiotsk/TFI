@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { esquemaCrearPostulacion, esquemaParametrosDePostulacion } from '@/http/esquemas/postulaciones'
 import { conActorDePanel, resolverAccion, type EstadoDeAccion } from '../../sesion-de-panel'
 
@@ -21,7 +22,11 @@ export async function crearPostulacionAccion(
       return 'Postulación creada.'
     }),
   )
-  revalidatePath(RUTA)
+
+  if (estado && estado.ok) {
+    revalidatePath(RUTA)
+    redirect('/aspirante/postulacion/requisitos')
+  }
 
   return estado
 }
@@ -41,7 +46,11 @@ export async function iniciarPagoAccion(
       return 'Pago iniciado.'
     }),
   )
-  revalidatePath(RUTA)
+
+  if (estado && estado.ok) {
+    revalidatePath(RUTA)
+    redirect('/aspirante/postulacion/pago')
+  }
 
   return estado
 }
