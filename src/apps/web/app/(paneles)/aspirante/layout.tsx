@@ -1,10 +1,14 @@
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
+import { Public_Sans } from 'next/font/google'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
 import { crearDependencias } from '@/composition-root'
 import { PANEL_DE_ROL } from '@/config/paneles'
 import { crearCliente } from '@/lib/supabase/servidor'
+import { cn } from '@/lib/utils'
+
+const publicSans = Public_Sans({ subsets: ['latin'], variable: '--font-public-sans' })
 
 export default async function LayoutDelAspirante({ children }: { children: ReactNode }) {
   const supabase = await crearCliente()
@@ -25,7 +29,10 @@ export default async function LayoutDelAspirante({ children }: { children: React
   const nombreCompleto = `${perfil.nombre} ${perfil.apellido}`
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#f0f3ff] text-slate-800 font-sans">
+    <div 
+      data-panel="aspirante" 
+      className={cn(publicSans.variable, 'min-h-screen flex flex-col justify-between font-sans text-foreground')}
+    >
       {/* Única barra principal integrada */}
       <HeaderInstitucional 
         dniPostulante={dniFormateado} 
