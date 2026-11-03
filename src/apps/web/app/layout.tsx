@@ -9,6 +9,9 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 export const metadata: Metadata = {
   title: 'Gestión de ingresantes',
   description: 'Preinscripción, pago y confirmación de vacantes de la TUP',
+  icons: {
+    icon: '/utn_haedo_arana.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

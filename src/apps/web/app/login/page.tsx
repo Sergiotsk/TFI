@@ -14,7 +14,7 @@ export const metadata = {
 export default async function PaginaLogin({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>
+  searchParams: Promise<{ redirect?: string; error?: string }>
 }) {
   if (await haySesion()) {
     redirect('/panel')
@@ -22,10 +22,30 @@ export default async function PaginaLogin({
 
   const params = await searchParams
   const destino = destinoSeguro(params.redirect, '/panel')
+  const enlaceVencido = params.error === 'enlace'
 
   return (
     <MarcoAuth subtitulo="Ingresá con tu email y contraseña.">
+      {enlaceVencido ? (
+        <p
+          role="alert"
+          className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          El enlace venció o ya se usó. Probá de nuevo.
+        </p>
+      ) : null}
+
       <FormularioLogin destino={destino} />
+
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        <Link
+          href="/recuperar-contrasena"
+          className="font-medium text-primary underline underline-offset-4 hover:no-underline"
+        >
+          Olvidé mi contraseña
+        </Link>
+      </p>
+
       <p className="mt-6 text-center text-sm text-muted-foreground">
         ¿No tenés cuenta?{' '}
         <Link

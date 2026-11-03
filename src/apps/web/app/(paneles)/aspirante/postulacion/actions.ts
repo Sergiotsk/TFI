@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { esquemaCrearPostulacion, esquemaParametrosDePostulacion } from '@/http/esquemas/postulaciones'
 import { conActorDePanel, resolverAccion, type EstadoDeAccion } from '../../sesion-de-panel'
 
@@ -22,6 +23,18 @@ export async function crearPostulacionAccion(
     }),
   )
   revalidatePath(RUTA)
+
+  return estado
+}
+
+// Demo: desde Requisitos, aceptar las condiciones crea la Postulación y vuelve al panel, donde sigue el pago.
+// El redirect va fuera de resolverAccion porque Next lo implementa lanzando una excepción.
+export async function aceptarCondicionesAccion(
+  anterior: EstadoDeAccion,
+  datos: FormData,
+): Promise<EstadoDeAccion> {
+  const estado = await crearPostulacionAccion(anterior, datos)
+  if (estado?.ok) redirect(RUTA)
 
   return estado
 }

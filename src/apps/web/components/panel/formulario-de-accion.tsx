@@ -11,6 +11,8 @@ interface FormularioDeAccionProps {
   etiqueta: string
   variante?: ComponentProps<typeof Button>['variant']
   tamano?: ComponentProps<typeof Button>['size']
+  /** Ícono delante de la etiqueta; mientras se envía no se muestra. */
+  icono?: ReactNode
   /** Campos visibles extra (por ejemplo, los días de una prórroga). */
   children?: ReactNode
 }
@@ -22,6 +24,7 @@ export function FormularioDeAccion({
   etiqueta,
   variante,
   tamano,
+  icono,
   children,
 }: FormularioDeAccionProps) {
   const [estado, ejecutar, enviando] = useActionState(accion, null)
@@ -33,6 +36,7 @@ export function FormularioDeAccion({
       ))}
       {children}
       <Button type="submit" variant={variante} size={tamano} disabled={enviando}>
+        {enviando ? null : icono}
         {enviando ? 'Enviando…' : etiqueta}
       </Button>
       {estado ? (
