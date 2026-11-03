@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { Perfil } from '@tfi/domain'
+import { GeneradorDeContrasenasFake } from '../../puertos/generador-de-contrasenas/fake'
 import { RepositorioDePerfilesFake } from '../../puertos/repositorio-de-perfiles/fake'
 import { ServicioDeAdministracionDeUsuariosFake } from '../../puertos/servicio-de-administracion-de-usuarios/fake'
 import type { Actor } from '../actor'
 import { NoAutorizado, NoEncontrado } from '../errores'
-import { contrasenaInicialDe } from './contrasena-inicial'
 import { RestablecerContrasenaUseCase } from './restablecer-contrasena'
 
 const INSTITUCION = '00000000-0000-0000-0000-000000000001'
@@ -29,7 +29,11 @@ function armar(cuentasDeAuth: string[] = ['1', '2', '3', '4']) {
   return {
     perfiles,
     usuarios,
-    restablecer: new RestablecerContrasenaUseCase(usuarios, perfiles),
+    restablecer: new RestablecerContrasenaUseCase(
+      usuarios,
+      perfiles,
+      new GeneradorDeContrasenasFake(),
+    ),
   }
 }
 
@@ -59,26 +63,24 @@ function conOtraSecretaria(mundo: ReturnType<typeof armar>) {
   return mundo
 }
 
-describe('contrasenaInicialDe', () => {
-  it('arma nombre + DNI sin acentos, espacios ni puntos', () => {
-    expect(contrasenaInicialDe({ nombre: 'Ana María', dni: '30.123.456' })).toBe(
-      'anamaria30123456',
-    )
-  })
-
-  it('pasa el nombre a minúsculas', () => {
-    expect(contrasenaInicialDe({ nombre: 'JUAN', dni: '10000001' })).toBe('juan10000001')
-  })
-})
-
 describe('RestablecerContrasenaUseCase', () => {
-  it('Secretaría deja la contraseña de un aspirante en nombre + DNI', async () => {
+  it('Secretaría deja al aspirante una contraseña temporal aleatoria', async () => {
     const { restablecer, usuarios } = armar()
 
     const resultado = await restablecer.ejecutar(secretaria, '1')
 
-    expect(resultado).toEqual({ perfilId: '1', contrasenaTemporal: 'juan10000001' })
-    expect(usuarios.contrasenaDe('1')).toBe('juan10000001')
+    expect(resultado.perfilId).toBe('1')
+    expect(resultado.contrasenaTemporal).toMatch(/^Temporal-\d+-Aa1!$/)
+    expect(usuarios.contrasenaDe('1')).toBe(resultado.contrasenaTemporal)
+  })
+
+  it('genera una contraseña distinta en cada restablecimiento', async () => {
+    const { restablecer } = armar()
+
+    const primero = await restablecer.ejecutar(secretaria, '1')
+    const segundo = await restablecer.ejecutar(secretaria, '1')
+
+    expect(segundo.contrasenaTemporal).not.toBe(primero.contrasenaTemporal)
   })
 
   it('Dirección puede restablecer la contraseña de una Secretaría', async () => {
@@ -86,8 +88,8 @@ describe('RestablecerContrasenaUseCase', () => {
 
     const resultado = await restablecer.ejecutar(direccion, '2')
 
-    expect(resultado.contrasenaTemporal).toBe('ana10000002')
-    expect(usuarios.contrasenaDe('2')).toBe('ana10000002')
+    expect(resultado.contrasenaTemporal).toMatch(/^Temporal-\d+-Aa1!$/)
+    expect(usuarios.contrasenaDe('2')).toBe(resultado.contrasenaTemporal)
   })
 
   it('Secretaría no puede restablecer la contraseña de Dirección', async () => {

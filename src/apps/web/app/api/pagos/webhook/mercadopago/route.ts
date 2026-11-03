@@ -1,15 +1,7 @@
 ﻿import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { crearClienteServiceRole } from '@/lib/supabase/service-role'
-import {
-  MercadoPagoAdapter,
-  RepositorioDePostulacionesSupabase,
-  AccionesDelPersonalSupabase,
-  RelojDeSistema,
-  RepositorioDeIntencionesDePagoSupabase,
-} from '@tfi/infrastructure'
-import { ProcesarWebhookMercadoPagoUseCase } from '@tfi/application'
-import type { AccionesDelPersonal } from '@tfi/application'
+import { crearDependenciasSinSesion } from '@/composition-root'
+import { firmaDeMercadoPagoValida } from '@/lib/mercadopago-webhook'
 
 const esquemaNotificacion = z
   .object({
@@ -46,50 +38,43 @@ export async function POST(request: Request) {
       search.get('data.id') ??
       undefined
 
-    const paymentId = id ? String(id) : undefined
+    const paymentId = id === undefined ? undefined : String(id)
     const webhookEventId =
       request.headers.get('x-request-id') ?? (body?.id ? String(body.id) : undefined)
 
-    if (!paymentId) {
+    // El id de un pago de MP es numérico. Cualquier otra cosa se ignora sin
+    // consultar la API ni tocar la base.
+    if (!paymentId || !/^\d{1,20}$/.test(paymentId)) {
       return NextResponse.json({ ok: true })
     }
 
-    const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
-    if (!habilitarPasarela || !process.env.MP_ACCESS_TOKEN) {
-      return NextResponse.json({ ok: true })
+    const secreto = process.env.MP_WEBHOOK_SECRET
+    if (secreto) {
+      const firmaValida = firmaDeMercadoPagoValida({
+        secret: secreto,
+        signature: request.headers.get('x-signature'),
+        requestId: request.headers.get('x-request-id'),
+        dataId: paymentId,
+      })
+      if (!firmaValida) {
+        console.warn('[webhook mercadopago] firma inválida', { paymentId })
+        return NextResponse.json({ ok: false }, { status: 401 })
+      }
+    } else {
+      console.warn(
+        '[webhook mercadopago] MP_WEBHOOK_SECRET no configurado; se valida el pago contra la API de MP',
+      )
     }
 
-    const supabase = crearClienteServiceRole()
-    const repoPostulaciones = new RepositorioDePostulacionesSupabase(
-      supabase as unknown as ConstructorParameters<typeof RepositorioDePostulacionesSupabase>[0],
-    )
-    const accionesDelPersonalBase = new AccionesDelPersonalSupabase(
-      supabase as unknown as ConstructorParameters<typeof AccionesDelPersonalSupabase>[0],
-      repoPostulaciones,
-    )
-    // El webhook llega sin sesión: usa la RPC que valida con la clave de
-    // servicio (`confirmar_vacante_por_webhook`), no la acción manual.
-    const accionesDelPersonal: AccionesDelPersonal = {
-      confirmarVacante: (postulacionId) =>
-        accionesDelPersonalBase.acreditarPagoPorWebhook(postulacionId),
-      prorrogarPlazo: (postulacionId, venceEl) =>
-        accionesDelPersonalBase.prorrogarPlazo(postulacionId, venceEl),
+    const deps = crearDependenciasSinSesion()
+    if (!deps.procesarWebhookMercadoPago) {
+      console.error(
+        '[webhook mercadopago] pasarela deshabilitada o configuración incompleta (PAGOS_PASARELA/MP_ACCESS_TOKEN)',
+      )
+      return NextResponse.json({ ok: false }, { status: 503 })
     }
-    const reloj = new RelojDeSistema()
-    const pasarela = new MercadoPagoAdapter({ accessToken: process.env.MP_ACCESS_TOKEN })
-    const intenciones = new RepositorioDeIntencionesDePagoSupabase(
-      supabase as unknown as ConstructorParameters<typeof RepositorioDeIntencionesDePagoSupabase>[0],
-    )
 
-    const useCase = new ProcesarWebhookMercadoPagoUseCase(
-      repoPostulaciones,
-      pasarela,
-      accionesDelPersonal,
-      reloj,
-      intenciones,
-    )
-
-    const resultado = await useCase.ejecutar({
+    const resultado = await deps.procesarWebhookMercadoPago.ejecutar({
       paymentId,
       webhookEventId: webhookEventId ?? undefined,
     })
