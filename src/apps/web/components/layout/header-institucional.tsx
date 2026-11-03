@@ -15,6 +15,8 @@ export function HeaderInstitucional({
   dniPostulante,
   nombrePostulante,
 }: HeaderProps) {
+  const tieneUsuario = Boolean(nombrePostulante || dniPostulante)
+
   return (
     <header className="sticky top-0 z-50 h-20 border-b border-border bg-card shadow-xs">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -45,18 +47,20 @@ export function HeaderInstitucional({
           </div>
         )}
 
-        <div className="flex items-center space-x-3">
-          {dniPostulante && (
-            <div className="text-right hidden sm:block">
-              <p className="text-[11px] font-medium text-muted-foreground">Postulante</p>
-              <p className="text-xs font-semibold text-foreground">DNI {dniPostulante}</p>
-            </div>
-          )}
-          <MenuUsuarioHeader 
-            nombreCompleto={nombrePostulante ?? 'Aspirante'} 
-            dni={dniPostulante} 
-          />
-        </div>
+        {tieneUsuario && (
+          <div className="flex items-center space-x-3">
+            {dniPostulante && (
+              <div className="text-right hidden sm:block">
+                <p className="text-[11px] font-medium text-muted-foreground">Postulante</p>
+                <p className="text-xs font-semibold text-foreground">DNI {dniPostulante}</p>
+              </div>
+            )}
+            <MenuUsuarioHeader 
+              nombreCompleto={nombrePostulante ?? ''} 
+              dni={dniPostulante} 
+            />
+          </div>
+        )}
       </div>
     </header>
   )
