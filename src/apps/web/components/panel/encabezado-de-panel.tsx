@@ -11,7 +11,7 @@ interface EncabezadoDePanelProps {
 
 export function EncabezadoDePanel({ area, titulo, descripcion, acciones }: EncabezadoDePanelProps) {
   return (
-    <header className="border-b border-border bg-card">
+    <header className="bg-transparent">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">

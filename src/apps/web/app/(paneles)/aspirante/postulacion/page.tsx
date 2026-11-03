@@ -29,8 +29,8 @@ export default async function PostulacionDelAspirantePage() {
 
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {postulaciones.length === 0 ? (
-          <section className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-xs">
-            <h2 className="text-base font-semibold">Todavía no tenés una postulación</h2>
+          <section className="space-y-4 bg-card p-6 shadow-(--sombra-tarjeta)">
+            <h2 className="text-base font-semibold text-foreground">Todavía no tenés una postulación</h2>
             {periodos.length === 0 ? (
               <p className="text-sm text-muted-foreground">No hay períodos de ingreso abiertos por ahora.</p>
             ) : (
@@ -38,10 +38,10 @@ export default async function PostulacionDelAspirantePage() {
                 {periodos.map((periodo) => (
                   <li
                     key={periodo.id}
-                    className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 border-b border-border pb-4 last:border-none sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <span className="block text-sm font-semibold">{periodo.nombre}</span>
+                      <span className="block text-sm font-semibold text-foreground">{periodo.nombre}</span>
                       <span className="block text-xs text-muted-foreground">
                         Cierra el {formatearFecha(periodo.cierraEl)}
                       </span>
@@ -61,12 +61,12 @@ export default async function PostulacionDelAspirantePage() {
         {postulaciones.map((postulacion) => (
           <section
             key={postulacion.id}
-            className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-xs"
+            className="space-y-6 bg-card p-6 shadow-(--sombra-tarjeta)"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="block text-xs font-medium text-muted-foreground">Número de postulación</span>
-                <span className="font-mono text-xl font-bold tracking-wider">Nº {postulacion.numero}</span>
+                <span className="font-mono text-xl font-bold tracking-wider text-primary">Nº {postulacion.numero}</span>
               </div>
               <InsigniaDePostulacion estado={postulacion.estado} />
             </div>
@@ -77,12 +77,12 @@ export default async function PostulacionDelAspirantePage() {
                 <span className="block text-xs font-medium text-muted-foreground">
                   {postulacion.estado === 'VENCIDO' ? 'El plazo para pagar venció el' : 'Fecha límite para pagar'}
                 </span>
-                <span className="text-base font-semibold">{formatearFecha(postulacion.venceEl)}</span>
+                <span className="text-base font-semibold text-foreground">{formatearFecha(postulacion.venceEl)}</span>
               </div>
             ) : null}
 
             {postulacion.aviso ? (
-              <p className="rounded-lg border border-secondary/30 bg-accent p-4 text-sm text-accent-foreground">
+              <p className="bg-accent p-4 text-sm text-accent-foreground">
                 {postulacion.aviso}
               </p>
             ) : null}
@@ -102,7 +102,7 @@ export default async function PostulacionDelAspirantePage() {
             ) : null}
 
             {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
-              <p className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+              <p className="border-l-4 border-[var(--senal-verde)] bg-accent p-4 text-sm font-medium text-foreground">
                 Tu pago fue acreditado y tu vacante está confirmada.
               </p>
             ) : null}

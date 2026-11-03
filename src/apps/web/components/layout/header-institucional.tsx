@@ -49,12 +49,6 @@ export function HeaderInstitucional({
 
         {tieneUsuario && (
           <div className="flex items-center space-x-3">
-            {dniPostulante && (
-              <div className="text-right hidden sm:block">
-                <p className="text-[11px] font-medium text-muted-foreground">Postulante</p>
-                <p className="text-xs font-semibold text-foreground">DNI {dniPostulante}</p>
-              </div>
-            )}
             <MenuUsuarioHeader 
               nombreCompleto={nombrePostulante ?? ''} 
               dni={dniPostulante} 
