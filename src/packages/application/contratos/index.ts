@@ -11,6 +11,7 @@ export type { EntornoDeDocumentos } from '../puertos/repositorio-de-documentos/c
 export { probarContratoDeAlmacenDeArchivos } from '../puertos/almacen-de-archivos/contrato'
 export { probarContratoDeReloj } from '../puertos/reloj/contrato'
 export { probarContratoDeGeneradorDeIds } from '../puertos/generador-de-ids/contrato'
+export { probarContratoDeGeneradorDeContrasenas } from '../puertos/generador-de-contrasenas/contrato'
 export { probarContratoDeAccionesDelPersonal } from '../puertos/acciones-del-personal/contrato'
 export { probarContratoDeRepositorioDePostulaciones } from '../puertos/repositorio-de-postulaciones/contrato'
 export type {
@@ -19,6 +20,8 @@ export type {
 } from '../puertos/repositorio-de-postulaciones/contrato'
 export { probarContratoDeRepositorioDePeriodos } from '../puertos/repositorio-de-periodos/contrato'
 export type { EntornoDePeriodos } from '../puertos/repositorio-de-periodos/contrato'
+export { probarContratoDeRepositorioDeIntencionesDePago } from '../puertos/repositorio-de-intenciones-de-pago/contrato'
+export type { EntornoDeIntencionesDePago } from '../puertos/repositorio-de-intenciones-de-pago/contrato'
 export {
   MATRICULA_DE_PRUEBA_CENTAVOS,
   probarContratoDeRegistroDePagos,

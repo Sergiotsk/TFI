@@ -7,7 +7,8 @@ import { EliminarDocumentoUseCase } from './eliminar-documento'
 import { ListarDocumentosUseCase } from './listar-documentos'
 import { RevisarDocumentoUseCase } from './revisar-documento'
 import { SubirDocumentoUseCase } from './subir-documento'
-import { ConflictoDeEstado, NoAutorizado } from '../errores'
+import { ConflictoDeEstado, NoAutorizado, NoEncontrado } from '../errores'
+import { SEGUNDOS_DE_URL_FIRMADA } from './comun'
 import { AlmacenDeArchivosFake } from '../../puertos/almacen-de-archivos/fake'
 import { AccionesDeDocumentacionFake } from '../../puertos/acciones-de-documentacion/fake'
 import { GeneradorDeIdsFake } from '../../puertos/generador-de-ids/fake'
@@ -35,6 +36,18 @@ const secretaria: Actor = {
 const tesoreria: Actor = {
   perfilId: 'tesoreria-1',
   rol: 'TESORERIA',
+  institucionId: INSTITUCION,
+}
+
+const direccion: Actor = {
+  perfilId: 'direccion-1',
+  rol: 'DIRECCION',
+  institucionId: INSTITUCION,
+}
+
+const otroAspirante: Actor = {
+  perfilId: 'aspirante-2',
+  rol: 'ASPIRANTE',
   institucionId: INSTITUCION,
 }
 
@@ -305,6 +318,48 @@ describe('ConsultarDocumento, ActualizarDocumento y EliminarDocumento', () => {
     expect(resultado.documento.id).toBe(documento.id)
     expect(resultado.urlFirmada).toContain('almacen.fake')
     expect(resultado.expiraEnSegundos).toBeGreaterThan(0)
+  })
+
+  it('la URL firmada vence en el menor tiempo posible', async () => {
+    const { consultar, documento } = await conUnDocumento()
+
+    const resultado = await consultar.ejecutar(aspirante, documento.id)
+
+    expect(resultado.expiraEnSegundos).toBe(SEGUNDOS_DE_URL_FIRMADA)
+    expect(resultado.expiraEnSegundos).toBeLessThanOrEqual(60)
+    expect(resultado.urlFirmada).toContain(`expira=${SEGUNDOS_DE_URL_FIRMADA}`)
+  })
+
+  it('Secretaría y Dirección pueden ver la URL de un documento ajeno', async () => {
+    const { consultar, documento } = await conUnDocumento()
+
+    const porSecretaria = await consultar.ejecutar(secretaria, documento.id)
+    const porDireccion = await consultar.ejecutar(direccion, documento.id)
+
+    expect(porSecretaria.urlFirmada).toContain('almacen.fake')
+    expect(porDireccion.urlFirmada).toContain('almacen.fake')
+  })
+
+  it('otro aspirante no puede ver la URL del documento', async () => {
+    const { consultar, documento } = await conUnDocumento()
+
+    await expect(consultar.ejecutar(otroAspirante, documento.id)).rejects.toBeInstanceOf(
+      NoAutorizado,
+    )
+  })
+
+  it('Tesorería no puede ver la URL de un documento', async () => {
+    const { consultar, documento } = await conUnDocumento()
+
+    await expect(consultar.ejecutar(tesoreria, documento.id)).rejects.toBeInstanceOf(NoAutorizado)
+  })
+
+  it('un documento inexistente responde NoEncontrado', async () => {
+    const { consultar } = await conUnDocumento()
+
+    await expect(consultar.ejecutar(aspirante, 'documento-que-no-existe')).rejects.toBeInstanceOf(
+      NoEncontrado,
+    )
   })
 
   it('el personal puede corregir los metadatos', async () => {

@@ -58,7 +58,7 @@ export async function importarInformeAccion(
           ok: true,
           mensaje: `Informe importado: ${filas.length} pago(s) procesados.`,
           resumen,
-          pendientes: filas.filter((fila) => fila.resultado !== 'ACREDITADO'),
+          pendientes: filas.filter((fila: FilaImportada) => fila.resultado !== 'ACREDITADO'),
           conError,
         }
       },

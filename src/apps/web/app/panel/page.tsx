@@ -34,5 +34,5 @@ export default async function PaginaPanel() {
     )
   }
 
-  redirect(PANEL_DE_ROL[resultado.actor.rol])
+  redirect(PANEL_DE_ROL[resultado.actor.rol as keyof typeof PANEL_DE_ROL])
 }

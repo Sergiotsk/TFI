@@ -4,6 +4,8 @@ import { formatearFecha } from '@/components/panel/formato'
 import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { conActorDePanel } from '../../sesion-de-panel'
 import { crearPostulacionAccion, iniciarPagoAccion } from './actions'
+import type { PeriodoDeIngreso } from '@tfi/domain'
+import type { PostulacionConsultada } from '@tfi/application'
 
 // Panel del aspirante conectado a los casos de uso: ConsultarPostulacion.listarMias, ListarPeriodosAbiertos,
 // CrearPostulacion e IniciarPago. Sin pasarela de pago: la acreditación la hace el personal.
@@ -35,7 +37,7 @@ export default async function PostulacionDelAspirantePage() {
               <p className="text-sm text-muted-foreground">No hay períodos de ingreso abiertos por ahora.</p>
             ) : (
               <ul className="space-y-3">
-                {periodos.map((periodo) => (
+                {periodos.map((periodo: PeriodoDeIngreso) => (
                   <li
                     key={periodo.id}
                     className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
@@ -58,7 +60,7 @@ export default async function PostulacionDelAspirantePage() {
           </section>
         ) : null}
 
-        {postulaciones.map((postulacion) => (
+        {postulaciones.map((postulacion: PostulacionConsultada) => (
           <section
             key={postulacion.id}
             className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-xs"

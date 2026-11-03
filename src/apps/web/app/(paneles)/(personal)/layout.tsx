@@ -20,7 +20,7 @@ export default async function LayoutDelPersonal({ children }: { children: ReactN
   }
   // Ubica a cada uno en su panel; no autoriza nada (cada caso de uso exige su rol).
   if (!esDelPersonal(perfil.rol)) {
-    redirect(PANEL_DE_ROL[perfil.rol])
+    redirect(PANEL_DE_ROL[perfil.rol as keyof typeof PANEL_DE_ROL])
   }
 
   // Pendientes de las bandejas de pagos, para el número al lado de cada ítem: Tesorería y Secretaría ven los no

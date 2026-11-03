@@ -6,6 +6,7 @@ import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { conActorDePanel, mensajeDeError } from '../../../sesion-de-panel'
 import { acreditarPagoAccion, prorrogarPlazoAccion } from './actions'
 import { esquemaBusquedaDeDni, esquemaPaginaDeSeguimiento } from './esquemas'
+import type { Pagina, PostulacionConsultada } from '@tfi/application'
 
 const POR_PAGINA = 20
 
@@ -27,7 +28,7 @@ export default async function PostulacionesDelPersonalPage({
 
   let errorDeBusqueda: string | null =
     dni && !dni.success ? (dni.error.issues[0]?.message ?? 'DNI inválido') : null
-  let resultado = null
+  let resultado: Pagina<PostulacionConsultada> | null = null
 
   if (!dni || dni.success) {
     try {
