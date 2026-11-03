@@ -71,44 +71,16 @@ CREATE POLICY intenciones_lectura ON public.intenciones_de_pago
     )
   );
 
+-- Sin policy de UPDATE: la intención solo la actualiza el webhook, con service_role.
 DROP POLICY IF EXISTS intenciones_actualizacion ON public.intenciones_de_pago;
-CREATE POLICY intenciones_actualizacion ON public.intenciones_de_pago
-  FOR UPDATE TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.postulaciones po
-       WHERE po.id = postulacion_id AND po.aspirante_id = auth.uid()
-    )
-    OR (
-      public.rol_actual() IN ('SECRETARIA', 'DIRECCION')
-      AND EXISTS (
-        SELECT 1 FROM public.postulaciones po
-        JOIN public.periodos_de_ingreso p ON p.id = po.periodo_id
-         WHERE po.id = postulacion_id AND p.institucion_id = public.institucion_actual()
-      )
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.postulaciones po
-       WHERE po.id = postulacion_id AND po.aspirante_id = auth.uid()
-    )
-    OR (
-      public.rol_actual() IN ('SECRETARIA', 'DIRECCION')
-      AND EXISTS (
-        SELECT 1 FROM public.postulaciones po
-        JOIN public.periodos_de_ingreso p ON p.id = po.periodo_id
-         WHERE po.id = postulacion_id AND p.institucion_id = public.institucion_actual()
-      )
-    )
-  );
 
 -- 3) Relacionar pago con intención (opcional pero trazable)
 ALTER TABLE public.pagos
   ADD COLUMN IF NOT EXISTS intencion_id UUID REFERENCES public.intenciones_de_pago(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_pagos_intencion ON public.pagos (intencion_id);
 
--- Grants mínimos para el rol authenticated
-GRANT SELECT, INSERT, UPDATE ON public.intenciones_de_pago TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.pagos TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.decisiones_de_direccion TO authenticated;
+-- Privilegios explícitos (la base local no tiene los toggles del remoto). El aspirante crea y lee su intención;
+-- pagos y decisiones_de_direccion se siguen escribiendo solo por RPC.
+REVOKE ALL ON public.intenciones_de_pago FROM anon, authenticated;
+GRANT SELECT, INSERT ON public.intenciones_de_pago TO authenticated;
+GRANT ALL ON public.intenciones_de_pago TO service_role;

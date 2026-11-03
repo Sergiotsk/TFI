@@ -82,5 +82,6 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.confirmar_vacante_por_webhook(UUID) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.confirmar_vacante_por_webhook(UUID) TO authenticated, service_role;
+-- Solo el webhook (service_role): no verifica rol, así que un usuario logueado no la puede llamar.
+REVOKE EXECUTE ON FUNCTION public.confirmar_vacante_por_webhook(UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.confirmar_vacante_por_webhook(UUID) TO service_role;
