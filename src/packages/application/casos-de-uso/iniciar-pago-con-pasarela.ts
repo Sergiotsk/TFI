@@ -115,6 +115,7 @@ export class IniciarPagoConPasarelaUseCase {
       monto: periodo.montoMatricula,
       backUrls: urls.backUrls,
       notificationUrl: urls.notificationUrl,
+      expiresAt: enPago.venceEl ?? undefined,
     })
 
     // Si no se puede guardar la intención, el webhook después no puede imputar
@@ -145,23 +146,21 @@ export class IniciarPagoConPasarelaUseCase {
     montoCentavos: number,
     ahora: Date,
   ): Promise<IntencionReutilizable | null> {
-    try {
-      const pendiente = await this.intenciones.obtenerPendientePorPostulacion(postulacionId, ahora)
-      if (
-        pendiente &&
-        pendiente.preferenceId !== null &&
-        pendiente.initPoint !== null &&
-        pendiente.montoCentavos === montoCentavos
-      ) {
-        return {
-          externalId: pendiente.externalId,
-          preferenceId: pendiente.preferenceId,
-          initPoint: pendiente.initPoint,
-          sandboxInitPoint: pendiente.sandboxInitPoint ?? undefined,
-        }
+    // Si la lectura falla, se propaga: crear una preferencia nueva sin saber si
+    // ya había una pendiente puede llevar a dos checkouts para el mismo lugar.
+    const pendiente = await this.intenciones.obtenerPendientePorPostulacion(postulacionId, ahora)
+    if (
+      pendiente &&
+      pendiente.preferenceId !== null &&
+      pendiente.initPoint !== null &&
+      pendiente.montoCentavos === montoCentavos
+    ) {
+      return {
+        externalId: pendiente.externalId,
+        preferenceId: pendiente.preferenceId,
+        initPoint: pendiente.initPoint,
+        sandboxInitPoint: pendiente.sandboxInitPoint ?? undefined,
       }
-    } catch {
-      // Si la lectura falla, se sigue con una intención nueva.
     }
 
     return null

@@ -4,6 +4,7 @@ import { DOCENTE, EQUIPO } from '@/lib/landing/datos'
 import { AvatarPersona } from '@/components/landing/avatar-persona'
 import { EquipoApilado } from '@/components/landing/equipo-apilado'
 import { Revelado } from '@/components/landing/revelado'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Sobre nosotros',
@@ -35,10 +36,12 @@ export default function Nosotros() {
             </p>
           </div>
           <div className='hero__marca' aria-hidden='true'>
-            <img
+            <Image
               src='/landing/img/grupo_avatars_sin_fondo.webp'
               alt=''
               className='hero__marca-imagen'
+              width={300}
+              height={300}
             />
           </div>
         </div>
@@ -70,44 +73,65 @@ export default function Nosotros() {
                   {persona.github !== '' ||
                   persona.linkedin !== '' ||
                   persona.portfolio !== '' ? (
-                    <p className='persona__links'>
+                    <div className='persona__links'>
                       {persona.github !== '' ? (
-                        <p className='pill'>
+                        <span className='pill'>
                           <a
                             className='enlace'
                             href={persona.github}
                             target='_blank'
                             rel='noopener'
                           >
+                            <Image
+                              src='/landing/img/github.svg'
+                              alt=''
+                              aria-hidden='true'
+                              width='16'
+                              height='16'
+                            />
                             GitHub
                           </a>
-                        </p>
+                        </span>
                       ) : null}
                       {persona.linkedin !== '' ? (
-                        <p className='pill'>
+                        <span className='pill'>
                           <a
                             className='enlace'
                             href={persona.linkedin}
                             target='_blank'
                             rel='noopener'
                           >
+                            <Image
+                              src='/landing/img/linkedin.svg'
+                              alt=''
+                              aria-hidden='true'
+                              width='16'
+                              height='16'
+                            />
                             LinkedIn
                           </a>
-                        </p>
+                        </span>
                       ) : null}
                       {persona.portfolio !== '' ? (
-                        <p className='pill'>
+                        <span className='pill'>
                           <a
                             className='enlace'
                             href={persona.portfolio}
                             target='_blank'
                             rel='noopener'
                           >
+                            <Image
+                              src='/landing/img/portfolio.svg'
+                              alt=''
+                              aria-hidden='true'
+                              width='16'
+                              height='16'
+                            />
                             Portfolio
                           </a>
-                        </p>
+                        </span>
                       ) : null}
-                    </p>
+                    </div>
                   ) : null}
                   {persona.resumen !== '' ? (
                     <p className='persona__resumen persona__resumen--amplio'>
@@ -121,7 +145,7 @@ export default function Nosotros() {
                   </p>
                   {persona.tecnologias.length > 0 ? (
                     <ul className='chips' aria-label='Tecnologías'>
-                      {persona.tecnologias.map((tecnologia) => (
+                      {[...new Set(persona.tecnologias)].map((tecnologia) => (
                         <li key={tecnologia}>{tecnologia}</li>
                       ))}
                     </ul>
@@ -141,16 +165,17 @@ export default function Nosotros() {
           <div className='split__intro reveal reveal--izq'>
             <h2 id='contexto-titulo'>Un proyecto real</h2>
             <p>
-              Este es el Trabajo Final Integrador de la Práctica Profesional
-              Supervisada 2026 de la UTN Facultad Regional Haedo. Docente:{' '}
-              {DOCENTE}.
+              Este desarrollo corresponde al Trabajo Final Integrador de la
+              Práctica Profesional Supervisada (2026) para la UTN Facultad
+              Regional Haedo, bajo la supervisión de la {DOCENTE}.
             </p>
           </div>
           <div className='texto-largo reveal'>
             <p>
-              Partimos de entrevistas con quienes gestionan el ingreso,
-              definimos las reglas del negocio y las pantallas, y las llevamos a
-              un sistema pensado para que la Facultad lo use.
+              A partir de entrevistas con los responsables del área de ingreso,
+              relevamos las necesidades operativas, definimos las reglas de
+              negocio y diseñamos una solución integral orientada a optimizar la
+              gestión institucional de la Facultad.
             </p>
             <p>
               <Link className='enlace' href='/contacto'>

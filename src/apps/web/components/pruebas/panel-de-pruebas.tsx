@@ -1100,10 +1100,10 @@ export function PanelDePruebas() {
               Restablecer contraseña (solo Secretaría/Dirección)
             </p>
             <p className="text-sm text-muted-foreground">
-              Deja la contraseña de la cuenta en la inicial: nombre + DNI, sin acentos, espacios
-              ni puntos (por ejemplo <code>ana30123456</code>). No pide la anterior ni manda mail.
-              Una Secretaría no puede restablecer la contraseña de Dirección ni de otra Secretaría.
-              La respuesta trae la contraseña temporal para dictarla en la mesa de entrada.
+              Deja una contraseña temporal aleatoria (por ejemplo <code>Temporal-7-Aa1!</code>). No
+              pide la anterior ni manda mail. Una Secretaría no puede restablecer la contraseña de
+              Dirección ni de otra Secretaría. La respuesta trae la contraseña temporal una sola vez
+              para dictarla en la mesa de entrada.
             </p>
             <div className="mt-3 flex flex-wrap items-end gap-2">
               <div className="min-w-64 flex-1">

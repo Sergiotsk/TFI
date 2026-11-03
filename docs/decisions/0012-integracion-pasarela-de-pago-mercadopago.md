@@ -1,9 +1,18 @@
-# ADR-0011: Integración de pasarela de pago con MercadoPago
+# ADR-0012: Integración de pasarela de pago con MercadoPago
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-10-23
 - **Autores:** Equipo TFI
-- **Relacionado:** ADR-0005 (Pagos, cargas e informe), FR-011, FR-012–FR-014, arquitectura hexagonal
+- **Relacionado:** ADR-0005 (Pagos, cargas e informe), FR-011, FR-012–FR-014, arquitectura hexagonal,
+  constitución 1.1.0 (Principio V)
+
+## Alcance de la excepción
+
+Mercado Pago **no reemplaza a Pagos360 como pasarela de producción institucional**. Se acepta como
+excepción temporal para la demo/MVP, mientras se valida el circuito completo de pago online. La
+excepción se activa solo con `PAGOS_PASARELA=mercadopago`, vive detrás del puerto `PasarelaDePago` y
+debe revisarse antes de la puesta en producción. Si la institución no autoriza Mercado Pago para
+producción, se cambia el adaptador por Pagos360 sin tocar dominio ni casos de uso.
 
 ## Contexto
 
@@ -49,7 +58,11 @@ interface PasarelaDePago {
 
 Casos de uso:
 - `IniciarPagoConPasarelaUseCase`: crea/obtiene `intencion_de_pago` PENDIENTE, crea preferencia en MP y devuelve `init_point`.
-- `ProcesarWebhookMercadoPagoUseCase`: procesa notificación, consulta el pago a MP si es necesario, es idempotente, crea/actualiza registro en `pagos` con `proveedor = 'MERCADOPAGO'` y `estado = 'ACREDITADO'` cuando corresponda.
+- `ProcesarWebhookMercadoPagoUseCase`: procesa la notificación, consulta el pago a MP, imputa el
+  pago con `evaluarPago` y lo persiste con la RPC `acreditar_pago` (la misma del informe manual) con
+  `proveedor = 'MERCADOPAGO'`. Registra **todos** los pagos aprobados: `ACREDITADO` si confirma la
+  vacante, `A_DECIDIR` si queda para Dirección y `NO_IMPUTADO` si es duplicado, monto insuficiente o
+  referencia desconocida. Así ningún pago cobrado se pierde aunque no acredite la vacante.
 
 ### Infraestructura
 `packages/infrastructure/pasarela/mercadopago/mercadopago-adapter.ts` implementa el puerto. Usa `fetch` contra la API REST de MercadoPago. Mapeo de estados MP -> nuestro modelo.

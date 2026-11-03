@@ -16,6 +16,7 @@ import {
   PERFIL_SYSADMIN_UTN_HAEDO,
   RelojDeSistema,
   GeneradorDeIdsCrypto,
+  GeneradorDeContrasenasCrypto,
   RepositorioDeIntencionesDePagoSupabase,
 } from '@tfi/infrastructure'
 import {
@@ -57,8 +58,10 @@ import {
   DecidirPagoExcepcionalUseCase,
   ListarCasosADecidirUseCase,
   IniciarPagoConPasarelaUseCase,
+  ProcesarWebhookMercadoPagoUseCase,
 } from '@tfi/application'
 import { urlBaseDeLaApp, urlDeApp } from '@/lib/url-de-app'
+import { crearClienteServiceRole } from '@/lib/supabase/service-role'
 
 // La raíz de composición: el único lugar donde se decide qué implementación se
 // usa para cada puerto. Se arma por request porque el cliente de Supabase
@@ -97,7 +100,7 @@ export function crearDependencias(supabase: SupabaseClient) {
       repoPeriodos,
       pasarela,
       reloj,
-      () => `int_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+      () => `int_${generadorDeIds.nuevo()}`,
       () => ({
         backUrls: {
           success: urlDeApp(appUrl, 'pagos/retorno?resultado=success'),
@@ -212,10 +215,34 @@ export function crearDependencias(supabase: SupabaseClient) {
 
 export function crearDependenciasSinSesion() {
   const habilitarPasarela = process.env.PAGOS_PASARELA === 'mercadopago'
-  if (!habilitarPasarela || !process.env.MP_ACCESS_TOKEN) {
+  const accessToken = process.env.MP_ACCESS_TOKEN
+  if (!habilitarPasarela || !accessToken) {
     return { procesarWebhookMercadoPago: undefined }
   }
-  return { procesarWebhookMercadoPago: undefined }
+
+  // El webhook no tiene sesión: usa la service role key solo para este
+  // endpoint. La RPC acreditar_pago reconoce ese rol y aplica las mismas
+  // reglas que el informe.
+  const supabase = crearClienteServiceRole()
+  const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
+  const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)
+  const repoPeriodos = new RepositorioDePeriodosSupabase(supabase)
+  const registroDePagos = new RegistroDePagosSupabase(supabase)
+  const intenciones = new RepositorioDeIntencionesDePagoSupabase(supabase)
+  const pasarela = new MercadoPagoAdapter({ accessToken })
+  const reloj = new RelojDeSistema()
+
+  return {
+    procesarWebhookMercadoPago: new ProcesarWebhookMercadoPagoUseCase(
+      repoPostulaciones,
+      repoPeriodos,
+      repoPerfiles,
+      registroDePagos,
+      pasarela,
+      reloj,
+      intenciones,
+    ),
+  }
 }
 
 export type Dependencias = ReturnType<typeof crearDependencias>
@@ -235,6 +262,7 @@ export function crearDependenciasDeAdministracion(clienteAdmin: SupabaseClient) 
     restablecerContrasena: new RestablecerContrasenaUseCase(
       new ServicioDeAdministracionDeUsuariosSupabase(clienteAdmin),
       repoPerfiles,
+      new GeneradorDeContrasenasCrypto(),
     ),
   }
 }

@@ -26,6 +26,7 @@ qué consecuencias trae.
 | [0009](0009-acciones-manuales-del-personal.md) | Acciones manuales del personal sobre Postulaciones y perfiles | Aceptado |
 | [0010](0010-documentacion-en-bucket-privado.md) | Circuito de documentación sobre un bucket privado | Aceptado |
 | [0011](0011-lector-xlsx-y-filas-ignoradas.md) | Lector XLSX del informe de pagos y filas que la admisión ignora | Propuesto |
+| [0012](0012-integracion-pasarela-de-pago-mercadopago.md) | Integración de pasarela de pago con Mercado Pago (excepción temporal de demo) | Aceptado |
 
 ## Plantilla
 

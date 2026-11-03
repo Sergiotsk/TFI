@@ -1,5 +1,5 @@
 -- ============================================================================
--- Integración MercadoPago (ADR-0011)
+-- Integración MercadoPago (ADR-0012)
 --
 -- - Agrega MERCADOPAGO al enum proveedor_pago (mantiene MANUAL, INFORME_SYSADMIN, PAGOS360)
 -- - Crea public.intenciones_de_pago para idempotencia de webhook/redirección

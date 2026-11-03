@@ -67,7 +67,8 @@ export {
   ROLES_QUE_RESTABLECEN_CONTRASENAS,
 } from './casos-de-uso/autenticacion/restablecer-contrasena'
 export type { ResultadoDeRestablecimientoDeContrasena } from './casos-de-uso/autenticacion/restablecer-contrasena'
-export { contrasenaInicialDe } from './casos-de-uso/autenticacion/contrasena-inicial'
+export type { GeneradorDeContrasenas } from './puertos/generador-de-contrasenas/puerto'
+export { GeneradorDeContrasenasFake } from './puertos/generador-de-contrasenas/fake'
 export {
   NoAutorizado,
   NoEncontrado,

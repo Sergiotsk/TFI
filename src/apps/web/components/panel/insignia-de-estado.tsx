@@ -52,6 +52,7 @@ export const motivosDeNoImputado: Record<MotivoNoImputado, string> = {
   AMBIGUA: 'El DNI coincide con más de una postulación',
   DNI_NO_COINCIDE: 'El DNI no coincide con el número',
   MONTO_INSUFICIENTE: 'Monto insuficiente',
+  MONTO_INCORRECTO: 'Monto o moneda incorrectos',
   YA_TIENE_PAGO: 'La postulación ya tiene un pago',
   SIN_PAGO_INICIADO: 'La postulación no inició el pago',
 }
