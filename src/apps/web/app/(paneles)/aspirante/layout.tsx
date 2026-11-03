@@ -38,7 +38,7 @@ function mapearEstadoAPaso(estado?: string): 1 | 2 | 3 | 4 {
 
 export default async function LayoutDelAspirante({ children }: { children: ReactNode }) {
   const supabase = await crearCliente()
-  const { consultarPerfilPropio, consultarPostulacion } = crearDependencias(supabase)
+  const { consultarPerfilPropio, consultarPostulacion, obtenerActorUseCase } = crearDependencias(supabase)
   const perfil = await consultarPerfilPropio.ejecutar()
 
   if (!perfil) {
@@ -48,15 +48,17 @@ export default async function LayoutDelAspirante({ children }: { children: React
     redirect(PANEL_DE_ROL[perfil.rol as keyof typeof PANEL_DE_ROL])
   }
 
+  // listarMias pide el Actor (perfilId, rol, institucionId), no el Perfil: lo arma ObtenerActor.
+  // Si la consulta falla, el stepper arranca en el paso 1 en vez de tirar abajo todo el panel.
   let pasoActual: 1 | 2 | 3 | 4 = 1
-  try {
-    // Si tu caso de uso no lleva parámetros:
-    // const propias = await consultarPostulacion.listarMias()
-    // Si espera el actor autenticado, pasamos el perfil:
-    const propias = await (consultarPostulacion.listarMias as any)(perfil)
-    pasoActual = mapearEstadoAPaso(propias[0]?.estado)
-  } catch {
-    pasoActual = 1
+  const sesion = await obtenerActorUseCase.ejecutar()
+  if (sesion.resultado === 'AUTENTICADO') {
+    try {
+      const propias = await consultarPostulacion.listarMias(sesion.actor)
+      pasoActual = mapearEstadoAPaso(propias[0]?.estado)
+    } catch {
+      pasoActual = 1
+    }
   }
 
   const dniFormateado = perfil.dni
