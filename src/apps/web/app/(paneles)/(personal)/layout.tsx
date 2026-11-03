@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { BarraLateral, type ContadoresDeMenu } from '@/components/panel/barra-lateral'
+import { MigaDelPanel } from '@/components/panel/miga-del-panel'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { crearDependencias } from '@/composition-root'
 import { esDelPersonal, PANEL_DE_ROL } from '@/config/paneles'
@@ -48,8 +49,10 @@ export default async function LayoutDelPersonal({ children }: { children: ReactN
         contadores={contadores}
       />
       <SidebarInset>
-        <div className="flex h-12 items-center border-b border-border bg-card px-4">
+        <div className="flex h-13 items-center gap-3 border-b border-border bg-card px-4">
           <SidebarTrigger className="-ml-1" />
+          <span aria-hidden="true" className="h-4 w-px bg-border" />
+          <MigaDelPanel rol={perfil.rol} />
         </div>
         {children}
       </SidebarInset>

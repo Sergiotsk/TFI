@@ -66,9 +66,9 @@ import { crearClienteServiceRole } from '@/lib/supabase/service-role'
 // usa para cada puerto. Se arma por request porque el cliente de Supabase
 // lleva las cookies de la sesión (Next.js).
 export function crearDependencias(supabase: SupabaseClient) {
+  const appUrl = urlBaseDeLaApp()
   // La URL de la app se inyecta al adaptador: es configuración de la raíz de
   // composición, no algo que el adaptador lea del entorno por su cuenta.
-  const appUrl = urlBaseDeLaApp()
   const auth = new ServicioDeAutenticacionSupabase(supabase, appUrl)
   const repoPerfiles = new RepositorioDePerfilesSupabase(supabase)
   const repoPostulaciones = new RepositorioDePostulacionesSupabase(supabase)

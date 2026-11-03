@@ -1,5 +1,8 @@
-﻿import { resolverEstadoDeRetorno } from './estado'
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
+import { resolverEstadoDeRetorno } from './estado'
 import type { EstadoDeRetorno, ParametrosDeRetorno } from './estado'
+import { RedireccionAlPanel } from './redireccion-al-panel'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +27,10 @@ export default async function PagosRetornoPage({
       <p className="text-sm text-muted-foreground">
         El sistema acredita el pago automáticamente cuando MercadoPago lo confirma.
       </p>
+      <Link href="/aspirante/postulacion" className={buttonVariants()}>
+        Volver a mi postulación
+      </Link>
+      <RedireccionAlPanel />
     </main>
   )
 }
