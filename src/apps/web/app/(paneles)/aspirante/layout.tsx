@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Public_Sans } from 'next/font/google'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
@@ -19,7 +20,7 @@ export default async function LayoutDelAspirante({ children }: { children: React
     redirect('/panel')
   }
   if (perfil.rol !== 'ASPIRANTE') {
-    redirect(PANEL_DE_ROL[perfil.rol])
+    redirect(PANEL_DE_ROL[perfil.rol as keyof typeof PANEL_DE_ROL])
   }
 
   const dniFormateado = perfil.dni

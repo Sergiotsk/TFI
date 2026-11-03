@@ -40,8 +40,9 @@ negocio: **pago acreditado = vacante confirmada**; la documentación se revisa d
 - **Lenguaje ubicuo**: la entidad es `Postulación`. No usar "Legajo" (es un concepto de SysAcad).
 - **Integración con la facultad solo por archivo**: nunca leer ni escribir en las bases de SysAdmin
   o SysAcad.
-- **Mercado Pago está prohibido** por la institución. El cobro digital va detrás del puerto
-  `PasarelaDePago`.
+- **Mercado Pago está prohibido en producción institucional**. Se admite solo como excepción
+  temporal para la demo/MVP, con `PAGOS_PASARELA=mercadopago` y detrás del puerto `PasarelaDePago`.
+  La pasarela prevista para producción sigue siendo Pagos360 (constitución 1.1.0, ADR-0012).
 - **Fuera del MVP**: OCR, LLM para feedback, integración directa con SysAcad, mails automáticos al
   pagador. No agregarlos sin un ADR.
 - **Seguridad**: nunca commitear secretos ni `.env` (usar `.env.example`). La autorización por rol

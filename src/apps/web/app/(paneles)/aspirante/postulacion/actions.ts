@@ -31,6 +31,18 @@ export async function crearPostulacionAccion(
   return estado
 }
 
+// Demo: desde Requisitos, aceptar las condiciones crea la Postulación y vuelve al panel, donde sigue el pago.
+// El redirect va fuera de resolverAccion porque Next lo implementa lanzando una excepción.
+export async function aceptarCondicionesAccion(
+  anterior: EstadoDeAccion,
+  datos: FormData,
+): Promise<EstadoDeAccion> {
+  const estado = await crearPostulacionAccion(anterior, datos)
+  if (estado?.ok) redirect(RUTA)
+
+  return estado
+}
+
 export async function iniciarPagoAccion(
   _anterior: EstadoDeAccion,
   datos: FormData,

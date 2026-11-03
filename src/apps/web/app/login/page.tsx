@@ -22,7 +22,7 @@ export const metadata = {
 export default async function PaginaLogin({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>
+  searchParams: Promise<{ redirect?: string; error?: string }>
 }) {
   if (await haySesion()) {
     redirect('/panel')
@@ -30,6 +30,7 @@ export default async function PaginaLogin({
 
   const params = await searchParams
   const destino = destinoSeguro(params.redirect, '/panel')
+  const enlaceVencido = params.error === 'enlace'
 
   return (
     // Contenedor 1: Activa el contexto de la institución
@@ -79,7 +80,26 @@ export default async function PaginaLogin({
             <div className="lg:col-span-6 flex justify-center lg:justify-end">
               <div className="w-full max-w-md bg-card shadow-(--sombra-tarjeta) p-8">
                 <MarcoAuth subtitulo="Ingresá con tu email y contraseña para acceder a tu legajo.">
+                  {enlaceVencido ? (
+                    <p
+                      role="alert"
+                      className="mb-4 border-l-4 border-destructive bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive"
+                    >
+                      El enlace venció o ya se usó. Probá de nuevo.
+                    </p>
+                  ) : null}
+
                   <FormularioLogin destino={destino} />
+
+                  <p className="mt-4 text-center text-xs text-muted-foreground">
+                    <Link
+                      href="/recuperar-contrasena"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Olvidé mi contraseña
+                    </Link>
+                  </p>
+
                   <div className="mt-6 pt-4 border-t border-border text-center text-xs text-muted-foreground">
                     ¿Todavía no iniciaste tu postulación?{' '}
                     <Link
