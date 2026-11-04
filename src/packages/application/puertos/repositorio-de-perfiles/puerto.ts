@@ -22,6 +22,12 @@ export interface FiltrosDePerfil {
 export interface RepositorioDePerfiles {
   listar(filtros: FiltrosDePerfil, paginacion: Paginacion): Promise<Pagina<Perfil>>
   obtenerPorId(id: string): Promise<Perfil | null>
+  /**
+   * Los perfiles de varios ids en una sola lectura, para no consultar uno por
+   * fila al armar un listado. Omite los que no existen o RLS no deja ver, y no
+   * repite perfiles aunque un id venga dos veces. El orden no está garantizado.
+   */
+  obtenerVarios(ids: readonly string[]): Promise<Perfil[]>
   buscarPorDni(dni: string): Promise<Perfil | null>
   guardar(perfil: Perfil): Promise<void>
 }

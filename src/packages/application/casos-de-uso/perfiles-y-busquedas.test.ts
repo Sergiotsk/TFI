@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { Perfil } from '@tfi/domain'
 import type { Actor } from './actor'
 import { ActualizarPerfilPropioUseCase } from './actualizar-perfil-propio'
 import { BuscarPostulacionesPorDniUseCase } from './buscar-postulaciones-por-dni'
@@ -124,10 +125,42 @@ describe('BuscarPostulacionesPorDni', () => {
       dni: '40999999',
     })
 
+    // El fake de perfiles viene sembrado con ids '1' a '4': aspirante-1 se
+    // agrega para que la búsqueda tenga a quién mostrar.
+    const perfiles = new RepositorioDePerfilesFake()
+    perfiles.agregar(
+      new Perfil(
+        'aspirante-1',
+        'marta@example.com',
+        'Marta',
+        'Sosa',
+        '30123456',
+        '27301234563',
+        new Date('1985-02-01'),
+        'F',
+        null,
+        null,
+        'ASPIRANTE',
+        INSTITUCION,
+        true,
+        AHORA,
+        AHORA,
+      ),
+    )
+
     return {
-      caso: new BuscarPostulacionesPorDniUseCase(postulaciones, new RelojFijo(AHORA)),
+      caso: new BuscarPostulacionesPorDniUseCase(postulaciones, perfiles, new RelojFijo(AHORA)),
     }
   }
+
+  it('acompaña cada resultado con el nombre, el apellido y el DNI del aspirante', async () => {
+    const { caso } = armar()
+
+    const pagina = await caso.ejecutar(secretaria, '30123456')
+
+    expect(pagina.items.every((p) => p.aspirante?.nombre === 'Marta')).toBe(true)
+    expect(pagina.items[0]?.aspirante).toEqual({ nombre: 'Marta', apellido: 'Sosa', dni: '30123456' })
+  })
 
   it('devuelve todo el historial de la persona, en cualquier estado', async () => {
     const { caso } = armar()
