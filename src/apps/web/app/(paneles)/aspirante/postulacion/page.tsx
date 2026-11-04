@@ -115,10 +115,10 @@ export default async function PostulacionDelAspirantePage() {
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p>
                   <strong className="text-foreground">En ventanilla:</strong> pagá en la caja de la facultad antes de
-                  la fecha límite, con tu DNI y tu número de postulación{' '}
-                  <strong className="font-mono text-foreground">Nº {postulacion.numero}</strong>. Tesorería acredita
-                  los pagos de la caja con el informe del día, así que la vacante confirmada puede tardar hasta un día
-                  hábil en verse acá.
+                  la fecha límite y <strong className="text-foreground">presentá tu DNI</strong>: con ese dato
+                  Tesorería encuentra tu pago en el informe del día. Tené a mano tu número de postulación{' '}
+                  <strong className="font-mono text-foreground">Nº {postulacion.numero}</strong> por si te lo piden. La
+                  vacante confirmada puede tardar hasta un día hábil en verse acá.
                 </p>
                 <p>
                   <strong className="text-foreground">Con Mercado Pago:</strong> si ya pagaste, en unos instantes vas
