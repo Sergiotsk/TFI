@@ -8,8 +8,9 @@ import type {
 } from '../puertos/repositorio-de-postulaciones/puerto'
 import type { Actor } from './actor'
 import { exigirRol } from './actor'
-import { aPostulacionConsultada } from './postulacion-consultada'
-import type { PostulacionConsultada } from './postulacion-consultada'
+import type { RepositorioDePerfiles } from '../puertos/repositorio-de-perfiles/puerto'
+import { aPostulacionesDelPersonal } from './postulacion-del-personal'
+import type { PostulacionDelPersonal } from './postulacion-del-personal'
 
 /**
  * Lectura del personal: lista las Postulaciones para hacer seguimiento.
@@ -25,6 +26,7 @@ import type { PostulacionConsultada } from './postulacion-consultada'
 export class ListarPostulacionesUseCase {
   constructor(
     private readonly postulaciones: RepositorioDePostulaciones,
+    private readonly perfiles: RepositorioDePerfiles,
     private readonly reloj: Reloj,
   ) {}
 
@@ -32,7 +34,7 @@ export class ListarPostulacionesUseCase {
     actor: Actor,
     filtros: FiltrosDePostulacion = {},
     paginacion?: Partial<Paginacion>,
-  ): Promise<Pagina<PostulacionConsultada>> {
+  ): Promise<Pagina<PostulacionDelPersonal>> {
     exigirRol(actor, ...ROLES_DEL_PERSONAL)
 
     const ahora = this.reloj.ahora()
@@ -40,7 +42,7 @@ export class ListarPostulacionesUseCase {
     const pagina = await this.postulaciones.listar(filtros, normalizada)
 
     return armarPagina(
-      pagina.items.map((postulacion) => aPostulacionConsultada(postulacion, ahora)),
+      await aPostulacionesDelPersonal(pagina.items, this.perfiles, ahora),
       pagina.total,
       normalizada,
     )

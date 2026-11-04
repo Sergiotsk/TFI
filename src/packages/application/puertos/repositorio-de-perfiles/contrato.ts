@@ -13,6 +13,11 @@ function idUnico(): string {
   return `perfil-${Date.now().toString(36)}-${contador}`
 }
 
+// UUIDs válidos que nunca se asignan: en la base real la columna id es uuid, y
+// un id con otro formato haría fallar la consulta en vez de no encontrar nada.
+const ID_INEXISTENTE_1 = 'ffffffff-ffff-4fff-bfff-fffffffffff1'
+const ID_INEXISTENTE_2 = 'ffffffff-ffff-4fff-bfff-fffffffffff2'
+
 function perfilDePrueba(id: string, rol: Rol): Perfil {
   dniContador += 1
   const dni = String(dniContador)
@@ -72,6 +77,30 @@ export function probarContratoRepositorioDePerfiles(
       const repositorio = crearRepositorio()
       const perfil = await repositorio.obtenerPorId(idUnico())
       expect(perfil).toBeNull()
+    })
+
+    it('obtenerVarios() devuelve una lista vacía si no se piden ids', async () => {
+      const repositorio = crearRepositorio()
+      expect(await repositorio.obtenerVarios([])).toEqual([])
+    })
+
+    it('obtenerVarios() omite los ids que no existen', async () => {
+      const repositorio = crearRepositorio()
+      expect(await repositorio.obtenerVarios([ID_INEXISTENTE_1, ID_INEXISTENTE_2])).toEqual([])
+    })
+
+    it('obtenerVarios() devuelve cada perfil existente una sola vez', async () => {
+      const repositorio = crearRepositorio()
+      const { items } = await repositorio.listar({}, PAGINACION_POR_DEFECTO)
+      const existentes = items.slice(0, 2).map((perfil) => perfil.id)
+
+      const perfiles = await repositorio.obtenerVarios([
+        ...existentes,
+        ...existentes,
+        ID_INEXISTENTE_1,
+      ])
+
+      expect(perfiles.map((perfil) => perfil.id).sort()).toEqual([...existentes].sort())
     })
 
     it('buscarPorDni() devuelve null cuando no existe', async () => {

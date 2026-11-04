@@ -92,6 +92,11 @@ export class RepositorioDePerfilesFake implements RepositorioDePerfiles {
     return perfil ?? null
   }
 
+  async obtenerVarios(ids: readonly string[]): Promise<Perfil[]> {
+    const buscados = new Set(ids)
+    return this.perfiles.filter((perfil) => buscados.has(perfil.id))
+  }
+
   async buscarPorDni(dni: string): Promise<Perfil | null> {
     return this.perfiles.find((perfil) => perfil.dni === dni) ?? null
   }

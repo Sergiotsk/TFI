@@ -106,6 +106,10 @@ export type {
 } from './puertos/acciones-del-personal/puerto'
 export { AccionesDelPersonalFake } from './puertos/acciones-del-personal/fake'
 export type { PostulacionConsultada } from './casos-de-uso/postulacion-consultada'
+export type {
+  DatosDelAspirante,
+  PostulacionDelPersonal,
+} from './casos-de-uso/postulacion-del-personal'
 export type { Reloj } from './puertos/reloj/puerto'
 export { RelojFijo } from './puertos/reloj/fake'
 export type { GeneradorDeIds } from './puertos/generador-de-ids/puerto'

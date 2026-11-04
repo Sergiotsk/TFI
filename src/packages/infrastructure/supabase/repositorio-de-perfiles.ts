@@ -77,6 +77,15 @@ export class RepositorioDePerfilesSupabase implements RepositorioDePerfiles {
     return mapearPerfil(data as FilaPerfil)
   }
 
+  async obtenerVarios(ids: readonly string[]): Promise<Perfil[]> {
+    const unicos = [...new Set(ids)]
+    if (unicos.length === 0) return []
+
+    const { data, error } = await this.supabase.from('perfiles').select('*').in('id', unicos)
+    if (error || !data) return []
+    return (data as FilaPerfil[]).map(mapearPerfil)
+  }
+
   async buscarPorDni(dni: string): Promise<Perfil | null> {
     const { data, error } = await this.supabase
       .from('perfiles')
