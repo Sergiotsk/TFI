@@ -184,7 +184,8 @@ export default async function PostulacionesDelPersonalPage({
                           <InsigniaDePostulacion estado={postulacion.estado} />
                         </td>
                         <td className="px-4 py-3">
-                          {postulacion.venceEl ? (
+                          {/* El vencimiento solo importa mientras falta pagar: una vacante ya pagada no vence. */}
+                          {operable && postulacion.venceEl ? (
                             <span className="flex flex-col">
                               <span>{formatearFecha(postulacion.venceEl)}</span>
                               {vencimiento ? (
