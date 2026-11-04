@@ -1,6 +1,8 @@
 # Supabase
 .branches
 .temp
+# Consultas que guarda Supabase Studio: son locales y pueden tener datos de prueba o personales
+snippets/
 
 # dotenvx
 .env.keys
