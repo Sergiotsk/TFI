@@ -22,7 +22,11 @@ export async function crearPostulacionAccion(
       return 'Postulación creada.'
     }),
   )
-  revalidatePath(RUTA)
+
+  if (estado && estado.ok) {
+    revalidatePath(RUTA)
+    redirect('/aspirante/postulacion/requisitos')
+  }
 
   return estado
 }
@@ -54,6 +58,8 @@ export async function iniciarPagoAccion(
       return 'Pago iniciado.'
     }),
   )
+
+  // Se queda en el panel: ahí se ven la fecha límite y qué llevar a la caja.
   revalidatePath(RUTA)
 
   return estado

@@ -21,3 +21,92 @@
   --sidebar-accent-foreground: #003f6e;
   --sidebar-ring: #005a9c;
 }
+
+/*
+ * Panel del aspirante con el sistema de diseño "UTN Haedo" (tokens del kit de frh.utn.edu.ar): azul petróleo de
+ * marca, texto gris oscuro y esquinas rectas. Se acota con data-panel="aspirante", que ponen aspirante/layout.tsx y
+ * aspirante/inscripcion/layout.tsx: login y registro siguen con globals.css. Va después para ganarle al :root:has()
+ * de arriba, que tiene la misma especificidad.
+ */
+[data-institucion='FRH'] [data-panel='aspirante'],
+:root:has([data-institucion='FRH'] [data-panel='aspirante']) {
+  --background: #f3f7f8;
+  --foreground: #454545;
+  --card: #ffffff;
+  --card-foreground: #454545;
+  --popover: #ffffff;
+  --popover-foreground: #454545;
+  --primary: #00455c;
+  --primary-foreground: #ffffff;
+  --secondary: #e6f0f3;
+  --secondary-foreground: #00455c;
+  --muted: #eef3f5;
+  --muted-foreground: #454545;
+  --accent: #e6f0f3;
+  --accent-foreground: #00455c;
+  --destructive: #d1243c;
+  --border: #d8e2e6;
+  --input: #7d9fab;
+  --ring: #157feb;
+  /* El sitio es de esquinas rectas: botones, tarjetas e inputs sin redondeo. */
+  --radius: 0rem;
+
+  /* Paleta de señal del sitio: estados y categorías. Los textos encima están medidos (sistema "UTN Haedo"). */
+  --senal-verde: #8dcc3d;
+  --senal-ambar: #ffab00;
+  --senal-violeta: #b047b3;
+  --senal-rojo: #d1243c;
+  --senal-neutro: #eeeeee;
+  /* Cian de los gráficos: lo pendiente, al lado del azul petróleo de lo ya ocupado. */
+  --senal-cian: #00b8d5;
+
+  /* Las tarjetas no llevan borde: se despegan del fondo con esta sombra. */
+  --sombra-tarjeta: 0 0 10px 0 rgb(0 0 0 / 0.13);
+  /* Alto de la barra superior: el fondo temático arranca debajo. */
+  --alto-barra-superior: 58px;
+}
+
+/* La tipografía va solo en el div del panel: la variable de next/font la define la clase de ese mismo div. */
+[data-institucion='FRH'] [data-panel='aspirante'] {
+  --font-sans: var(--font-public-sans);
+}
+
+/*
+ * Botones del aspirante: 44 px de alto (el mínimo táctil del sistema) y el secundario blanco con borde de marca. Se
+ * pisan por data-variant y data-size: button.tsx lo comparten el login y el registro. Los de ícono quedan como están.
+ */
+[data-institucion='FRH'] [data-panel='aspirante'] [data-slot='button']:not([data-size^='icon']) {
+  min-height: 44px;
+  padding-inline: 16px;
+  font-size: 15px;
+}
+[data-institucion='FRH'] [data-panel='aspirante'] [data-slot='button'][data-variant='outline'] {
+  border-color: var(--primary);
+  background: var(--card);
+  color: var(--primary);
+}
+[data-institucion='FRH'] [data-panel='aspirante'] [data-slot='button'][data-variant='outline']:hover {
+  background: var(--accent);
+}
+
+/*
+ * Fondo del panel del aspirante, debajo de la barra superior blanca. Cuatro capas, de arriba hacia abajo: trazos
+ * inclinados en los colores de señal (el eco de los trazos de "HAEDO" en el logo), una trama de X y una grilla de
+ * puntos en azul petróleo al 9 %, sobre el color base. Las opacidades ya vienen bajas en los SVG: el fondo tiene que
+ * quedar sutil para que resalten las tarjetas blancas.
+ */
+[data-institucion='FRH'] [data-panel='aspirante'] {
+  background-color: var(--background);
+  background-image:
+    url('/instituciones/frh/fondo-trazos.svg'), url('/instituciones/frh/trama-x.svg'),
+    radial-gradient(rgb(0 69 92 / 0.09) 1px, transparent 1.5px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position:
+    right 0 top var(--alto-barra-superior),
+    0 0,
+    0 0;
+  background-size:
+    600px auto,
+    48px 48px,
+    24px 24px;
+}

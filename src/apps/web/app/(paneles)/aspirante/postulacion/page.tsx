@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { BotonPagarMercadoPago } from '@/components/panel/boton-pagar-mercado-pago'
 import { CorregirDocumento } from '@/components/panel/corregir-documento'
+import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { formatearFecha } from '@/components/panel/formato'
 import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { buttonVariants } from '@/components/ui/button'
 import { conActorDePanel } from '../../sesion-de-panel'
+import { iniciarPagoAccion } from './actions'
 import type { Documento, PeriodoDeIngreso } from '@tfi/domain'
 import type { PostulacionConsultada } from '@tfi/application'
 
@@ -37,7 +39,7 @@ export default async function PostulacionDelAspirantePage() {
   )
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div>
       <EncabezadoDePanel
         area="Aspirante"
         titulo="Mi postulación"
@@ -46,8 +48,8 @@ export default async function PostulacionDelAspirantePage() {
 
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         {postulaciones.length === 0 ? (
-          <section className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-xs">
-            <h2 className="text-base font-semibold">Todavía no tenés una postulación</h2>
+          <section className="space-y-4 bg-card p-6 shadow-(--sombra-tarjeta)">
+            <h2 className="text-base font-semibold text-foreground">Todavía no tenés una postulación</h2>
             {periodos.length === 0 ? (
               <p className="text-sm text-muted-foreground">No hay períodos de ingreso abiertos por ahora.</p>
             ) : (
@@ -55,10 +57,10 @@ export default async function PostulacionDelAspirantePage() {
                 {periodos.map((periodo: PeriodoDeIngreso) => (
                   <li
                     key={periodo.id}
-                    className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 border-b border-border pb-4 last:border-none sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <span className="block text-sm font-semibold">{periodo.nombre}</span>
+                      <span className="block text-sm font-semibold text-foreground">{periodo.nombre}</span>
                       <span className="block text-xs text-muted-foreground">
                         Cierra el {formatearFecha(periodo.cierraEl)}
                       </span>
@@ -79,74 +81,90 @@ export default async function PostulacionDelAspirantePage() {
         {postulaciones.map((postulacion: PostulacionConsultada) => (
           <section
             key={postulacion.id}
-            className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-xs"
+            className="space-y-6 bg-card p-6 shadow-(--sombra-tarjeta)"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="block text-xs font-medium text-muted-foreground">Número de postulación</span>
-                <span className="font-mono text-xl font-bold tracking-wider">Nº {postulacion.numero}</span>
+                <span className="font-mono text-xl font-bold tracking-wider text-primary">Nº {postulacion.numero}</span>
               </div>
               <InsigniaDePostulacion estado={postulacion.estado} />
             </div>
 
-            {/* El vencimiento se conserva después del pago (auditoría), pero al aspirante solo le sirve mientras
-                tiene que pagar o si el plazo ya se le pasó. */}
             {postulacion.venceEl &&
             (postulacion.estado === 'PAGO_PENDIENTE' || postulacion.estado === 'VENCIDO') ? (
               <div>
                 <span className="block text-xs font-medium text-muted-foreground">
                   {postulacion.estado === 'VENCIDO' ? 'El plazo para pagar venció el' : 'Fecha límite para pagar'}
                 </span>
-                <span className="text-base font-semibold">{formatearFecha(postulacion.venceEl)}</span>
+                <span className="text-base font-semibold text-foreground">{formatearFecha(postulacion.venceEl)}</span>
               </div>
             ) : null}
 
             {postulacion.aviso ? (
-              <p className="rounded-lg border border-secondary/30 bg-accent p-4 text-sm text-accent-foreground">
+              <p className="bg-accent p-4 text-sm text-accent-foreground">
                 {postulacion.aviso}
               </p>
             ) : null}
 
+            {/* La Postulación no guarda por qué medio eligió pagar: el texto cubre los dos. No se ofrece el botón
+                de MP acá: con el webhook demorado, quien ya pagó podría pagar dos veces. */}
             {postulacion.estado === 'PAGO_PENDIENTE' ? (
-              <p className="text-sm text-muted-foreground">
-                Estamos esperando la confirmación de Mercado Pago. Si ya pagaste, en unos instantes vas a ver tu
-                vacante confirmada acá.
-              </p>
-            ) : null}
-
-            {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
-              <div className="space-y-1 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
-                <p className="font-semibold">Tu pago fue acreditado y tu vacante está confirmada.</p>
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <p>
-                  Ahora tenés 10 días hábiles para cargar la documentación obligatoria. Si no la presentás en ese
-                  plazo, perdés la vacante.
+                  <strong className="text-foreground">En ventanilla:</strong> pagá en la caja de la facultad antes de
+                  la fecha límite y <strong className="text-foreground">presentá tu DNI</strong>: con ese dato
+                  Tesorería encuentra tu pago en el informe del día. Tené a mano tu número de postulación{' '}
+                  <strong className="font-mono text-foreground">Nº {postulacion.numero}</strong> por si te lo piden. La
+                  vacante confirmada puede tardar hasta un día hábil en verse acá.
+                </p>
+                <p>
+                  <strong className="text-foreground">Con Mercado Pago:</strong> si ya pagaste, en unos instantes vas
+                  a ver tu vacante confirmada acá.
                 </p>
               </div>
             ) : null}
 
+            {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
+              <div className="space-y-3">
+                <div className="space-y-1 border-l-4 border-[var(--senal-verde)] bg-accent p-4 text-sm text-foreground">
+                  <p className="font-bold">Tu pago fue acreditado y tu vacante está confirmada.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Ahora disponés de 10 días hábiles para presentar la totalidad de la documentación requerida.
+                  </p>
+                </div>
+                <Link
+                  href="/aspirante/postulacion/documentacion"
+                  className={buttonVariants({ size: 'lg' })}
+                >
+                  Cargar documentación
+                </Link>
+              </div>
+            ) : null}
+
             {postulacion.estado === 'ESPERANDO_DOCUMENTACION' ? (
-              <p className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+              <p className="border-l-4 border-primary bg-accent p-4 text-sm text-foreground">
                 Recibimos tu documentación. La Secretaría la va a revisar y vas a ver el resultado acá.
               </p>
             ) : null}
 
             {postulacion.estado === 'OBSERVADO' ? (
               (observados.get(postulacion.id) ?? []).length === 0 ? (
-                <p className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+                <p className="border-l-4 border-primary bg-accent p-4 text-sm text-foreground">
                   Recibimos tus correcciones. La Secretaría las va a revisar y vas a ver el resultado acá.
                 </p>
               ) : (
-                <div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-                  <p className="text-sm font-semibold text-destructive">
+                <div className="space-y-3 border-l-4 border-destructive bg-destructive/5 p-4">
+                  <p className="text-sm font-bold text-destructive">
                     La Secretaría observó documentación. Corregí estos documentos:
                   </p>
                   <ul className="space-y-4">
                     {(observados.get(postulacion.id) ?? []).map((documento) => (
                       <li key={documento.id} className="space-y-2">
-                        <span className="block text-sm font-medium">
+                        <span className="block text-sm font-semibold text-foreground">
                           {documento.tipo} · {documento.nombreArchivo}
                         </span>
-                        <span className="block text-sm text-muted-foreground">
+                        <span className="block text-xs text-muted-foreground">
                           Motivo: {documento.observaciones}
                         </span>
                         <CorregirDocumento
@@ -168,32 +186,36 @@ export default async function PostulacionDelAspirantePage() {
             ) : null}
 
             {postulacion.estado === 'DOCUMENTACION_VALIDADA' ? (
-              <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
-                <p className="font-semibold">Tu documentación fue validada. ¡Tu inscripción está completa!</p>
-                <p>
+              <div className="space-y-2 border-l-4 border-[var(--senal-verde)] bg-accent p-4 text-sm text-foreground">
+                <p className="font-bold">Tu documentación fue validada. ¡Tu inscripción está completa!</p>
+                <p className="text-xs text-muted-foreground">
                   En los próximos días, el personal de la UTN se va a comunicar con vos al correo electrónico que
                   registraste en este proceso para enviarte los datos de acceso al sistema de alumnos de la facultad.
                 </p>
               </div>
             ) : null}
 
-            {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
-              <Link
-                href="/aspirante/postulacion/documentacion"
-                className={buttonVariants({ size: 'lg' })}
-              >
-                Cargar documentación
-              </Link>
-            ) : null}
-
             {postulacion.estado === 'PREINSCRIPTO' || postulacion.estado === 'VENCIDO' ? (
               <div className="space-y-4">
-                <p className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-950">
+                <p className="border-l-4 border-[var(--senal-ambar)] bg-card shadow-(--sombra-tarjeta) p-4 text-sm text-foreground">
                   El pago es una <strong>seña que reserva tu vacante</strong>. Al iniciarlo tenés un plazo para
                   completarlo, que vas a ver acá; si vence, el cupo se libera. Con el pago acreditado, tenés 10 días
                   hábiles para cargar la documentación.
                 </p>
-                <BotonPagarMercadoPago postulacionId={postulacion.id} />
+                <p className="text-sm text-muted-foreground">
+                  Podés pagar en línea con Mercado Pago o en la caja de la facultad. Si vas a la caja, iniciá el
+                  pago acá antes: así arranca tu plazo y Tesorería puede imputar tu pago con el informe del día.
+                </p>
+                <div className="flex flex-wrap items-start gap-3">
+                  <BotonPagarMercadoPago postulacionId={postulacion.id} />
+                  <FormularioDeAccion
+                    accion={iniciarPagoAccion}
+                    ocultos={{ id: postulacion.id }}
+                    etiqueta="Pagar en ventanilla"
+                    variante="outline"
+                    tamano="lg"
+                  />
+                </div>
               </div>
             ) : null}
           </section>

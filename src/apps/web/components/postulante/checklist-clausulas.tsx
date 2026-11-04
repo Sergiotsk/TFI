@@ -7,7 +7,6 @@ import { aceptarCondicionesAccion } from '@/app/(paneles)/aspirante/postulacion/
 
 interface ChecklistClausulasProps {
   periodoId: string
-  /** El monto de la seña ya formateado, por ejemplo "$100.000,00". */
   monto: string
 }
 
@@ -45,7 +44,6 @@ function clausulasDe(monto: string) {
   ]
 }
 
-// Demo: al aceptar todas las cláusulas se crea la Postulación (aceptarCondicionesAccion) y se vuelve al panel.
 export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps) {
   const clausulas = clausulasDe(monto)
   const [seleccionados, setSeleccionados] = useState<number[]>([])
@@ -68,10 +66,10 @@ export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-xs">
+    <div className="bg-card shadow-(--sombra-tarjeta) p-6">
       <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
         <div>
-          <h3 className="font-semibold text-foreground text-base">
+          <h3 className="font-bold text-foreground text-base">
             Declaración jurada y conformidad del postulante
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -81,7 +79,7 @@ export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps
         <button
           type="button"
           onClick={handleMarcarTodos}
-          className="text-xs font-semibold text-primary hover:underline shrink-0 ml-3 cursor-pointer"
+          className="text-xs font-bold text-primary hover:underline shrink-0 ml-3 cursor-pointer"
         >
           {todosSeleccionados ? 'Desmarcar todos' : 'Marcar todos'}
         </button>
@@ -93,17 +91,20 @@ export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps
           return (
             <label
               key={clausula.id}
-              className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
-                checked ? 'bg-accent/30' : 'hover:bg-muted/50'
+              onClick={() => handleToggle(clausula.id)}
+              className={`flex items-start gap-3 p-3.5 border rounded-sm cursor-pointer select-none transition ${
+                checked
+                  ? 'bg-accent/40 border-primary text-foreground'
+                  : 'bg-card border-border hover:bg-muted/50 text-foreground/90'
               }`}
             >
               <input
                 type="checkbox"
                 checked={checked}
-                onChange={() => handleToggle(clausula.id)}
-                className="mt-0.5 w-4 h-4 text-primary rounded border-input focus:ring-primary"
+                onChange={() => {}}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input text-primary accent-primary cursor-pointer"
               />
-              <span className="text-xs text-foreground/80 leading-relaxed">
+              <span className="text-xs leading-relaxed font-normal">
                 {clausula.texto}
               </span>
             </label>
@@ -130,7 +131,7 @@ export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps
         </Button>
 
         {estado && !estado.ok ? (
-          <p role="alert" className="w-full text-xs text-destructive">
+          <p role="alert" className="w-full text-xs font-semibold text-destructive mt-2">
             {estado.mensaje}
           </p>
         ) : null}

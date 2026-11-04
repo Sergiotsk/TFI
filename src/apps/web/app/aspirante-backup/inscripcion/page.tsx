@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { createBrowserClient } from '@supabase/ssr'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { 
@@ -14,21 +15,25 @@ import {
   Lock, 
   ArrowRight, 
   Info,
-  PhoneCall
+  PhoneCall,
+  KeyRound
 } from 'lucide-react'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
-import { CargaDatosSchema, type CargaDatosInput } from '@/http/schemas/carga-datos.schema'
+import { CargaDatosSchema } from '@/http/schemas/carga-datos.schema'
 
 export default function InscripcionPage() {
   const router = useRouter()
-  const [errores, setErrores] = useState<Partial<Record<keyof CargaDatosInput, string>>>({})
+  const [errores, setErrores] = useState<Record<string, string | undefined>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorServidor, setErrorServidor] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
     email: '',
+    password: '',
+    confirmarPassword: '',
     dni: '',
     genero: '',
     telefono: '',
@@ -46,38 +51,95 @@ export default function InscripcionPage() {
       [name]: type === 'checkbox' ? checked : value,
     }))
 
-    if (errores[name as keyof CargaDatosInput]) {
+    if (errores[name]) {
       setErrores((prev) => ({ ...prev, [name]: undefined }))
     }
+    setErrorServidor(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setErrorServidor(null)
 
     const validacion = CargaDatosSchema.safeParse(formData)
+    const nuevosErrores: Record<string, string> = {}
 
     if (!validacion.success) {
-      const fieldErrors: Partial<Record<keyof CargaDatosInput, string>> = {}
       validacion.error.issues.forEach((err) => {
-        const campo = err.path[0] as keyof CargaDatosInput
-        fieldErrors[campo] = err.message
+        const campo = err.path[0] as string
+        nuevosErrores[campo] = err.message
       })
-      setErrores(fieldErrors)
+    }
+
+    if (!formData.password) {
+      nuevosErrores.password = 'Ingresá una contraseña'
+    } else if (formData.password.length < 6) {
+      nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres'
+    }
+
+    if (!formData.confirmarPassword) {
+      nuevosErrores.confirmarPassword = 'Confirmá tu contraseña'
+    } else if (formData.password !== formData.confirmarPassword) {
+      nuevosErrores.confirmarPassword = 'Las contraseñas no coinciden'
+    }
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErrores(nuevosErrores)
       setIsSubmitting(false)
       return
     }
+
     try {
-      // Sin id en la URL: la Postulación sale de la sesión (una activa por aspirante y período)
-      router.push('/aspirante/postulacion/requisitos')
-    } catch {
+      // Cliente de Supabase en el navegador
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321'
+      const supabaseAnonKey =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        ''
+
+      const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
+
+// Registrar la cuenta en auth.users cumpliendo los requisitos del trigger
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            nombre: formData.nombre,
+            apellido: formData.apellido,
+            dni: formData.dni,
+            cuil: formData.dni,
+            fecha_nacimiento: '2000-01-01',
+            sexo: formData.genero === 'Femenino' ? 'F' : (formData.genero === 'Masculino' ? 'M' : 'O'),
+            telefono: formData.telefono,
+            direccion: formData.direccion,
+          },
+        },
+      })
+      if (error) {
+        setErrorServidor(error.message)
+        setIsSubmitting(false)
+        return
+      }
+
+      // Cierra la sesión automática que crea Supabase al registrarse
+      await supabase.auth.signOut()
+
+      // Con la sesión cerrada, te manda al login a autenticarte manualmente
+      router.push(`/login?email=${encodeURIComponent(formData.email)}`)
+
+      // Con el usuario creado, redirige a login con el email ya cargado
+      router.push(`/login?email=${encodeURIComponent(formData.email)}`)
+    } catch (err) {
+      setErrorServidor(err instanceof Error ? err.message : 'Ocurrió un error al registrar la cuenta')
       setIsSubmitting(false)
     }
   }
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between text-foreground">
-      {/* Capa de Fondo Fija (Cubre toda la pantalla detrás del contenido) */}
+      {/* Capa de Fondo Fija */}
       <div className="fixed inset-0 -z-10 pointer-events-none select-none">
         <Image
           src="/fondo-utn.jpg"
@@ -86,7 +148,6 @@ export default function InscripcionPage() {
           priority
           className="object-cover object-center opacity-90"
         />
-        {/* Overlay tenue para mantener la nitidez y los colores de la foto */}
         <div className="absolute inset-0 bg-background/15" />
       </div>
 
@@ -95,7 +156,7 @@ export default function InscripcionPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         <div className="flex items-center justify-between mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent text-accent-foreground text-xs font-bold rounded-full shadow-xs">
-            <ClipboardCheck className="w-4 h-4" /> PASO PREVIO · IDENTIFICACIÓN
+            <ClipboardCheck className="w-4 h-4" /> PASO PREVIO · IDENTIFICACIÓN Y CUENTA
           </div>
           <span className="text-xs font-medium text-muted-foreground bg-background/80 px-2 py-0.5 rounded-md border border-border">
             Requisito administrativo obligatorio
@@ -109,10 +170,15 @@ export default function InscripcionPage() {
               Carga de datos
             </h1>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-              Ingresá tus datos personales y fiscales básicos para iniciar el expediente del trámite,
-              emitir la factura correspondiente a la reserva de vacante y darte acceso a las siguientes etapas.
+              Ingresá tus datos personales y creá tu contraseña de acceso para iniciar el expediente del trámite.
             </p>
           </div>
+
+          {errorServidor && (
+            <div className="mb-5 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-xs font-medium text-destructive">
+              {errorServidor}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {/* Nombre y Apellido */}
@@ -171,6 +237,48 @@ export default function InscripcionPage() {
                 <Mail className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
               {errores.email && <p className="text-destructive text-xs mt-1">{errores.email}</p>}
+            </div>
+
+            {/* Clave y Confirmación de Clave */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="password" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
+                  <span>Contraseña *</span>
+                  <span className="text-[10px] font-normal text-muted-foreground">Mínimo 6 caracteres</span>
+                </label>
+                <div className="relative">
+                  <Input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className={`pl-10 ${errores.password ? 'border-destructive bg-destructive/10' : ''}`}
+                  />
+                  <KeyRound className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+                {errores.password && <p className="text-destructive text-xs mt-1">{errores.password}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="confirmarPassword" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
+                  <span>Confirmar contraseña *</span>
+                </label>
+                <div className="relative">
+                  <Input
+                    type="password"
+                    id="confirmarPassword"
+                    name="confirmarPassword"
+                    value={formData.confirmarPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className={`pl-10 ${errores.confirmarPassword ? 'border-destructive bg-destructive/10' : ''}`}
+                  />
+                  <KeyRound className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+                {errores.confirmarPassword && <p className="text-destructive text-xs mt-1">{errores.confirmarPassword}</p>}
+              </div>
             </div>
 
             {/* DNI y Género */}
@@ -295,8 +403,8 @@ export default function InscripcionPage() {
                   className="mt-1 h-4 w-4 text-primary rounded border-input focus:ring-primary"
                 />
                 <span className="text-xs text-foreground leading-relaxed">
-                  Entiendo que al presionar <strong>Siguiente</strong> pasaré a la lectura de los requisitos
-                  académicos, condiciones de la seña de reserva de vacante y métodos de pago.
+                  Entiendo que al presionar <strong>Siguiente</strong> pasaré al inicio de sesión y a la lectura de los requisitos
+                  académicos y aranceles.
                 </span>
               </label>
               {errores.aceptaReglamento && (
@@ -304,7 +412,7 @@ export default function InscripcionPage() {
               )}
             </div>
 
-            {/* Botón Shadcn */}
+            {/* Botón Siguiente */}
             <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Lock className="w-4 h-4 text-muted-foreground" /> Tus datos fiscales están protegidos (Ley 25.326).
@@ -314,7 +422,7 @@ export default function InscripcionPage() {
                 disabled={isSubmitting}
                 className="w-full sm:w-auto min-w-[220px]"
               >
-                <span>{isSubmitting ? 'Iniciando...' : 'Siguiente'}</span>
+                <span>{isSubmitting ? 'Registrando cuenta...' : 'Siguiente'}</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
