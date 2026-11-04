@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { conActorDePanel, mensajeDeError } from '../../../sesion-de-panel'
 import { revisarDocumentoAccion } from './actions'
 import type { Documento, EstadoDocumento, EstadoPostulacion } from '@tfi/domain'
-import type { PostulacionConsultada } from '@tfi/application'
+import type { PostulacionDelPersonal } from '@tfi/application'
 
 // Las etapas de la Postulación en las que hay documentación para revisar.
 const ETAPAS_DE_DOCUMENTACION: readonly EstadoPostulacion[] = [
@@ -33,7 +33,7 @@ const PRESENTACION_DE_DOCUMENTO: Record<EstadoDocumento, { etiqueta: string; ico
 }
 
 interface PostulacionConDocumentos {
-  postulacion: PostulacionConsultada
+  postulacion: PostulacionDelPersonal
   documentos: Documento[]
 }
 
@@ -53,7 +53,7 @@ export default async function DocumentacionDelPersonalPage() {
       const postulaciones = porEtapa.flatMap((pagina) => pagina.items)
 
       return Promise.all(
-        postulaciones.map(async (postulacion: PostulacionConsultada) => ({
+        postulaciones.map(async (postulacion: PostulacionDelPersonal) => ({
           postulacion,
           documentos: (
             await listarDocumentos.ejecutar(actor, { postulacionId: postulacion.id }, PAGINA_COMPLETA)
@@ -97,9 +97,19 @@ export default async function DocumentacionDelPersonalPage() {
               className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs"
             >
               <div className="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-mono text-lg font-bold tracking-wider">Nº {postulacion.numero}</span>
-                  <InsigniaDePostulacion estado={postulacion.estado} />
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-lg font-bold">
+                      {postulacion.aspirante
+                        ? `${postulacion.aspirante.apellido}, ${postulacion.aspirante.nombre}`
+                        : 'Aspirante sin perfil visible'}
+                    </span>
+                    <InsigniaDePostulacion estado={postulacion.estado} />
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {postulacion.aspirante ? `DNI ${postulacion.aspirante.dni} · ` : null}
+                    <span className="font-mono">Nº {postulacion.numero}</span>
+                  </span>
                 </div>
                 {documentos.length > 0 ? (
                   <div className="flex min-w-52 items-center gap-3">

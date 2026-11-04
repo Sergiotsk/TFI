@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { conActorDePanel, mensajeDeError } from '../../../sesion-de-panel'
 import { acreditarPagoAccion, prorrogarPlazoAccion } from './actions'
 import { esquemaBusquedaDeDni, esquemaPaginaDeSeguimiento, esquemaPeriodoDeSeguimiento } from './esquemas'
-import type { Pagina, PostulacionConsultada } from '@tfi/application'
+import type { Pagina, PostulacionDelPersonal } from '@tfi/application'
 
 const POR_PAGINA = 20
 // Cuántos números de página se muestran alrededor de la actual.
@@ -36,7 +36,7 @@ export default async function PostulacionesDelPersonalPage({
 
   let errorDeBusqueda: string | null =
     dni && !dni.success ? (dni.error.issues[0]?.message ?? 'DNI inválido') : null
-  let resultado: Pagina<PostulacionConsultada> | null = null
+  let resultado: Pagina<PostulacionDelPersonal> | null = null
   let periodos: { id: string; nombre: string }[] = []
 
   try {
@@ -130,11 +130,14 @@ export default async function PostulacionesDelPersonalPage({
         {resultado ? (
           <>
             <div className="overflow-x-auto bg-card shadow-(--sombra-tarjeta)">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[920px] text-left text-sm">
                 <thead className="bg-muted text-xs tracking-[0.6px] text-primary uppercase">
                   <tr>
                     <th scope="col" className="px-5 py-3 font-extrabold">
                       Número
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-extrabold">
+                      Aspirante
                     </th>
                     <th scope="col" className="px-4 py-3 font-extrabold">
                       Estado
@@ -163,6 +166,20 @@ export default async function PostulacionesDelPersonalPage({
                         )}
                       >
                         <td className="px-5 py-3 font-semibold text-primary">Nº {postulacion.numero}</td>
+                        <td className="px-4 py-3">
+                          {postulacion.aspirante ? (
+                            <span className="flex flex-col">
+                              <span className="font-semibold">
+                                {postulacion.aspirante.apellido}, {postulacion.aspirante.nombre}
+                              </span>
+                              <span className="text-[13px] text-muted-foreground">
+                                DNI {postulacion.aspirante.dni}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">Sin perfil visible</span>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
                           <InsigniaDePostulacion estado={postulacion.estado} />
                         </td>
@@ -224,7 +241,7 @@ export default async function PostulacionesDelPersonalPage({
                   })}
                   {resultado.items.length === 0 ? (
                     <tr className="border-t border-border">
-                      <td colSpan={4} className="px-5 py-10 text-center">
+                      <td colSpan={5} className="px-5 py-10 text-center">
                         No hay postulaciones para mostrar.
                       </td>
                     </tr>
