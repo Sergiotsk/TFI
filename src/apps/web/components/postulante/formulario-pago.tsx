@@ -7,7 +7,11 @@ import { Button } from '@/components/ui/button'
 
 type MetodoPago = 'mercadopago' | 'efectivo'
 
-export function FormularioPago() {
+interface FormularioPagoProps {
+  postulacionId?: string
+}
+
+export function FormularioPago({ postulacionId }: FormularioPagoProps) {
   const router = useRouter()
   const [metodo, setMetodo] = useState<MetodoPago>('efectivo')
   const [procesando, setProcesando] = useState(false)
@@ -19,27 +23,43 @@ export function FormularioPago() {
     setProcesando(true)
 
     if (metodo === 'efectivo') {
-      // El aspirante elige abonar en tesorería: avanzamos a la carga de documentación
-      // dejando asentado el compromiso de pago pendiente
       router.push('/aspirante/postulacion/documentacion?metodo=efectivo&estado=pago_pendiente')
       return
     }
 
     // Flujo Mercado Pago
     try {
-      const res = await fetch('/api/pagos/mercadopago', {
+      const res = await fetch('/api/pagos/iniciar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postulacionId }),
       })
 
-      const data = await res.json()
+      const respuesta = await res.json()
+      console.log('Respuesta completa del servidor:', respuesta)
 
-      if (data?.init_point || data?.url) {
-        window.location.href = data.init_point || data.url
+      // El resultado de jsonOk viene dentro de respuesta.data
+      const payload = respuesta?.data ?? respuesta
+
+      const urlDestino =
+        payload?.url ||
+        payload?.initPoint ||
+        payload?.init_point ||
+        payload?.puntoDeInicio ||
+        payload?.checkoutUrl ||
+        (typeof payload === 'string' ? payload : undefined)
+
+      if (urlDestino) {
+        window.location.href = urlDestino
       } else {
-        throw new Error(data?.error || 'No se pudo generar la orden de pago en Mercado Pago.')
+        console.error('Payload recibido sin URL:', payload)
+        throw new Error(
+          respuesta?.error?.mensaje ||
+          'El servidor respondió correctamente pero no se encontró la URL de pago.'
+        )
       }
     } catch (err) {
+      console.error(err)
       setErrorPago(err instanceof Error ? err.message : 'Ocurrió un error al conectar con Mercado Pago.')
       setProcesando(false)
     }

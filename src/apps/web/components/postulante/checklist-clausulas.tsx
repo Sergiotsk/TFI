@@ -7,7 +7,6 @@ import { aceptarCondicionesAccion } from '@/app/(paneles)/aspirante/postulacion/
 
 interface ChecklistClausulasProps {
   periodoId: string
-  /** El monto de la seña ya formateado, por ejemplo "$100.000,00". */
   monto: string
 }
 
@@ -45,7 +44,6 @@ function clausulasDe(monto: string) {
   ]
 }
 
-// Demo: al aceptar todas las cláusulas se crea la Postulación (aceptarCondicionesAccion) y se vuelve al panel.
 export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps) {
   const clausulas = clausulasDe(monto)
   const [seleccionados, setSeleccionados] = useState<number[]>([])
@@ -93,12 +91,20 @@ export function ChecklistClausulas({ periodoId, monto }: ChecklistClausulasProps
           return (
             <label
               key={clausula.id}
-              className={`flex items-start gap-3 p-3 cursor-pointer transition ${
-                checked ? 'bg-accent/40' : 'hover:bg-muted/50'
+              onClick={() => handleToggle(clausula.id)}
+              className={`flex items-start gap-3 p-3.5 border rounded-sm cursor-pointer select-none transition ${
+                checked
+                  ? 'bg-accent/40 border-primary text-foreground'
+                  : 'bg-card border-border hover:bg-muted/50 text-foreground/90'
               }`}
             >
-              <input type="hidden" name="periodoId" defaultValue={periodoId ?? ''} />
-              <span className="text-xs text-foreground/90 leading-relaxed">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => {}}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input text-primary accent-primary cursor-pointer"
+              />
+              <span className="text-xs leading-relaxed font-normal">
                 {clausula.texto}
               </span>
             </label>

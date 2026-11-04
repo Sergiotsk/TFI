@@ -1,7 +1,22 @@
 import { FormularioPago } from '@/components/postulante/formulario-pago'
 import { Info, Receipt } from 'lucide-react'
 
+import type { PostulacionConsultada } from '@tfi/application'
+import { conActorDePanel } from '@/app/(paneles)/sesion-de-panel'
+
 export default async function PagoPage() {
+  const { postulacion } = await conActorDePanel(
+    async ({ consultarPostulacion }, actor) => {
+      const propias: PostulacionConsultada[] = await consultarPostulacion.listarMias(actor)
+      // Tomamos la postulación activa o más reciente
+      return {
+        postulacion: propias[0] ?? null,
+      }
+    },
+  )
+
+  const postulacionId = postulacion?.id ?? undefined
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       <div className="mb-6">
@@ -20,7 +35,7 @@ export default async function PagoPage() {
         {/* Columna Izquierda: Formulario de Pago */}
         <div className="lg:col-span-2">
           <div className="bg-card shadow-(--sombra-tarjeta) p-6">
-            <FormularioPago />
+            <FormularioPago postulacionId={postulacionId} />
           </div>
         </div>
 
