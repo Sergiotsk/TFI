@@ -10,6 +10,8 @@ export const INSTITUCION = {
   codigo: 'FRH',
   nombre: 'UTN FRH',
   carrera: 'Tecnicatura Universitaria en Programación',
+  // Logo horizontal oficial, de tinta oscura y fondo transparente: sobre la barra lateral va en una placa blanca.
+  logo: { src: '/instituciones/frh/logo-utn-haedo.png', ancho: 859, alto: 121, alt: 'UTN Facultad Regional Haedo' },
 } as const
 
 export const ETIQUETAS_DE_ROL: Record<Rol, string> = {

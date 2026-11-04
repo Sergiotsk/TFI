@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -63,25 +64,33 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2.5 px-1 py-1.5">
-          <span
-            aria-hidden="true"
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-[0.7rem] font-bold tracking-wide text-sidebar-primary-foreground group-data-[collapsible=icon]:size-8"
-          >
-            UTN
-          </span>
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <span className="block text-sm font-bold text-sidebar-primary">{INSTITUCION.nombre}</span>
-            <span className="block text-xs leading-tight text-muted-foreground">{INSTITUCION.carrera}</span>
-          </div>
+      <SidebarHeader className="gap-3.5 border-b border-sidebar-border pt-5 pb-5 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:py-2">
+        {/* El logo es de tinta oscura: va sobre una placa blanca. Colapsada, la barra no tiene ancho para él. */}
+        <div className="bg-white px-3.5 py-4 group-data-[collapsible=icon]:hidden">
+          <Image
+            src={INSTITUCION.logo.src}
+            alt={INSTITUCION.logo.alt}
+            width={INSTITUCION.logo.ancho}
+            height={INSTITUCION.logo.alto}
+            priority
+            className="h-auto w-full max-w-[200px]"
+          />
         </div>
+        <span className="px-2 text-[13px] leading-[18px] text-white/80 group-data-[collapsible=icon]:hidden">
+          {INSTITUCION.carrera}
+        </span>
+        <span
+          aria-hidden="true"
+          className="hidden size-8 items-center justify-center bg-sidebar-primary text-[0.7rem] font-extrabold text-sidebar-primary-foreground group-data-[collapsible=icon]:flex"
+        >
+          UTN
+        </span>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gap-3 pt-4">
         {agruparMenu(rol).map(({ area, items }) => (
           <SidebarGroup key={area}>
-            <SidebarGroupLabel className="font-semibold tracking-wider uppercase">
+            <SidebarGroupLabel className="text-xs font-extrabold tracking-[0.8px] text-white/70 uppercase">
               {area === 'pagos' ? 'Pagos' : ETIQUETAS_DE_ROL[rol]}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -95,7 +104,7 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
                         render={<Link href={item.href} />}
                         isActive={item === activo}
                         tooltip={item.etiqueta}
-                        className="h-9 rounded-lg data-active:font-semibold"
+                        className="h-11 text-[15px] data-active:font-semibold data-active:shadow-[inset_3px_0_0_var(--sidebar-primary)] [&_svg]:size-[18px]"
                       >
                         <Icono />
                         <span>{item.etiqueta}</span>
@@ -103,7 +112,7 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
                       {pendientes > 0 ? (
                         <SidebarMenuBadge
                           aria-label={`${pendientes} pendientes`}
-                          className="top-2! rounded-full bg-sidebar-primary text-sidebar-primary-foreground peer-hover/menu-button:text-sidebar-primary-foreground peer-data-active/menu-button:text-sidebar-primary-foreground"
+                          className="top-3! bg-sidebar-primary text-sidebar-primary-foreground peer-hover/menu-button:text-sidebar-primary-foreground peer-data-active/menu-button:text-sidebar-primary-foreground"
                         >
                           {pendientes}
                         </SidebarMenuBadge>
@@ -118,18 +127,18 @@ export function BarraLateral({ rol, nombre, contadores = {} }: BarraLateralProps
       </SidebarContent>
 
       {/* Con la barra colapsada se ocultan los textos, no el cierre de sesión: queda el ícono con su tooltip. */}
-      <SidebarFooter>
-        <div className="flex items-center gap-2.5 rounded-xl border border-sidebar-border bg-background/60 p-2 group-data-[collapsible=icon]:hidden">
+      <SidebarFooter className="border-t border-sidebar-border pt-4 group-data-[collapsible=icon]:border-0">
+        <div className="flex items-center gap-3 px-2 pb-2 group-data-[collapsible=icon]:hidden">
           <span
             aria-hidden="true"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground"
+            className="flex size-10 shrink-0 items-center justify-center bg-sidebar-primary text-sm font-extrabold text-sidebar-primary-foreground"
           >
             {iniciales(nombre)}
           </span>
-          <div className="min-w-0">
-            <span className="block truncate text-sm font-semibold">{nombre}</span>
-            <span className="block truncate text-xs text-muted-foreground">{ETIQUETAS_DE_ROL[rol]}</span>
-          </div>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-[15px] font-semibold text-sidebar-accent-foreground">{nombre}</span>
+            <span className="truncate text-[13px] text-white/80">{ETIQUETAS_DE_ROL[rol]}</span>
+          </span>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>

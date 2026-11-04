@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Check, Search } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { describirVencimiento, formatearFecha } from '@/components/panel/formato'
@@ -7,11 +7,15 @@ import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { cn } from '@/lib/utils'
 import { conActorDePanel, mensajeDeError } from '../../../sesion-de-panel'
 import { acreditarPagoAccion, prorrogarPlazoAccion } from './actions'
-import { esquemaBusquedaDeDni, esquemaPaginaDeSeguimiento } from './esquemas'
+import { esquemaBusquedaDeDni, esquemaPaginaDeSeguimiento, esquemaPeriodoDeSeguimiento } from './esquemas'
 import type { Pagina, PostulacionConsultada } from '@tfi/application'
 
 const POR_PAGINA = 20
-const ESTILO_DE_PAGINA = 'inline-flex h-8 items-center rounded-lg border border-border px-3 text-sm font-medium hover:bg-muted'
+// Cuántos números de página se muestran alrededor de la actual.
+const PAGINAS_VISIBLES = 5
+const ESTILO_DE_CAMPO =
+  'h-11 w-full rounded-[3px] border border-input bg-card px-3 text-[15px] font-normal text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
+const ESTILO_DE_PAGINA = 'flex size-11 items-center justify-center border border-border bg-card hover:bg-accent'
 
 function primero(valor: string | string[] | undefined): string {
   return (Array.isArray(valor) ? valor[0] : valor) ?? ''
@@ -27,32 +31,45 @@ export default async function PostulacionesDelPersonalPage({
   const consulta = await searchParams
   const dniIngresado = primero(consulta.dni).trim()
   const pagina = esquemaPaginaDeSeguimiento.parse(primero(consulta.pagina) || undefined)
+  const periodoId = esquemaPeriodoDeSeguimiento.parse(primero(consulta.periodo) || undefined)
   const dni = dniIngresado ? esquemaBusquedaDeDni.safeParse(dniIngresado) : null
 
   let errorDeBusqueda: string | null =
     dni && !dni.success ? (dni.error.issues[0]?.message ?? 'DNI inválido') : null
   let resultado: Pagina<PostulacionConsultada> | null = null
+  let periodos: { id: string; nombre: string }[] = []
 
-  if (!dni || dni.success) {
-    try {
-      resultado = await conActorDePanel(({ buscarPostulacionesPorDni, listarPostulaciones }, actor) => {
+  try {
+    ;[periodos, resultado] = await conActorDePanel(
+      async ({ buscarPostulacionesPorDni, listarPostulaciones, listarPeriodosTodos }, actor) => {
         const paginacion = { pagina, porPagina: POR_PAGINA }
+        const todos = await listarPeriodosTodos.ejecutar(actor, { pagina: 1, porPagina: 100 })
+        const opciones = todos.items.map(({ id, nombre }) => ({ id, nombre }))
 
-        return dni?.success
-          ? buscarPostulacionesPorDni.ejecutar(actor, dni.data, undefined, paginacion)
-          : listarPostulaciones.ejecutar(actor, {}, paginacion)
-      })
-    } catch (error) {
-      errorDeBusqueda = mensajeDeError(error)
-    }
+        if (dni && !dni.success) return [opciones, null] as const
+        return [
+          opciones,
+          dni?.success
+            ? await buscarPostulacionesPorDni.ejecutar(actor, dni.data, periodoId, paginacion)
+            : await listarPostulaciones.ejecutar(actor, { periodoId }, paginacion),
+        ] as const
+      },
+    )
+  } catch (error) {
+    errorDeBusqueda = mensajeDeError(error)
   }
 
   const ahora = new Date()
+  const filtrado = Boolean(dniIngresado || periodoId)
   const enlace = (destino: number) =>
-    `?${new URLSearchParams({ ...(dniIngresado ? { dni: dniIngresado } : {}), pagina: String(destino) })}`
+    `?${new URLSearchParams({
+      ...(dniIngresado ? { dni: dniIngresado } : {}),
+      ...(periodoId ? { periodo: periodoId } : {}),
+      pagina: String(destino),
+    })}`
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <EncabezadoDePanel
         area="Personal de la TUP"
         titulo="Postulaciones"
@@ -60,37 +77,48 @@ export default async function PostulacionesDelPersonalPage({
       />
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        <form
-          method="get"
-          className="flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-5 shadow-xs"
-        >
-          <label className="w-full max-w-sm space-y-1.5">
-            <span className="block text-xs font-medium text-muted-foreground">DNI del aspirante</span>
+        <form method="get" className="flex flex-wrap items-end gap-4 bg-card p-5 shadow-(--sombra-tarjeta)">
+          <label className="flex flex-[2_1_260px] flex-col gap-1.5 text-[13px] font-semibold text-primary">
+            DNI del aspirante
             <span className="relative block">
               <Search
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-input"
               />
               <input
                 name="dni"
+                type="search"
                 defaultValue={dniIngresado}
                 inputMode="numeric"
                 placeholder="Todas las postulaciones"
-                className="h-10 w-full rounded-lg border border-input bg-background pr-3 pl-9 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                className={cn(ESTILO_DE_CAMPO, 'pl-9')}
               />
             </span>
           </label>
-          <button
-            type="submit"
-            className="h-10 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            Buscar
-          </button>
-          {dniIngresado ? (
-            <Link href="?" className="h-10 content-center text-sm text-muted-foreground underline">
-              Ver todas
-            </Link>
-          ) : null}
+          <label className="flex flex-[1_1_200px] flex-col gap-1.5 text-[13px] font-semibold text-primary">
+            Período
+            <select name="periodo" defaultValue={periodoId ?? ''} className={ESTILO_DE_CAMPO}>
+              <option value="">Todos los períodos</option>
+              {periodos.map(({ id, nombre }) => (
+                <option key={id} value={id}>
+                  {nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex items-center gap-4">
+            <button
+              type="submit"
+              className="h-11 bg-primary px-6 text-[15px] font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Buscar
+            </button>
+            {filtrado ? (
+              <Link href="?" className="text-sm font-semibold text-primary underline">
+                Ver todas
+              </Link>
+            ) : null}
+          </div>
         </form>
 
         {errorDeBusqueda ? (
@@ -100,19 +128,23 @@ export default async function PostulacionesDelPersonalPage({
         ) : null}
 
         {resultado ? (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
-            <p className="border-b border-border px-5 py-3.5 text-sm text-muted-foreground">
-              <strong className="text-foreground">{resultado.total} postulación(es)</strong> · página{' '}
-              {resultado.pagina} de {resultado.totalPaginas}
-            </p>
-            <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto bg-card shadow-(--sombra-tarjeta)">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs tracking-wide text-muted-foreground uppercase">
+                <thead className="bg-muted text-xs tracking-[0.6px] text-primary uppercase">
                   <tr>
-                    <th className="px-5 py-3 font-semibold">Número</th>
-                    <th className="px-5 py-3 font-semibold">Estado</th>
-                    <th className="px-5 py-3 font-semibold">Vence el</th>
-                    <th className="px-5 py-3 text-right font-semibold">Acciones</th>
+                    <th scope="col" className="px-5 py-3 font-extrabold">
+                      Número
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-extrabold">
+                      Estado
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-extrabold">
+                      Vence el pago
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-right font-extrabold">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -127,28 +159,23 @@ export default async function PostulacionesDelPersonalPage({
                         key={postulacion.id}
                         className={cn(
                           'border-t border-border align-middle',
-                          vencimiento?.urgencia === 'proximo' && 'bg-accent/40',
+                          vencimiento?.urgencia === 'proximo' && 'bg-accent/50',
                         )}
                       >
-                        <td className="px-5 py-4">
-                          <span className="rounded-md bg-muted px-2 py-1 font-mono text-xs font-semibold">
-                            Nº {postulacion.numero}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3 font-semibold text-primary">Nº {postulacion.numero}</td>
+                        <td className="px-4 py-3">
                           <InsigniaDePostulacion estado={postulacion.estado} />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3">
                           {postulacion.venceEl ? (
                             <span className="flex flex-col">
                               <span>{formatearFecha(postulacion.venceEl)}</span>
                               {vencimiento ? (
                                 <span
                                   className={cn(
-                                    'text-xs',
-                                    vencimiento.urgencia === 'normal' && 'text-muted-foreground',
-                                    vencimiento.urgencia === 'proximo' && 'font-semibold text-accent-foreground',
-                                    vencimiento.urgencia === 'vencido' && 'text-destructive',
+                                    'text-[13px]',
+                                    vencimiento.urgencia === 'proximo' && 'font-semibold text-primary',
+                                    vencimiento.urgencia === 'vencido' && 'font-semibold text-destructive',
                                   )}
                                 >
                                   {vencimiento.texto}
@@ -156,10 +183,10 @@ export default async function PostulacionesDelPersonalPage({
                               ) : null}
                             </span>
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span>—</span>
                           )}
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-2">
                           {operable ? (
                             <div className="flex flex-wrap items-start justify-end gap-3">
                               <FormularioDeAccion
@@ -174,7 +201,7 @@ export default async function PostulacionesDelPersonalPage({
                                 etiqueta="Prorrogar"
                                 variante="outline"
                               >
-                                <label className="flex h-8 items-center gap-1.5 text-xs text-muted-foreground">
+                                <label className="flex h-11 items-center gap-1.5 text-[13px]">
                                   <span className="sr-only">Días de prórroga</span>
                                   <input
                                     name="dias"
@@ -182,16 +209,14 @@ export default async function PostulacionesDelPersonalPage({
                                     min={1}
                                     max={365}
                                     defaultValue={7}
-                                    className="h-8 w-16 rounded-lg border border-input bg-background px-2 text-center text-sm"
+                                    className="h-11 w-16 rounded-[3px] border border-input bg-card px-2 text-center text-[15px]"
                                   />
                                   días
                                 </label>
                               </FormularioDeAccion>
                             </div>
                           ) : (
-                            <span className="block text-right text-xs text-muted-foreground">
-                              Sin acciones disponibles
-                            </span>
+                            <span className="block text-right text-[13px]">Sin acciones disponibles</span>
                           )}
                         </td>
                       </tr>
@@ -199,7 +224,7 @@ export default async function PostulacionesDelPersonalPage({
                   })}
                   {resultado.items.length === 0 ? (
                     <tr className="border-t border-border">
-                      <td colSpan={4} className="px-5 py-10 text-center text-muted-foreground">
+                      <td colSpan={4} className="px-5 py-10 text-center">
                         No hay postulaciones para mostrar.
                       </td>
                     </tr>
@@ -208,23 +233,60 @@ export default async function PostulacionesDelPersonalPage({
               </table>
             </div>
 
-            {resultado.totalPaginas > 1 ? (
-              <nav aria-label="Paginación" className="flex justify-end gap-2 border-t border-border px-5 py-3">
-                {resultado.pagina > 1 ? (
-                  <Link href={enlace(resultado.pagina - 1)} className={ESTILO_DE_PAGINA}>
-                    Anterior
-                  </Link>
-                ) : null}
-                {resultado.pagina < resultado.totalPaginas ? (
-                  <Link href={enlace(resultado.pagina + 1)} className={ESTILO_DE_PAGINA}>
-                    Siguiente
-                  </Link>
-                ) : null}
-              </nav>
-            ) : null}
-          </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+              <span>{describirRango(resultado.pagina, resultado.total)}</span>
+              {resultado.totalPaginas > 1 ? (
+                <nav aria-label="Paginación" className="flex gap-1">
+                  {resultado.pagina > 1 ? (
+                    <Link href={enlace(resultado.pagina - 1)} aria-label="Página anterior" className={ESTILO_DE_PAGINA}>
+                      <ChevronLeft aria-hidden="true" className="size-4" />
+                    </Link>
+                  ) : null}
+                  {paginasVisibles(resultado.pagina, resultado.totalPaginas).map((numero) =>
+                    numero === resultado.pagina ? (
+                      <span
+                        key={numero}
+                        aria-current="page"
+                        className="flex size-11 items-center justify-center bg-primary font-bold text-primary-foreground"
+                      >
+                        {numero}
+                      </span>
+                    ) : (
+                      <Link key={numero} href={enlace(numero)} className={ESTILO_DE_PAGINA}>
+                        {numero}
+                      </Link>
+                    ),
+                  )}
+                  {resultado.pagina < resultado.totalPaginas ? (
+                    <Link
+                      href={enlace(resultado.pagina + 1)}
+                      aria-label="Página siguiente"
+                      className={ESTILO_DE_PAGINA}
+                    >
+                      <ChevronRight aria-hidden="true" className="size-4" />
+                    </Link>
+                  ) : null}
+                </nav>
+              ) : null}
+            </div>
+          </>
         ) : null}
       </main>
     </div>
   )
+}
+
+// "Mostrando 21–40 de 48 postulaciones".
+function describirRango(pagina: number, total: number): string {
+  if (total === 0) return 'Sin postulaciones'
+  const desde = (pagina - 1) * POR_PAGINA + 1
+  const hasta = Math.min(pagina * POR_PAGINA, total)
+  return `Mostrando ${desde}–${hasta} de ${total} ${total === 1 ? 'postulación' : 'postulaciones'}`
+}
+
+// Ventana de números de página centrada en la actual, sin pasarse de los bordes.
+function paginasVisibles(actual: number, total: number): number[] {
+  const cantidad = Math.min(PAGINAS_VISIBLES, total)
+  const desde = Math.min(Math.max(1, actual - Math.floor(cantidad / 2)), total - cantidad + 1)
+  return Array.from({ length: cantidad }, (_, indice) => desde + indice)
 }
