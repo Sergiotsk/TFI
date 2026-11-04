@@ -5,20 +5,24 @@ import { EstadoVacio } from '@/components/panel/estado-vacio'
 import { formatearFecha, formatearMontoEnCentavos, porcentaje } from '@/components/panel/formato'
 import { cn } from '@/lib/utils'
 import { conActorDePanel } from '../../../sesion-de-panel'
+import { EditarPeriodo } from './editar-periodo'
 import type { PeriodoDeIngreso } from '@tfi/domain'
 
-// Períodos reales (ListarPeriodosTodos) con su ocupación (ConsultarOcupacion).
-// Alta y edición siguen pendientes: las migraciones las restringen a Dirección y falta definir el formulario.
+// Períodos reales (ListarPeriodosTodos) con su ocupación (ConsultarOcupacion). Dirección los edita
+// (ModificarPeriodo); el resto del personal solo los ve. El alta sigue pendiente.
 export default async function PeriodosPage() {
-  const periodos = await conActorDePanel(async ({ listarPeriodosTodos, consultarOcupacion }, actor) => {
+  const { periodos, esDireccion } = await conActorDePanel(async ({ listarPeriodosTodos, consultarOcupacion }, actor) => {
     const pagina = await listarPeriodosTodos.ejecutar(actor, { pagina: 1, porPagina: 100 })
 
-    return Promise.all(
-      pagina.items.map(async (periodo: PeriodoDeIngreso) => ({
-        periodo,
-        ocupacion: await consultarOcupacion.ejecutar(actor, periodo.id),
-      })),
-    )
+    return {
+      esDireccion: actor.rol === 'DIRECCION',
+      periodos: await Promise.all(
+        pagina.items.map(async (periodo: PeriodoDeIngreso) => ({
+          periodo,
+          ocupacion: await consultarOcupacion.ejecutar(actor, periodo.id),
+        })),
+      ),
+    }
   })
 
   const ahora = new Date()
@@ -38,7 +42,7 @@ export default async function PeriodosPage() {
         area="Secretaría TUP"
         titulo="Períodos de ingreso"
         descripcion="Cupos, cierre y plazo de pago de cada período, con su ocupación actual."
-        acciones={<AccionPendiente>Nuevo período</AccionPendiente>}
+        acciones={esDireccion ? <AccionPendiente>Nuevo período</AccionPendiente> : undefined}
       />
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -87,9 +91,6 @@ export default async function PeriodosPage() {
                       Cierra el {formatearFecha(periodo.cierraEl)}
                     </span>
                   </div>
-                  <AccionPendiente variant="outline" size="sm">
-                    Editar
-                  </AccionPendiente>
                 </div>
 
                 <div className="space-y-4 px-6 py-5">
@@ -160,6 +161,8 @@ export default async function PeriodosPage() {
                     <dd className="text-sm font-semibold">{ocupacion.libres}</dd>
                   </div>
                 </dl>
+
+                {esDireccion ? <EditarPeriodo periodo={periodo} /> : null}
               </article>
             )
           })}
