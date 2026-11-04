@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { User, LogOut } from 'lucide-react'
+import { User } from 'lucide-react'
 import { BotonCerrarSesion } from '@/components/auth/boton-cerrar-sesion'
 
 interface MenuUsuarioHeaderProps {
