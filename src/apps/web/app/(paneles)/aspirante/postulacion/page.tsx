@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { BotonPagarMercadoPago } from '@/components/panel/boton-pagar-mercado-pago'
 import { CorregirDocumento } from '@/components/panel/corregir-documento'
+import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { formatearFecha } from '@/components/panel/formato'
 import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
 import { buttonVariants } from '@/components/ui/button'
 import { conActorDePanel } from '../../sesion-de-panel'
+import { iniciarPagoAccion } from './actions'
 import type { Documento, PeriodoDeIngreso } from '@tfi/domain'
 import type { PostulacionConsultada } from '@tfi/application'
 
@@ -107,11 +109,22 @@ export default async function PostulacionDelAspirantePage() {
               </p>
             ) : null}
 
+            {/* La Postulación no guarda por qué medio eligió pagar: el texto cubre los dos. No se ofrece el botón
+                de MP acá: con el webhook demorado, quien ya pagó podría pagar dos veces. */}
             {postulacion.estado === 'PAGO_PENDIENTE' ? (
-              <p className="text-sm text-muted-foreground">
-                Estamos esperando la confirmación de Mercado Pago. Si ya pagaste, en unos instantes vas a ver tu
-                vacante confirmada acá.
-              </p>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  <strong className="text-foreground">En ventanilla:</strong> pagá en la caja de la facultad antes de
+                  la fecha límite, con tu DNI y tu número de postulación{' '}
+                  <strong className="font-mono text-foreground">Nº {postulacion.numero}</strong>. Tesorería acredita
+                  los pagos de la caja con el informe del día, así que la vacante confirmada puede tardar hasta un día
+                  hábil en verse acá.
+                </p>
+                <p>
+                  <strong className="text-foreground">Con Mercado Pago:</strong> si ya pagaste, en unos instantes vas
+                  a ver tu vacante confirmada acá.
+                </p>
+              </div>
             ) : null}
 
             {postulacion.estado === 'VACANTE_CONFIRMADA' ? (
@@ -191,7 +204,20 @@ export default async function PostulacionDelAspirantePage() {
                   completarlo, que vas a ver acá; si vence, el cupo se libera. Con el pago acreditado, tenés 10 días
                   hábiles para cargar la documentación.
                 </p>
-                <BotonPagarMercadoPago postulacionId={postulacion.id} />
+                <p className="text-sm text-muted-foreground">
+                  Podés pagar en línea con Mercado Pago o en la caja de la facultad. Si vas a la caja, iniciá el
+                  pago acá antes: así arranca tu plazo y Tesorería puede imputar tu pago con el informe del día.
+                </p>
+                <div className="flex flex-wrap items-start gap-3">
+                  <BotonPagarMercadoPago postulacionId={postulacion.id} />
+                  <FormularioDeAccion
+                    accion={iniciarPagoAccion}
+                    ocultos={{ id: postulacion.id }}
+                    etiqueta="Pagar en ventanilla"
+                    variante="outline"
+                    tamano="lg"
+                  />
+                </div>
               </div>
             ) : null}
           </section>
