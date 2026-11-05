@@ -42,7 +42,7 @@ export default async function PaginaLogin({
       >
         <HeaderInstitucional />
 
-        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex items-center justify-center">
+        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-center">
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* Columna Izquierda: Identidad Institucional */}
@@ -79,7 +79,10 @@ export default async function PaginaLogin({
             {/* Columna Derecha: Tarjeta de Acceso */}
             <div className="lg:col-span-6 flex justify-center lg:justify-end">
               <div className="w-full max-w-md bg-card shadow-(--sombra-tarjeta) p-8">
-                <MarcoAuth subtitulo="Ingresá con tu email y contraseña para acceder a tu legajo.">
+                <MarcoAuth
+                  incrustado
+                  subtitulo="Ingresá con tu email y contraseña para acceder a tu legajo."
+                >
                   {enlaceVencido ? (
                     <p
                       role="alert"

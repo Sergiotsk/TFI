@@ -3,16 +3,28 @@ import Link from 'next/link'
 
 /**
  * Marco comun de las pantallas de acceso (login y registro).
+ * `incrustado`: la pagina ya trae su propio layout (header, main y footer),
+ * asi que el marco no ocupa la pantalla entera ni abre otro <main>.
  */
 export function MarcoAuth({
   subtitulo,
+  incrustado = false,
   children,
 }: {
   subtitulo: string
+  incrustado?: boolean
   children: ReactNode
 }) {
+  const Contenedor = incrustado ? 'div' : 'main'
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
+    <Contenedor
+      className={
+        incrustado
+          ? 'flex flex-col items-center'
+          : 'flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12'
+      }
+    >
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -32,6 +44,6 @@ export function MarcoAuth({
           </Link>
         </p>
       </div>
-    </main>
+    </Contenedor>
   )
 }
