@@ -49,7 +49,7 @@ export default function Institucion() {
       <section className="section" aria-labelledby="utn-titulo">
         <div className="container split">
           <div className="split__intro reveal reveal--izq">
-            <h2 id="utn-titulo">Una universidad nacional dedicada a la tecnología</h2>
+            <h2 id="utn-titulo">Una universidad dedicada a la tecnología</h2>
             <p>
               La Universidad Tecnológica Nacional (UTN) se creó el{' '}
               <strong>14 de octubre de 1959</strong> por la ley 14.855. Su antecedente es la
@@ -62,6 +62,10 @@ export default function Institucion() {
               tiene a las ingenierías como eje central, y tiene <strong>carácter federal</strong>:
               sus facultades regionales están repartidas en distintas ciudades de la Argentina, y
               cada una responde a las necesidades productivas de su zona.
+            </p>
+            <p>
+              Su propuesta combina <strong>carreras de grado, tecnicaturas y posgrados</strong>, y
+              mantiene un vínculo cercano con el sector productivo y con la comunidad de cada región.
             </p>
             <p>
               <a className="enlace" href={UTN_SITIO} target="_blank" rel="noopener">

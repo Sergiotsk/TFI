@@ -59,21 +59,33 @@ export default function Inicio() {
 
       {/* El problema */}
       <section
-        className='section'
+        className='section section--fondo-utiles'
         id='problema'
         aria-labelledby='problema-titulo'
       >
-        <div className='container split'>
+        <div className='container split split--problema section-card'>
+          <h2 id='problema-titulo' className='split__titulo reveal reveal--izq'>
+            Hoy, el ingreso depende de herramientas que no se hablan
+          </h2>
           <div className='split__intro reveal reveal--izq'>
-            <h2 id='problema-titulo'>
-              Hoy, el ingreso depende de herramientas que no se hablan
-            </h2>
             <p>
               Formularios, carpetas compartidas, planillas y correos sostienen
               el proceso. Secretaría <strong>revisa la documentación</strong> de
               cada aspirante <strong>antes de saber si va a pagar</strong>, y
               nadie tiene <strong>una vista única</strong> de cuántas personas
               están realmente confirmadas.
+            </p>
+            <p className='nota'>
+              Este proceso fragmentado genera cuellos de botella en la atención
+              de aspirantes y retrasa la gestión administrativa de la facultad.
+            </p>
+            <p className='nota'>
+              La falta de sincronización impide que Tesorería y Secretaría
+              trabajen sobre datos confiables y actualizados en tiempo real.
+            </p>
+            <p className='nota'>
+              Resulta imposible medir el progreso real de la inscripción hasta
+              que el proceso administrativo finaliza manualmente.
             </p>
           </div>
           <dl className='hallazgos'>
@@ -226,10 +238,10 @@ export default function Inicio() {
 
       {/* Roles */}
       <section
-        className='section section--blanca'
+        className='section section--fondo-roles'
         aria-labelledby='roles-titulo'
       >
-        <div className='container'>
+        <div className='container section-card'>
           <h2 id='roles-titulo' className='reveal'>
             Qué hace cada rol
           </h2>
