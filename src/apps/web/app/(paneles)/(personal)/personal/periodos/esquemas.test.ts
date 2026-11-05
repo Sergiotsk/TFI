@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aHoraDeLaInstitucion, leerCambiosDePeriodo } from './esquemas'
+import { aHoraDeLaInstitucion, leerCambiosDePeriodo, leerNuevoPeriodo } from './esquemas'
 
 const ID = '7b0e7a52-3c1f-4f51-9a40-2b5d8f3e6a10'
 
@@ -60,6 +60,48 @@ describe('leerCambiosDePeriodo', () => {
     [{ cierraEl: 'mañana' }, 'La fecha de cierre no es válida'],
   ])('rechaza %o con un mensaje claro', (campos, mensaje) => {
     expect(leerCambiosDePeriodo(formulario(campos))).toEqual({ ok: false, mensaje })
+  })
+})
+
+function formularioNuevo(campos: Record<string, string>): FormData {
+  const datos = new FormData()
+  const completos = {
+    nombre: 'Ingreso 2027',
+    totalCupos: '60',
+    diasPlazoPago: '5',
+    montoPesos: '120000',
+    cierraEl: '2027-03-01T18:00',
+    ...campos,
+  }
+  for (const [nombre, valor] of Object.entries(completos)) datos.set(nombre, valor)
+  return datos
+}
+
+describe('leerNuevoPeriodo', () => {
+  it('lee el alta con el monto en centavos y el cierre en hora de Argentina', () => {
+    const resultado = leerNuevoPeriodo(formularioNuevo({ nombre: '  Ingreso 2027  ', montoPesos: '1500.50' }))
+
+    expect(resultado).toEqual({
+      ok: true,
+      datos: {
+        nombre: 'Ingreso 2027',
+        totalCupos: 60,
+        diasPlazoPago: 5,
+        montoMatriculaCentavos: 150050,
+        cierraEl: new Date('2027-03-01T21:00:00.000Z'),
+      },
+    })
+  })
+
+  it.each([
+    [{ nombre: '   ' }, 'El nombre es obligatorio'],
+    [{ totalCupos: '-1' }, 'El total de cupos no puede ser negativo'],
+    [{ totalCupos: '2.5' }, 'Los cupos tienen que ser un número entero'],
+    [{ diasPlazoPago: '0' }, 'El plazo debe ser de al menos un día'],
+    [{ montoPesos: '0' }, 'El monto debe ser mayor que cero'],
+    [{ cierraEl: '' }, 'La fecha de cierre no es válida'],
+  ])('rechaza %o con un mensaje claro', (campos, mensaje) => {
+    expect(leerNuevoPeriodo(formularioNuevo(campos))).toEqual({ ok: false, mensaje })
   })
 })
 
