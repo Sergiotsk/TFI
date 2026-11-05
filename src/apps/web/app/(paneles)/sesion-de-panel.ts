@@ -10,6 +10,8 @@ import {
 import {
   CuposPorDebajoDeConfirmadas,
   PeriodoCerrado,
+  PeriodoDuplicado,
+  PeriodoInvalido,
   PostulacionDuplicada,
   SinCuposParaConfirmar,
   SinCuposParaIniciar,
@@ -56,7 +58,9 @@ export function mensajeDeError(error: unknown): string {
     error instanceof ConflictoDeEstado ||
     error instanceof SolicitudInvalida ||
     error instanceof DatosDuplicados ||
-    error instanceof CuposPorDebajoDeConfirmadas
+    error instanceof CuposPorDebajoDeConfirmadas ||
+    error instanceof PeriodoInvalido ||
+    error instanceof PeriodoDuplicado
   ) {
     return error.message
   }

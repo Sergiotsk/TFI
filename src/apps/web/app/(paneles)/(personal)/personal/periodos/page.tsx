@@ -1,15 +1,15 @@
 import { CalendarRange, Check, Clock, SquarePlus, Users, type LucideIcon } from 'lucide-react'
-import { AccionPendiente } from '@/components/maqueta/accion-pendiente'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { EstadoVacio } from '@/components/panel/estado-vacio'
 import { formatearFecha, formatearMontoEnCentavos, porcentaje } from '@/components/panel/formato'
 import { cn } from '@/lib/utils'
 import { conActorDePanel } from '../../../sesion-de-panel'
 import { EditarPeriodo } from './editar-periodo'
+import { NuevoPeriodo } from './nuevo-periodo'
 import type { PeriodoDeIngreso } from '@tfi/domain'
 
-// Períodos reales (ListarPeriodosTodos) con su ocupación (ConsultarOcupacion). Dirección los edita
-// (ModificarPeriodo); el resto del personal solo los ve. El alta sigue pendiente.
+// Períodos reales (ListarPeriodosTodos) con su ocupación (ConsultarOcupacion). Dirección los da de alta
+// (CrearPeriodo) y los edita (ModificarPeriodo); el resto del personal solo los ve.
 export default async function PeriodosPage() {
   const { periodos, esDireccion } = await conActorDePanel(async ({ listarPeriodosTodos, consultarOcupacion }, actor) => {
     const pagina = await listarPeriodosTodos.ejecutar(actor, { pagina: 1, porPagina: 100 })
@@ -42,15 +42,20 @@ export default async function PeriodosPage() {
         area="Secretaría TUP"
         titulo="Períodos de ingreso"
         descripcion="Cupos, cierre y plazo de pago de cada período, con su ocupación actual."
-        acciones={esDireccion ? <AccionPendiente>Nuevo período</AccionPendiente> : undefined}
       />
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        {esDireccion ? <NuevoPeriodo abierto={periodos.length === 0} /> : null}
+
         {periodos.length === 0 ? (
           <EstadoVacio
             icono={CalendarRange}
             titulo="Todavía no hay períodos de ingreso"
-            descripcion="Cuando Dirección cargue un período, vas a ver acá sus cupos y su ocupación."
+            descripcion={
+              esDireccion
+                ? 'Cuando cargues el primero, vas a ver acá sus cupos y su ocupación.'
+                : 'Cuando Dirección cargue un período, vas a ver acá sus cupos y su ocupación.'
+            }
           />
         ) : (
           <section aria-label="Resumen de cupos" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
