@@ -285,9 +285,11 @@ export interface EntornoDeDocumentosConSesion {
 /**
  * Entorno para verificar los grants y RLS de `documentos`: a diferencia de
  * `prepararEntornoDeDocumentos`, el adaptador usa sesiones reales y no la clave
- * de servicio, que se saltea los permisos.
+ * de servicio, que se saltea los permisos. `estado` es el de la Postulación sembrada.
  */
-export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeDocumentosConSesion> {
+export async function prepararEntornoDeDocumentosConSesion(
+  estado: DatosDePostulacionSembrada['estado'] = 'ESPERANDO_DOCUMENTACION',
+): Promise<EntornoDeDocumentosConSesion> {
   const servicio = clienteDeServicio()
   const institucionId = await idDeLaInstitucionFrh(servicio)
 
@@ -296,7 +298,7 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
   const postulacion = await sembrarPostulacion(servicio, {
     aspiranteId: aspirante.id,
     periodoId: periodo.id,
-    estado: 'ESPERANDO_DOCUMENTACION',
+    estado,
   })
 
   const personal = await crearUsuario(servicio, dniUnico())

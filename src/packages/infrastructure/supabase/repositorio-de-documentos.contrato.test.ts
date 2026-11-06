@@ -4,9 +4,11 @@ import { Documento } from '@tfi/domain'
 import { probarContratoRepositorioDeDocumentos } from '@tfi/application/contratos'
 import { hayEntornoDePruebaConServicio } from './entorno-de-prueba'
 import {
+  clienteDeServicio,
   prepararEntornoDeDocumentos,
   prepararEntornoDeDocumentosConSesion,
 } from './prueba/entorno'
+import { RepositorioDeDocumentosSupabase } from './repositorio-de-documentos'
 
 /**
  * Contrato del adaptador de documentos contra Supabase.
@@ -91,6 +93,87 @@ describe.skipIf(!hayEntornoDePruebaConServicio())(
       const revisado = await entorno.delPersonal.obtenerPorId(documento.id)
       expect(revisado?.estado).toBe('APROBADO')
       expect(revisado?.revisadoPor).toBe(entorno.personalId)
+    })
+  },
+)
+
+function aprobado(documento: Documento, revisadoPor: string): Documento {
+  return new Documento(
+    documento.id,
+    documento.postulacionId,
+    documento.tipo,
+    documento.ruta,
+    documento.nombreArchivo,
+    documento.mimeType,
+    documento.tamanioBytes,
+    documento.vigencia,
+    'APROBADO',
+    documento.subidoPor,
+    revisadoPor,
+    documento.creadoEl,
+    null,
+    documento.creadoEl,
+    documento.actualizadoEl,
+  )
+}
+
+/**
+ * La base exige las reglas de SubirDocumento y EliminarDocumento aunque el
+ * aspirante llame a la API de Supabase directo, con su sesión y la clave pública.
+ */
+describe.skipIf(!hayEntornoDePruebaConServicio())(
+  'RLS de documentos: lo que el aspirante no puede hacer por fuera de la app',
+  () => {
+    it('no sube un documento ya aprobado', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const documento = aprobado(
+        documentoSubido(entorno.postulacionId, entorno.aspiranteId),
+        entorno.personalId,
+      )
+
+      await expect(entorno.delAspirante.guardar(documento)).rejects.toThrow()
+      expect(await entorno.delPersonal.obtenerPorId(documento.id)).toBeNull()
+    })
+
+    it('no sube documentos a nombre de otra persona', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const documento = documentoSubido(entorno.postulacionId, entorno.personalId)
+
+      await expect(entorno.delAspirante.guardar(documento)).rejects.toThrow()
+    })
+
+    it('no sube documentos si la Postulación no está en la etapa de documentación', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion('PAGO_PENDIENTE')
+      const documento = documentoSubido(entorno.postulacionId, entorno.aspiranteId)
+
+      await expect(entorno.delAspirante.guardar(documento)).rejects.toThrow()
+    })
+
+    it('no sube documentos después de la validación', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion('DOCUMENTACION_VALIDADA')
+      const documento = documentoSubido(entorno.postulacionId, entorno.aspiranteId)
+
+      await expect(entorno.delAspirante.guardar(documento)).rejects.toThrow()
+    })
+
+    it('no borra documentos después de la validación', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion('DOCUMENTACION_VALIDADA')
+      const documento = documentoSubido(entorno.postulacionId, entorno.aspiranteId)
+      await new RepositorioDeDocumentosSupabase(clienteDeServicio()).guardar(documento)
+
+      await entorno.delAspirante.eliminar(documento.id)
+
+      expect(await entorno.delPersonal.obtenerPorId(documento.id)).not.toBeNull()
+    })
+
+    it('borra los propios mientras la documentación está abierta', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const documento = documentoSubido(entorno.postulacionId, entorno.aspiranteId)
+      await entorno.delAspirante.guardar(documento)
+
+      await entorno.delAspirante.eliminar(documento.id)
+
+      expect(await entorno.delPersonal.obtenerPorId(documento.id)).toBeNull()
     })
   },
 )
