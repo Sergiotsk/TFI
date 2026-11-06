@@ -565,6 +565,14 @@ html {
   gap: 2.5rem 4rem;
   grid-template-columns: 1fr;
 }
+/* El título del problema ocupa todo el ancho de la card: así entra en dos renglones en vez de
+   partirse en la columna angosta del split. */
+.split--problema .split__titulo {
+  grid-column: 1 / -1;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  text-wrap: balance;
+  text-align: center;
+}
 .split__intro > * + * {
   margin-top: 1.1rem;
 }
@@ -1751,16 +1759,17 @@ html {
 /* ---------- Sobre nosotros ---------- */
 /* Fondo de útiles: solo un lavado tenue para que la sección no quede blanca. Va desenfocado y
    con opacidad baja a propósito, para que no se reconozca lo que hay en la foto. */
-.equipo-section-full {
+.equipo-section-full,
+.section--fondo-utiles,
+.section--fondo-roles {
   position: relative;
   isolation: isolate;
   overflow: clip;
-  background: var(--white);
-  padding-top: clamp(5rem, 12vw, 8rem);
-  padding-bottom: clamp(4rem, 10vw, 7rem);
 }
 
-.equipo-section-full::before {
+.equipo-section-full::before,
+.section--fondo-utiles::before,
+.section--fondo-roles::before {
   content: '';
   position: absolute;
   /* Se pasa del borde a propósito: el desenfoque se come los bordes y el recorte de la sección
@@ -1770,10 +1779,33 @@ html {
   pointer-events: none;
   /* fixed: la foto queda clavada a la ventana, no acompaña el scroll (la sección es larguísima
      porque el mazo se queda pegado). El desenfoque es para que no se entienda qué hay. */
-  background: url('/landing/img/fondo-utiles.webp') center / cover no-repeat
-    fixed;
   filter: blur(3px) saturate(1.6) contrast(1.08);
   opacity: 0.2;
+}
+
+.section--fondo-utiles::before {
+  background: url('/landing/img/fondo-utiles.webp') center / cover no-repeat
+    fixed;
+}
+
+.section--fondo-roles::before {
+  background: url('/landing/img/fondo-roles.webp') center / cover no-repeat
+    fixed;
+}
+
+.equipo-section-full {
+  background: var(--white);
+  padding-top: clamp(5rem, 12vw, 8rem);
+  padding-bottom: clamp(4rem, 10vw, 7rem);
+}
+
+/* Card blanca que separa el contenido del fondo de útiles, para que se lea cómodo. */
+.section-card {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: clamp(var(--radius-l), 2vw, 2rem);
+  box-shadow: 0 70px 140px -90px rgba(15, 23, 42, 0.7);
 }
 
 .equipo-wrapper {
