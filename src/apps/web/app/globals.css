@@ -128,3 +128,81 @@
     @apply font-sans;
     }
 }
+
+.cta-movil {
+  display: none;
+}
+@media (max-width: 720px) {
+  .cta-movil {
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    border-radius: var(--radius);
+    background: var(--utn);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 12px 28px -8px rgba(0, 40, 90, 0.6);
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+  .cta-movil:active {
+    transform: scale(0.99);
+    background: var(--utn-deep);
+  }
+  .site-footer {
+    padding-bottom: 6rem;
+  }
+}
+
+/* ---------- Pie y botón fijo en celulares ---------- */
+.site-footer {
+  background: var(--slate-900);
+  color: var(--slate-300);
+  padding-block: 2.5rem;
+  font-size: 0.95rem;
+}
+.site-footer__grid {
+  display: grid;
+  gap: 1.5rem;
+}
+.site-footer__nombre {
+  margin-bottom: 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #fff;
+}
+.site-footer__texto {
+  max-width: 48ch;
+}
+.site-footer__texto + .site-footer__texto {
+  margin-top: 0.5rem;
+}
+.site-footer__enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.site-footer__enlaces a {
+  color: #fff;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+.site-footer__enlaces a:hover {
+  color: var(--blue-200);
+}
+@media (min-width: 760px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+}
