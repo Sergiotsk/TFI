@@ -6,8 +6,15 @@
 !.specify/memory/constitution.md
 .claude/skills/speckit-*/
 
-# Archivos sueltos de trabajo
-arqSanti.jpeg
-
 node_modules
 package-lock.json
+*.tsbuildinfo
+.next/
+# Estado local del Supabase CLI (link, claves, ref del proyecto)
+supabase/.temp/
+# Lo genera Next en cada dev/build/typegen (docs: config/typescript)
+next-env.d.ts
+
+# Secretos: nunca se suben (constitución, Principio VII)
+.env*
+!.env.example

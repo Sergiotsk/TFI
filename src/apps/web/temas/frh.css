@@ -1,0 +1,160 @@
+/*
+ * Tema de UTN FRH para los paneles (Principio VIII). Se aplica con data-institucion="FRH" en
+ * app/(paneles)/layout.tsx, así que estos valores solo valen dentro de los paneles y no pisan la landing.
+ * El :root:has() lleva el tema a todo el documento mientras haya un panel montado: los tooltips y la barra en el
+ * celular (Sheet) se renderizan en un portal dentro de <body>, fuera del div con el atributo.
+ *
+ * Solo van los tokens que distinguen a la institución; el resto sale de globals.css. Por ahora repite los
+ * colores que globals.css todavía tiene en :root (los usan el login y el registro). Cuando exista el
+ * DESIGN.md (TODO(DESIGN_MD) de la constitución), los valores salen de ahí.
+ */
+[data-institucion='FRH'],
+:root:has([data-institucion='FRH']) {
+  --background: #f0f3ff;
+  --primary: #005a9c;
+  --primary-foreground: #ffffff;
+  --ring: #005a9c;
+  --sidebar: #ffffff;
+  --sidebar-primary: #005a9c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e1e9f7;
+  --sidebar-accent-foreground: #003f6e;
+  --sidebar-ring: #005a9c;
+}
+
+/*
+ * Panel del personal con el sistema de diseño "UTN Haedo" (tokens del kit de frh.utn.edu.ar): azul petróleo de
+ * marca, cian de acento, texto gris oscuro y esquinas rectas. Se acota con data-panel="personal", que pone
+ * (personal)/layout.tsx: el panel del aspirante sigue con los valores de arriba. Va después para ganarle al
+ * :root:has() de arriba, que tiene la misma especificidad.
+ */
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']),
+:root:has([data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante'])) {
+  --background: #f3f7f8;
+  --foreground: #454545;
+  --card: #ffffff;
+  --card-foreground: #454545;
+  --popover: #ffffff;
+  --popover-foreground: #454545;
+  --primary: #00455c;
+  --primary-foreground: #ffffff;
+  --secondary: #e6f0f3;
+  --secondary-foreground: #00455c;
+  --muted: #eef3f5;
+  --muted-foreground: #454545;
+  --accent: #e6f0f3;
+  --accent-foreground: #00455c;
+  --destructive: #d1243c;
+  --border: #d8e2e6;
+  --input: #7d9fab;
+  --ring: #157feb;
+  /* El sitio es de esquinas rectas: botones, tarjetas e inputs sin redondeo. */
+  --radius: 0rem;
+
+  /* Barra lateral en azul petróleo, con el cian marcando el ítem activo. */
+  --sidebar: #00455c;
+  --sidebar-foreground: rgb(255 255 255 / 0.86);
+  --sidebar-primary: #00d2f2;
+  --sidebar-primary-foreground: #00455c;
+  --sidebar-accent: rgb(255 255 255 / 0.12);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.18);
+  --sidebar-ring: #00d2f2;
+
+  /* Paleta de señal del sitio: estados y categorías. Los textos encima están medidos (sistema "UTN Haedo"). */
+  --senal-verde: #8dcc3d;
+  --senal-ambar: #ffab00;
+  --senal-violeta: #b047b3;
+  --senal-rojo: #d1243c;
+  --senal-neutro: #eeeeee;
+  /* Cian de los gráficos: lo pendiente, al lado del azul petróleo de lo ya ocupado. */
+  --senal-cian: #00b8d5;
+
+  /* Las tarjetas no llevan borde: se despegan del fondo con esta sombra. */
+  --sombra-tarjeta: 0 0 10px 0 rgb(0 0 0 / 0.13);
+  /* Alto de la barra superior: el fondo temático arranca debajo. */
+  --alto-barra-superior: 58px;
+}
+
+/* La tipografía va solo en el div del panel: la variable de next/font la define la clase de ese mismo div. */
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) {
+  --font-sans: var(--font-public-sans);
+}
+
+/*
+ * Botones del personal: 44 px de alto (el mínimo táctil del sistema) y el secundario blanco con borde de marca. Se
+ * pisan por data-variant y data-size, como las insignias: button.tsx lo comparte el aspirante. Los de ícono (la
+ * barra superior, por ejemplo) quedan como están.
+ */
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-slot='button']:not([data-size^='icon']) {
+  min-height: 44px;
+  padding-inline: 16px;
+  font-size: 15px;
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-slot='button'][data-variant='outline'] {
+  border-color: var(--primary);
+  background: var(--card);
+  color: var(--primary);
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-slot='button'][data-variant='outline']:hover {
+  background: var(--accent);
+}
+
+/*
+ * Fondo del contenido del personal, debajo de la barra superior blanca. Cuatro capas, de arriba hacia abajo:
+ * trazos inclinados en los colores de señal (el eco de los trazos de "HAEDO" en el logo), una trama de X y una
+ * grilla de puntos en azul petróleo al 9 %, sobre el color base. Las opacidades ya vienen bajas en los SVG: el fondo
+ * tiene que quedar sutil para que resalten las tarjetas blancas.
+ */
+[data-institucion='FRH'] [data-panel='personal'] [data-slot='sidebar-inset'],
+[data-institucion='FRH'] [data-panel='aspirante'] {
+  background-color: var(--background);
+  background-image:
+    url('/instituciones/frh/fondo-trazos.svg'), url('/instituciones/frh/trama-x.svg'),
+    radial-gradient(rgb(0 69 92 / 0.09) 1px, transparent 1.5px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position:
+    right 0 top var(--alto-barra-superior),
+    0 0,
+    0 0;
+  background-size:
+    600px auto,
+    48px 48px,
+    24px 24px;
+}
+
+/*
+ * Insignias de estado del personal: colores llenos de la paleta de señal, esquinas de 3 px y sin el punto. Las
+ * clases de insignia-de-estado.tsx siguen siendo las del aspirante; acá se pisan por el tono (data-tono), porque
+ * esta hoja no está en una capa y le gana a las utilidades de Tailwind.
+ */
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono] {
+  gap: 0;
+  border-radius: 3px;
+  border-color: transparent;
+  padding: 3px 8px;
+  font-weight: 700;
+  color: var(--primary);
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono] > [aria-hidden='true'] {
+  display: none;
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono='exito'] {
+  background: var(--senal-verde);
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono='aviso'] {
+  background: var(--senal-ambar);
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono='revision'] {
+  background: var(--senal-violeta);
+  color: #ffffff;
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono='error'] {
+  border-color: var(--senal-rojo);
+  background: #ffffff;
+  color: var(--senal-rojo);
+}
+[data-institucion='FRH'] :is([data-panel='personal'], [data-panel='aspirante']) [data-tono='neutro'] {
+  background: var(--senal-neutro);
+  color: var(--foreground);
+}

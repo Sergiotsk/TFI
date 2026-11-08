@@ -93,8 +93,14 @@ rechazadas (constitución, Principio II).
 stateDiagram-v2
     [*] --> PREINSCRIPTO: carga datos mínimos y acepta condiciones
     PREINSCRIPTO --> PAGO_PENDIENTE: elige medio de pago
-    PAGO_PENDIENTE --> VACANTE_CONFIRMADA: pago acreditado (Tesorería o Pagos360)
-    PAGO_PENDIENTE --> VENCIDO: vence el plazo
+    PAGO_PENDIENTE --> VACANTE_CONFIRMADA: pago acreditado en plazo y con cupo (Tesorería o Pagos360)
+    PAGO_PENDIENTE --> VENCIDO: vence el plazo (sin retener cupo)
+    VENCIDO --> PAGO_PENDIENTE: reintenta, con un plazo nuevo
+    VENCIDO --> VACANTE_CONFIRMADA: pagó a tiempo, pero se informó después
+    PAGO_PENDIENTE --> PAGO_EN_REVISION: pago sin cupo o fuera de plazo
+    VENCIDO --> PAGO_EN_REVISION: pago fuera de plazo, o en plazo y sin cupo
+    PAGO_EN_REVISION --> VACANTE_CONFIRMADA: Dirección acepta
+    PAGO_EN_REVISION --> VENCIDO: Dirección rechaza (se devuelve el pago)
     VACANTE_CONFIRMADA --> ESPERANDO_DOCUMENTACION: se habilita el panel de carga
     ESPERANDO_DOCUMENTACION --> DOCUMENTACION_EN_REVISION: sube DNI y analítico
     DOCUMENTACION_EN_REVISION --> OBSERVADO: Secretaría TUP detecta un problema
@@ -105,6 +111,10 @@ stateDiagram-v2
 
 > El estado final y su nombre dependen de cómo se defina la entrega de la lista de confirmados
 > (ver pendientes). `CONFIRMADO_PARA_EXPORTAR` es un nombre provisorio.
+>
+> `PAGO_PENDIENTE` **no retiene cupo**: el pago acreditado es la única reserva. El plazo de cada aspirante se
+> evalúa con la **fecha de pago**, y los casos sin cupo o fuera de plazo los decide Dirección
+> ([ADR-0005](../decisions/0005-excepciones-de-vacante-decide-direccion.md)).
 
 ## 5. Integración con la facultad: solo por archivo
 

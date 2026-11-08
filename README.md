@@ -40,7 +40,9 @@ stack. Todavía no hay código de producción.
 | Si querés... | Leé |
 |---|---|
 | Conocer las reglas del proyecto | [Constitución](.specify/memory/constitution.md) |
+| Instalar y correr el proyecto (comandos de desarrollo) | [src/README.md](src/README.md) |
 | Escribir código | [Guía de estructura del código](docs/architecture/estructura-codigo.md) |
+| Levantar la base local y crear migraciones | [Supabase](src/supabase/README.md) |
 | Ver la arquitectura en diagramas | [Visión general](docs/architecture/overview.md) y [secuencia de pago](docs/architecture/secuencia-pago.md) |
 | Entender por qué se decidió algo | [Decisiones (ADRs)](docs/decisions/) |
 | Ver entrevistas e ideación | [Discovery](docs/discovery/) |
