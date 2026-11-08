@@ -8,12 +8,34 @@
  *   directamente (los triggers y las politicas RLS no se ven desde el rol anon).
  *
  * Si faltan, los tests de contrato se saltan solos: la suite de unidad corre siempre.
+ *
+ * SUPABASE_TEST_URL tiene que ser local: los contratos crean usuarios, períodos y
+ * postulaciones que no se borran. Con otra URL la corrida falla, no se saltea.
  */
 
+const HOSTS_LOCALES = ['127.0.0.1', 'localhost', '[::1]']
+
+export function esUrlLocal(url: string): boolean {
+  try {
+    return HOSTS_LOCALES.includes(new URL(url).hostname)
+  } catch {
+    return false
+  }
+}
+
+function exigirUrlLocal(url: string): void {
+  if (!esUrlLocal(url)) {
+    throw new Error(
+      'SUPABASE_TEST_URL no apunta a un Supabase local: los contratos crean datos que no se borran.',
+    )
+  }
+}
+
 export function hayEntornoDePrueba(): boolean {
-  return Boolean(
-    process.env.SUPABASE_TEST_URL && process.env.SUPABASE_TEST_PUBLISHABLE_KEY,
-  )
+  const url = process.env.SUPABASE_TEST_URL
+  if (url) exigirUrlLocal(url)
+
+  return Boolean(url && process.env.SUPABASE_TEST_PUBLISHABLE_KEY)
 }
 
 /**
@@ -25,7 +47,9 @@ export function hayEntornoDePruebaConServicio(): boolean {
 }
 
 export function urlDePrueba(): string {
-  return exigir('SUPABASE_TEST_URL')
+  const url = exigir('SUPABASE_TEST_URL')
+  exigirUrlLocal(url)
+  return url
 }
 
 export function clavePublicaDePrueba(): string {

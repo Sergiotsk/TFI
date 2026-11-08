@@ -17,6 +17,19 @@ pnpm test             # Vitest, proyecto `unidad`: dominio, casos de uso, fakes 
 pnpm test:contratos   # Vitest, proyecto `contratos`: suites de contrato contra Supabase local
 ```
 
+Los contratos leen sus variables de `src/.env.test` (ignorado por git). Con `supabase start` corriendo, crealo con los
+valores de `supabase status`. Tiene que apuntar al Supabase **local**: los contratos crean datos que no se borran, y
+con cualquier otra URL la corrida falla a propósito.
+
+```bash
+SUPABASE_TEST_URL=http://127.0.0.1:54321
+SUPABASE_TEST_PUBLISHABLE_KEY=<anon / publishable key>
+SUPABASE_TEST_SERVICE_ROLE_KEY=<service_role key>
+```
+
+Sin ese archivo (ni las variables en el shell) las suites se saltan solas y Vitest las muestra como `skipped`.
+`SUPABASE_TEST_DOMAIN` es opcional: cambia el dominio de los emails de prueba (por defecto, `utnfrh.edu.ar`).
+
 En el editor, los errores de lint aparecen con la extensión **ESLint** (`dbaeumer.vscode-eslint`), que el repo
 recomienda al abrirlo. `.vscode/settings.json` le indica que la config está en `src/`: sin eso, abriendo la raíz
 del repo, la extensión no la encuentra.
