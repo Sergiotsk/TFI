@@ -12,13 +12,25 @@ const ADMITEN_DOCUMENTOS = [
 ]
 
 export default async function DocumentacionPage() {
-  const postulacionId = await conActorDePanel(async ({ consultarPostulacion }, actor) => {
-    const propias = await consultarPostulacion.listarMias(actor)
-    const enDocumentacion = propias.find((postulacion: PostulacionConsultada) =>
-      ADMITEN_DOCUMENTOS.includes(postulacion.estado),
-    )
-    return enDocumentacion?.id ?? null
-  })
+  const { postulacionId, tiposCargados } = await conActorDePanel(
+    async ({ consultarPostulacion, listarDocumentos }, actor) => {
+      const propias = await consultarPostulacion.listarMias(actor)
+      const enDocumentacion = propias.find((postulacion: PostulacionConsultada) =>
+        ADMITEN_DOCUMENTOS.includes(postulacion.estado),
+      )
+      if (!enDocumentacion) return { postulacionId: null, tiposCargados: [] }
+
+      const cargados = await listarDocumentos.ejecutar(
+        actor,
+        { postulacionId: enDocumentacion.id },
+        { pagina: 1, porPagina: 50 },
+      )
+      return {
+        postulacionId: enDocumentacion.id,
+        tiposCargados: cargados.items.map((documento) => documento.tipo),
+      }
+    },
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
@@ -56,7 +68,7 @@ export default async function DocumentacionPage() {
           </div>
 
           <div className="bg-card shadow-(--sombra-tarjeta) p-6">
-            <UploadDocumentos postulacionId={postulacionId} />
+            <UploadDocumentos postulacionId={postulacionId} tiposCargados={tiposCargados} />
           </div>
         </div>
 

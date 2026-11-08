@@ -21,6 +21,11 @@ export const esquemaSubidaDeDocumento = z.object({
   archivo: z.instanceof(File, { message: 'Falta el archivo' }),
 })
 
+/** `POST /api/documentos/:id/reemplazo` (multipart/form-data) */
+export const esquemaReemplazoDeDocumento = z.object({
+  archivo: z.instanceof(File, { message: 'Falta el archivo' }),
+})
+
 /** `PATCH /api/documentos/:id` cuando se revisa el estado. */
 export const esquemaRevisionDeDocumento = z
   .object({

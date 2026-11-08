@@ -1,4 +1,4 @@
-import { Documento } from '@tfi/domain'
+import { Documento, DocumentoDuplicado } from '@tfi/domain'
 import type { EstadoDocumento, TipoDeDocumento } from '@tfi/domain'
 import { armarPagina, rangoDe } from '../../paginacion'
 import type { Pagina, Paginacion } from '../../paginacion'
@@ -68,6 +68,17 @@ export class RepositorioDeDocumentosFake implements RepositorioDeDocumentos {
   }
 
   async guardar(documento: Documento): Promise<void> {
+    const repetido =
+      documento.estado !== 'OBSERVADO' &&
+      this.documentos.some(
+        (d) =>
+          d.id !== documento.id &&
+          d.postulacionId === documento.postulacionId &&
+          d.tipo === documento.tipo &&
+          d.estado !== 'OBSERVADO',
+      )
+    if (repetido) throw new DocumentoDuplicado(documento.tipo)
+
     const index = this.documentos.findIndex((d) => d.id === documento.id)
     if (index >= 0) {
       this.documentos[index] = documento

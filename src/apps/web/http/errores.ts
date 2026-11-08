@@ -8,6 +8,7 @@ import {
 } from '@tfi/application'
 import {
   CuposPorDebajoDeConfirmadas,
+  DocumentoDuplicado,
   PeriodoCerrado,
   PeriodoDuplicado,
   PeriodoInvalido,
@@ -44,6 +45,9 @@ export function respuestaDeErrorDePostulacion(error: unknown): NextResponse {
   }
   if (error instanceof TransicionDeDocumentoInvalida) {
     return jsonError('TRANSICION_INVALIDA', error.message, 409)
+  }
+  if (error instanceof DocumentoDuplicado) {
+    return jsonError('DOCUMENTO_DUPLICADO', error.message, 409)
   }
   if (error instanceof ObservacionDeDocumentoRequerida) {
     return jsonError('OBSERVACION_REQUERIDA', error.message, 400)

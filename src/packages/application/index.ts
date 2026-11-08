@@ -31,6 +31,7 @@ export type { RevisionDeDocumento } from './casos-de-uso/documentos/revisar-docu
 export { ActualizarDocumentoUseCase } from './casos-de-uso/documentos/actualizar-documento'
 export type { CambiosDeDocumento } from './casos-de-uso/documentos/actualizar-documento'
 export { EliminarDocumentoUseCase } from './casos-de-uso/documentos/eliminar-documento'
+export { ReemplazarDocumentoUseCase } from './casos-de-uso/documentos/reemplazar-documento'
 export type {
   ServicioDeAutenticacion,
   DatosDeRegistro,

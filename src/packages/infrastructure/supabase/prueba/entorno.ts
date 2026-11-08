@@ -21,6 +21,7 @@ import {
 } from '../entorno-de-prueba'
 import { mapearPeriodo } from '../mapeadores/periodo'
 import { mapearPostulacion } from '../mapeadores/postulacion'
+import { AlmacenDeArchivosSupabase } from '../almacen-de-archivos'
 import { RepositorioDeDocumentosSupabase } from '../repositorio-de-documentos'
 import { RepositorioDeIntencionesDePagoSupabase } from '../repositorio-de-intenciones-de-pago'
 import { RepositorioDePeriodosSupabase } from '../repositorio-de-periodos'
@@ -273,6 +274,8 @@ export async function prepararEntornoDeDocumentos(): Promise<EntornoDeDocumentos
 }
 
 export interface EntornoDeDocumentosConSesion {
+  institucionId: string
+  almacenDelAspirante: AlmacenDeArchivosSupabase
   postulacionId: string
   /** Adaptador con la sesión del aspirante dueño de la Postulación. */
   delAspirante: RepositorioDeDocumentosSupabase
@@ -285,9 +288,11 @@ export interface EntornoDeDocumentosConSesion {
 /**
  * Entorno para verificar los grants y RLS de `documentos`: a diferencia de
  * `prepararEntornoDeDocumentos`, el adaptador usa sesiones reales y no la clave
- * de servicio, que se saltea los permisos.
+ * de servicio, que se saltea los permisos. `estado` es el de la Postulación sembrada.
  */
-export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeDocumentosConSesion> {
+export async function prepararEntornoDeDocumentosConSesion(
+  estado: DatosDePostulacionSembrada['estado'] = 'ESPERANDO_DOCUMENTACION',
+): Promise<EntornoDeDocumentosConSesion> {
   const servicio = clienteDeServicio()
   const institucionId = await idDeLaInstitucionFrh(servicio)
 
@@ -296,7 +301,7 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
   const postulacion = await sembrarPostulacion(servicio, {
     aspiranteId: aspirante.id,
     periodoId: periodo.id,
-    estado: 'ESPERANDO_DOCUMENTACION',
+    estado,
   })
 
   const personal = await crearUsuario(servicio, dniUnico())
@@ -306,9 +311,13 @@ export async function prepararEntornoDeDocumentosConSesion(): Promise<EntornoDeD
     .eq('id', personal.id)
   if (error) throw new Error(`No se pudo dar el rol de Secretaría: ${error.message}`)
 
+  const clienteDelAspirante = await clienteConSesion(aspirante.email)
+
   return {
     postulacionId: postulacion.id,
-    delAspirante: new RepositorioDeDocumentosSupabase(await clienteConSesion(aspirante.email)),
+    institucionId,
+    almacenDelAspirante: new AlmacenDeArchivosSupabase(clienteDelAspirante),
+    delAspirante: new RepositorioDeDocumentosSupabase(clienteDelAspirante),
     aspiranteId: aspirante.id,
     delPersonal: new RepositorioDeDocumentosSupabase(await clienteConSesion(personal.email)),
     personalId: personal.id,

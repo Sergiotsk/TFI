@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Upload, FileCheck, AlertCircle, ArrowRight, X } from 'lucide-react'
 import type { TipoDeDocumento } from '@tfi/domain'
 import { Button } from '@/components/ui/button'
@@ -15,9 +16,16 @@ interface DocumentoItem {
 }
 
 // Demo: sube cada archivo a POST /api/documentos (multipart). La Postulación la resuelve la página.
-export function UploadDocumentos({ postulacionId }: { postulacionId: string | null }) {
+export function UploadDocumentos({
+  postulacionId,
+  tiposCargados = [],
+}: {
+  postulacionId: string | null
+  /** Los tipos que la Postulación ya tiene: se cambian desde el panel, acá no se piden. */
+  tiposCargados?: readonly TipoDeDocumento[]
+}) {
   const router = useRouter()
-  const [documentos, setDocumentos] = useState<DocumentoItem[]>([
+  const [documentos, setDocumentos] = useState<DocumentoItem[]>(([
     {
       id: 'dni',
       tipo: 'DNI',
@@ -39,7 +47,7 @@ export function UploadDocumentos({ postulacionId }: { postulacionId: string | nu
       descripcion: 'Comprobante de transferencia bancaria o recibo oficial de Mercado Pago.',
       archivo: null,
     },
-  ])
+  ] satisfies DocumentoItem[]).filter((doc) => !tiposCargados.includes(doc.tipo)))
 
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -69,8 +77,10 @@ export function UploadDocumentos({ postulacionId }: { postulacionId: string | nu
         const respuesta = await fetch('/api/documentos', { method: 'POST', body: formulario })
         if (!respuesta.ok) {
           const cuerpo = (await respuesta.json().catch(() => null)) as {
-            error?: { mensaje?: string }
+            error?: { codigo?: string; mensaje?: string }
           } | null
+          // Ya estaba cargado (un reintento o un doble envío): se sigue con los que falten.
+          if (cuerpo?.error?.codigo === 'DOCUMENTO_DUPLICADO') continue
           setError(`${doc.titulo}: ${cuerpo?.error?.mensaje ?? 'no se pudo subir'}`)
           return
         }
@@ -82,6 +92,17 @@ export function UploadDocumentos({ postulacionId }: { postulacionId: string | nu
     } finally {
       setEnviando(false)
     }
+  }
+
+  if (documentos.length === 0) {
+    return (
+      <div className="space-y-3 text-sm text-foreground">
+        <p>Ya cargaste toda la documentación. Si te equivocaste de archivo, podés reemplazarlo desde tu panel.</p>
+        <Link href="/aspirante/postulacion" className="font-semibold text-primary underline">
+          Volver a mi postulación
+        </Link>
+      </div>
+    )
   }
 
   return (

@@ -33,13 +33,18 @@ export function CorregirDocumento({ postulacionId, documentoId, tipo }: Corregir
 
       const subida = await fetch('/api/documentos', { method: 'POST', body: formulario })
       if (!subida.ok) {
-        setError(await mensajeDeRespuesta(subida, 'No se pudo subir el archivo nuevo'))
-        return
+        const fallo = await errorDeRespuesta(subida)
+        // Un reintento: el archivo nuevo ya estaba cargado y falta quitar el observado.
+        if (fallo?.codigo !== 'DOCUMENTO_DUPLICADO') {
+          setError(fallo?.mensaje ?? 'No se pudo subir el archivo nuevo')
+          return
+        }
       }
 
       const baja = await fetch(`/api/documentos/${documentoId}`, { method: 'DELETE' })
       if (!baja.ok) {
-        setError(await mensajeDeRespuesta(baja, 'Se subió el archivo nuevo, pero no se pudo quitar el observado'))
+        const fallo = await errorDeRespuesta(baja)
+        setError(fallo?.mensaje ?? 'Se subió el archivo nuevo, pero no se pudo quitar el observado')
         return
       }
 
@@ -71,7 +76,9 @@ export function CorregirDocumento({ postulacionId, documentoId, tipo }: Corregir
   )
 }
 
-async function mensajeDeRespuesta(respuesta: Response, predeterminado: string): Promise<string> {
-  const cuerpo = (await respuesta.json().catch(() => null)) as { error?: { mensaje?: string } } | null
-  return cuerpo?.error?.mensaje ?? predeterminado
+export async function errorDeRespuesta(respuesta: Response) {
+  const cuerpo = (await respuesta.json().catch(() => null)) as {
+    error?: { codigo?: string; mensaje?: string }
+  } | null
+  return cuerpo?.error
 }
