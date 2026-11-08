@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { PanelDePruebas } from '@/components/pruebas/panel-de-pruebas'
+import { laboratorioHabilitado } from '@/lib/laboratorio'
 
 export const metadata: Metadata = {
   title: 'Laboratorio de endpoints',
@@ -7,5 +9,7 @@ export const metadata: Metadata = {
 }
 
 export default function PaginaDePruebas() {
+  if (!laboratorioHabilitado(process.env.VERCEL_ENV)) notFound()
+
   return <PanelDePruebas />
 }

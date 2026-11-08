@@ -1,10 +1,8 @@
-// src/apps/web/app/aspirante/inscripcion/page.tsx
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { createBrowserClient } from '@supabase/ssr'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { 
@@ -20,13 +18,15 @@ import {
 } from 'lucide-react'
 import { HeaderInstitucional } from '@/components/layout/header-institucional'
 import { FooterInstitucional } from '@/components/layout/footer-institucional'
-import { CargaDatosSchema } from '@/http/schemas/carga-datos.schema'
+import Link from 'next/link'
+import { inscribir } from './actions'
 
 export default function InscripcionPage() {
   const router = useRouter()
   const [errores, setErrores] = useState<Record<string, string | undefined>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorServidor, setErrorServidor] = useState<string | null>(null)
+  const [emailPorConfirmar, setEmailPorConfirmar] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -35,6 +35,8 @@ export default function InscripcionPage() {
     password: '',
     confirmarPassword: '',
     dni: '',
+    cuil: '',
+    fechaNacimiento: '',
     genero: '',
     telefono: '',
     direccion: '',
@@ -61,80 +63,26 @@ export default function InscripcionPage() {
     e.preventDefault()
     setIsSubmitting(true)
     setErrorServidor(null)
-
-    const validacion = CargaDatosSchema.safeParse(formData)
-    const nuevosErrores: Record<string, string> = {}
-
-    if (!validacion.success) {
-      validacion.error.issues.forEach((err) => {
-        const campo = err.path[0] as string
-        nuevosErrores[campo] = err.message
-      })
-    }
-
-    if (!formData.password) {
-      nuevosErrores.password = 'Ingresá una contraseña'
-    } else if (formData.password.length < 6) {
-      nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres'
-    }
-
-    if (!formData.confirmarPassword) {
-      nuevosErrores.confirmarPassword = 'Confirmá tu contraseña'
-    } else if (formData.password !== formData.confirmarPassword) {
-      nuevosErrores.confirmarPassword = 'Las contraseñas no coinciden'
-    }
-
-    if (Object.keys(nuevosErrores).length > 0) {
-      setErrores(nuevosErrores)
-      setIsSubmitting(false)
-      return
-    }
+    setErrores({})
 
     try {
-      // Cliente de Supabase en el navegador
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321'
-      const supabaseAnonKey =
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-        ''
+      const resultado = await inscribir(formData)
 
-      const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
-
-// Registrar la cuenta en auth.users cumpliendo los requisitos del trigger
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            nombre: formData.nombre,
-            apellido: formData.apellido,
-            dni: formData.dni,
-            cuil: formData.dni,
-            fecha_nacimiento: '2000-01-01',
-            sexo: formData.genero === 'Femenino' ? 'F' : (formData.genero === 'Masculino' ? 'M' : 'O'),
-            telefono: formData.telefono,
-            direccion: formData.direccion,
-          },
-        },
-      })
-      if (error) {
-        setErrorServidor(error.message)
-        setIsSubmitting(false)
+      if (resultado.estado === 'REGISTRADO') {
+        router.push('/panel')
         return
       }
-
-      // Cierra la sesión automática que crea Supabase al registrarse
-      await supabase.auth.signOut()
-
-      // Con la sesión cerrada, te manda al login a autenticarte manualmente
-      router.push(`/login?email=${encodeURIComponent(formData.email)}`)
-
-      // Con el usuario creado, redirige a login con el email ya cargado
-      router.push(`/login?email=${encodeURIComponent(formData.email)}`)
-    } catch (err) {
-      setErrorServidor(err instanceof Error ? err.message : 'Ocurrió un error al registrar la cuenta')
-      setIsSubmitting(false)
+      if (resultado.estado === 'CONFIRMAR_EMAIL') {
+        setEmailPorConfirmar(formData.email)
+      } else if (resultado.estado === 'CON_ERRORES') {
+        setErrores(resultado.errores)
+      } else {
+        setErrorServidor(resultado.mensaje)
+      }
+    } catch {
+      setErrorServidor('No se pudo conectar con el servidor. Probá de nuevo.')
     }
+    setIsSubmitting(false)
   }
 
   return (
@@ -163,6 +111,19 @@ export default function InscripcionPage() {
           </span>
         </div>
 
+        {emailPorConfirmar ? (
+          <div className="bg-card/95 backdrop-blur-md rounded-2xl border border-border p-6 sm:p-10 shadow-xl">
+            <h1 className="text-2xl font-black tracking-tight text-foreground">Revisá tu correo</h1>
+            <p className="mt-3 text-sm leading-relaxed text-foreground">
+              Te enviamos un enlace de confirmación a <strong>{emailPorConfirmar}</strong>. Cuando confirmes tu cuenta, vas a
+              poder iniciar sesión y continuar con tu postulación.
+            </p>
+            <Link href="/login" className="mt-5 inline-block text-sm font-bold text-primary hover:underline">
+              Ir a iniciar sesión
+            </Link>
+          </div>
+        ) : (
+        <>
         {/* Tarjeta del Formulario */}
         <div className="bg-card/95 backdrop-blur-md rounded-2xl border border-border p-6 sm:p-10 shadow-xl">
           <div className="mb-6 border-b border-border pb-6">
@@ -244,7 +205,7 @@ export default function InscripcionPage() {
               <div>
                 <label htmlFor="password" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
                   <span>Contraseña *</span>
-                  <span className="text-[10px] font-normal text-muted-foreground">Mínimo 6 caracteres</span>
+                  <span className="text-[10px] font-normal text-muted-foreground">Mínimo 8 caracteres</span>
                 </label>
                 <div className="relative">
                   <Input
@@ -326,6 +287,45 @@ export default function InscripcionPage() {
               </div>
             </div>
 
+            {/* CUIL y Fecha de nacimiento */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="cuil" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
+                  <span>CUIL *</span>
+                  <span className="text-[10px] font-normal text-muted-foreground">11 dígitos</span>
+                </label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    id="cuil"
+                    name="cuil"
+                    value={formData.cuil}
+                    onChange={handleChange}
+                    placeholder="Ej: 20-43829114-7"
+                    maxLength={13}
+                    className={`pl-10 ${errores.cuil ? 'border-destructive bg-destructive/10' : ''}`}
+                  />
+                  <IdCard className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+                {errores.cuil && <p className="text-destructive text-xs mt-1">{errores.cuil}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="fechaNacimiento" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
+                  <span>Fecha de nacimiento *</span>
+                </label>
+                <Input
+                  type="date"
+                  id="fechaNacimiento"
+                  name="fechaNacimiento"
+                  value={formData.fechaNacimiento}
+                  onChange={handleChange}
+                  className={errores.fechaNacimiento ? 'border-destructive bg-destructive/10' : ''}
+                />
+                {errores.fechaNacimiento && <p className="text-destructive text-xs mt-1">{errores.fechaNacimiento}</p>}
+              </div>
+            </div>
+
             {/* Teléfono */}
             <div>
               <label htmlFor="telefono" className="flex items-center justify-between text-xs font-bold text-foreground mb-1.5">
@@ -403,7 +403,7 @@ export default function InscripcionPage() {
                   className="mt-1 h-4 w-4 text-primary rounded border-input focus:ring-primary"
                 />
                 <span className="text-xs text-foreground leading-relaxed">
-                  Entiendo que al presionar <strong>Siguiente</strong> pasaré al inicio de sesión y a la lectura de los requisitos
+                  Entiendo que al presionar <strong>Siguiente</strong> se creará mi cuenta y que después voy a leer los requisitos
                   académicos y aranceles.
                 </span>
               </label>
@@ -439,6 +439,8 @@ export default function InscripcionPage() {
           </div>
           <span className="font-medium text-muted-foreground">Arancel de Reserva TUP: $100.000 ARS</span>
         </div>
+        </>
+        )}
       </main>
 
       <FooterInstitucional />
