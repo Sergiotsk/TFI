@@ -6,8 +6,15 @@ import type {
   Paginacion,
   RepositorioDeDocumentos,
 } from '@tfi/application'
+import { DocumentoDuplicado } from '@tfi/domain'
 import type { Documento } from '@tfi/domain'
 import { mapearDocumento } from './mapeadores/documento'
+
+const INDICE_DE_DOCUMENTO_ACTIVO = 'documentos_un_activo_por_tipo'
+
+function violaDocumentoActivo(error: { code: string; message: string }): boolean {
+  return error.code === '23505' && error.message.includes(INDICE_DE_DOCUMENTO_ACTIVO)
+}
 
 /**
  * Adaptador de `RepositorioDeDocumentos` sobre Supabase.
@@ -91,6 +98,7 @@ export class RepositorioDeDocumentosSupabase implements RepositorioDeDocumentos 
       .eq('id', documento.id)
       .select('id')
     if (actualizacion.error) {
+      if (violaDocumentoActivo(actualizacion.error)) throw new DocumentoDuplicado(documento.tipo)
       throw new Error(`No se pudo guardar el documento: ${actualizacion.error.message}`)
     }
     if (actualizacion.data.length > 0) return
@@ -98,6 +106,7 @@ export class RepositorioDeDocumentosSupabase implements RepositorioDeDocumentos 
     const { error } = await this.supabase
       .from('documentos')
       .insert({ id: documento.id, ...columnas })
+    if (error && violaDocumentoActivo(error)) throw new DocumentoDuplicado(documento.tipo)
     if (error) throw new Error(`No se pudo guardar el documento: ${error.message}`)
   }
 

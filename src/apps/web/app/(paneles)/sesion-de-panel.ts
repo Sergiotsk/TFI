@@ -9,6 +9,7 @@ import {
 } from '@tfi/application'
 import {
   CuposPorDebajoDeConfirmadas,
+  DocumentoDuplicado,
   PeriodoCerrado,
   PeriodoDuplicado,
   PeriodoInvalido,
@@ -58,6 +59,7 @@ export function mensajeDeError(error: unknown): string {
     error instanceof ConflictoDeEstado ||
     error instanceof SolicitudInvalida ||
     error instanceof DatosDuplicados ||
+    error instanceof DocumentoDuplicado ||
     error instanceof CuposPorDebajoDeConfirmadas ||
     error instanceof PeriodoInvalido ||
     error instanceof PeriodoDuplicado

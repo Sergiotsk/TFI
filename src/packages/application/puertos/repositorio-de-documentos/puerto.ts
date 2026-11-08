@@ -16,7 +16,8 @@ export interface FiltrosDeDocumento {
  * - `obtenerPorPostulacion` devuelve todos los documentos de una Postulación
  *   (se usa para decidir el estado de la documentación).
  * - `guardar` inserta o actualiza; `eliminar` borra la fila. El archivo vive en
- *   Supabase Storage y lo maneja `AlmacenDeArchivos`.
+ *   Supabase Storage y lo maneja `AlmacenDeArchivos`. Una Postulación tiene un
+ *   solo documento activo (no observado) por tipo: si no, `DocumentoDuplicado`.
  */
 export interface RepositorioDeDocumentos {
   listar(

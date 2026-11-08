@@ -1,4 +1,12 @@
-import type { EstadoDocumento } from './estado'
+import type { EstadoDocumento, TipoDeDocumento } from './estado'
+
+/** La Postulación ya tiene un documento activo (no observado) de ese tipo. */
+export class DocumentoDuplicado extends Error {
+  constructor(readonly tipo: TipoDeDocumento) {
+    super(`La Postulación ya tiene un documento de tipo ${tipo} cargado`)
+    this.name = 'DocumentoDuplicado'
+  }
+}
 
 /** El documento no puede pasar de un estado a otro. */
 export class TransicionDeDocumentoInvalida extends Error {

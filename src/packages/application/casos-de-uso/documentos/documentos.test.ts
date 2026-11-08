@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { Documento, PeriodoDeIngreso } from '@tfi/domain'
+import { describe, expect, it, vi } from 'vitest'
+import { Documento, DocumentoDuplicado, PeriodoDeIngreso } from '@tfi/domain'
 import type { Actor } from '../actor'
 import { ActualizarDocumentoUseCase } from './actualizar-documento'
 import { ConsultarDocumentoUseCase } from './consultar-documento'
@@ -159,6 +159,45 @@ describe('SubirDocumento', () => {
     expect((await postulaciones.obtenerPorId(postulacion.id))?.estado).toBe(
       'ESPERANDO_DOCUMENTACION',
     )
+  })
+
+  it('no deja subir otro documento activo del mismo tipo y no deja su archivo en el storage', async () => {
+    const { subir, documentos, almacen, postulacion } = await armarConPeriodo('VACANTE_CONFIRMADA')
+    const datos = {
+      postulacionId: postulacion.id,
+      tipo: 'DNI' as const,
+      vigencia: 365,
+      archivo: archivo(),
+    }
+    const primero = await subir.ejecutar(aspirante, datos)
+    const eliminar = vi.spyOn(almacen, 'eliminar')
+
+    await expect(subir.ejecutar(aspirante, datos)).rejects.toBeInstanceOf(DocumentoDuplicado)
+
+    expect((await documentos.obtenerPorPostulacion(postulacion.id)).map((d) => d.id)).toEqual([
+      primero.id,
+    ])
+    expect(eliminar).toHaveBeenCalledOnce()
+    expect(almacen.obtener(primero.ruta)).toBeDefined()
+  })
+
+  it('deja subir el reemplazo de un documento observado', async () => {
+    const { subir, revisar, postulacion } = await armarConPeriodo('VACANTE_CONFIRMADA')
+    const datos = {
+      postulacionId: postulacion.id,
+      tipo: 'DNI' as const,
+      vigencia: 365,
+      archivo: archivo(),
+    }
+    const primero = await subir.ejecutar(aspirante, datos)
+    await revisar.ejecutar(secretaria, primero.id, {
+      estado: 'OBSERVADO',
+      observaciones: 'Está ilegible',
+    })
+
+    const reemplazo = await subir.ejecutar(aspirante, datos)
+
+    expect(reemplazo.estado).toBe('PENDIENTE')
   })
 
   it('rechaza un archivo que no es PDF, JPG o PNG', async () => {

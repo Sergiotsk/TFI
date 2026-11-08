@@ -31,6 +31,7 @@ export {
 } from './documento/estado'
 export type { EstadoDocumento, TipoDeDocumento } from './documento/estado'
 export {
+  DocumentoDuplicado,
   ObservacionDeDocumentoRequerida,
   TransicionDeDocumentoInvalida,
 } from './documento/errores'

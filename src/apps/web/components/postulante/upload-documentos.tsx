@@ -69,8 +69,10 @@ export function UploadDocumentos({ postulacionId }: { postulacionId: string | nu
         const respuesta = await fetch('/api/documentos', { method: 'POST', body: formulario })
         if (!respuesta.ok) {
           const cuerpo = (await respuesta.json().catch(() => null)) as {
-            error?: { mensaje?: string }
+            error?: { codigo?: string; mensaje?: string }
           } | null
+          // Ya estaba cargado (un reintento o un doble envío): se sigue con los que falten.
+          if (cuerpo?.error?.codigo === 'DOCUMENTO_DUPLICADO') continue
           setError(`${doc.titulo}: ${cuerpo?.error?.mensaje ?? 'no se pudo subir'}`)
           return
         }
@@ -82,6 +84,16 @@ export function UploadDocumentos({ postulacionId }: { postulacionId: string | nu
     } finally {
       setEnviando(false)
     }
+  }
+
+  return (
+      <div className="space-y-3 text-sm text-foreground">
+        <p>Ya cargaste toda la documentación. Si te equivocaste de archivo, podés reemplazarlo desde tu panel.</p>
+        <Link href="/aspirante/postulacion" className="font-semibold text-primary underline">
+          Volver a mi postulación
+        </Link>
+      </div>
+    )
   }
 
   return (

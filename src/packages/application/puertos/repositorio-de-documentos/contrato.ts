@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { Documento } from '@tfi/domain'
+import { Documento, DocumentoDuplicado } from '@tfi/domain'
+import type { TipoDeDocumento } from '@tfi/domain'
 import { PAGINACION_POR_DEFECTO } from '../../paginacion'
 import type { RepositorioDeDocumentos } from './puerto'
 
@@ -17,11 +18,12 @@ function documentoDePrueba(
   id: string,
   postulacionId: string,
   estado: 'PENDIENTE' | 'APROBADO' | 'OBSERVADO' = 'PENDIENTE',
+  tipo: TipoDeDocumento = 'DNI',
 ): Documento {
   return new Documento(
     id,
     postulacionId,
-    'DNI',
+    tipo,
     `/documentos/${postulacionId}/${id}.pdf`,
     'dni.pdf',
     'application/pdf',
@@ -71,7 +73,9 @@ export function probarContratoRepositorioDeDocumentos(
       const postulacionB = await crearPostulacion()
 
       await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacionA))
-      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacionA))
+      await repositorio.guardar(
+        documentoDePrueba(crearIdDocumento(), postulacionA, 'PENDIENTE', 'TITULO'),
+      )
       await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacionB))
 
       const deA = await repositorio.obtenerPorPostulacion(postulacionA)
@@ -88,7 +92,9 @@ export function probarContratoRepositorioDeDocumentos(
       const postulacion = await crearPostulacion()
 
       await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'PENDIENTE'))
-      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'APROBADO'))
+      await repositorio.guardar(
+        documentoDePrueba(crearIdDocumento(), postulacion, 'APROBADO', 'TITULO'),
+      )
       await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'OBSERVADO'))
 
       const deLaPostulacion = await repositorio.listar(
@@ -125,6 +131,51 @@ export function probarContratoRepositorioDeDocumentos(
       await repositorio.eliminar(documento.id)
 
       expect(await repositorio.obtenerPorId(documento.id)).toBeNull()
+    })
+
+    it('guardar() rechaza un segundo documento activo del mismo tipo', async () => {
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const postulacion = await crearPostulacion()
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion))
+
+      const repetido = documentoDePrueba(crearIdDocumento(), postulacion)
+
+      await expect(repositorio.guardar(repetido)).rejects.toBeInstanceOf(DocumentoDuplicado)
+      expect(await repositorio.obtenerPorId(repetido.id)).toBeNull()
+    })
+
+    it('guardar() admite otro del mismo tipo si el anterior está observado', async () => {
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const postulacion = await crearPostulacion()
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion, 'OBSERVADO'))
+
+      const corregido = documentoDePrueba(crearIdDocumento(), postulacion)
+      await repositorio.guardar(corregido)
+
+      expect(await repositorio.obtenerPorId(corregido.id)).not.toBeNull()
+    })
+
+    it('guardar() no toma como duplicado al mismo documento cuando se actualiza', async () => {
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const id = crearIdDocumento()
+      const postulacion = await crearPostulacion()
+      await repositorio.guardar(documentoDePrueba(id, postulacion))
+
+      await repositorio.guardar(documentoDePrueba(id, postulacion, 'APROBADO'))
+
+      expect((await repositorio.obtenerPorId(id))?.estado).toBe('APROBADO')
+    })
+
+    it('guardar() rechaza reactivar un observado si ya hay otro activo del mismo tipo', async () => {
+      const { repositorio, crearIdDocumento, crearPostulacion } = await crearEntorno()
+      const postulacion = await crearPostulacion()
+      const observadoId = crearIdDocumento()
+      await repositorio.guardar(documentoDePrueba(observadoId, postulacion, 'OBSERVADO'))
+      await repositorio.guardar(documentoDePrueba(crearIdDocumento(), postulacion))
+
+      await expect(
+        repositorio.guardar(documentoDePrueba(observadoId, postulacion, 'APROBADO')),
+      ).rejects.toBeInstanceOf(DocumentoDuplicado)
     })
   })
 }
