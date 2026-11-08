@@ -8,6 +8,7 @@ import {
   prepararEntornoDeDocumentos,
   prepararEntornoDeDocumentosConSesion,
 } from './prueba/entorno'
+import { AlmacenDeArchivosSupabase } from './almacen-de-archivos'
 import { RepositorioDeDocumentosSupabase } from './repositorio-de-documentos'
 
 /**
@@ -166,6 +167,19 @@ describe.skipIf(!hayEntornoDePruebaConServicio())(
       expect(await entorno.delPersonal.obtenerPorId(documento.id)).not.toBeNull()
     })
 
+    it('no borra un documento aprobado aunque la documentación siga abierta', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const documento = aprobado(
+        documentoSubido(entorno.postulacionId, entorno.aspiranteId),
+        entorno.personalId,
+      )
+      await new RepositorioDeDocumentosSupabase(clienteDeServicio()).guardar(documento)
+
+      await entorno.delAspirante.eliminar(documento.id)
+
+      expect(await entorno.delPersonal.obtenerPorId(documento.id)).not.toBeNull()
+    })
+
     it('borra los propios mientras la documentación está abierta', async () => {
       const entorno = await prepararEntornoDeDocumentosConSesion()
       const documento = documentoSubido(entorno.postulacionId, entorno.aspiranteId)
@@ -174,6 +188,102 @@ describe.skipIf(!hayEntornoDePruebaConServicio())(
       await entorno.delAspirante.eliminar(documento.id)
 
       expect(await entorno.delPersonal.obtenerPorId(documento.id)).toBeNull()
+    })
+  },
+)
+
+const ARCHIVO_DE_PRUEBA = {
+  contenido: new Uint8Array([37, 80, 68, 70]).buffer,
+  nombreArchivo: 'dni.pdf',
+  mimeType: 'application/pdf',
+}
+
+/** Las policies de Storage, con la sesión del aspirante y un archivo real. */
+describe.skipIf(!hayEntornoDePruebaConServicio())(
+  'RLS de los archivos de documentos: lo que el aspirante no puede hacer',
+  () => {
+    function rutaDe(entorno: { institucionId: string; postulacionId: string }): string {
+      return `${entorno.institucionId}/${entorno.postulacionId}/${randomUUID()}-dni.pdf`
+    }
+
+    async function existe(ruta: string): Promise<boolean> {
+      return new AlmacenDeArchivosSupabase(clienteDeServicio())
+        .urlFirmada(ruta, 60)
+        .then(() => true)
+        .catch(() => false)
+    }
+
+    async function sembrarArchivo(
+      entorno: Awaited<ReturnType<typeof prepararEntornoDeDocumentosConSesion>>,
+      estado: 'PENDIENTE' | 'APROBADO',
+    ): Promise<string> {
+      const ruta = rutaDe(entorno)
+      await new AlmacenDeArchivosSupabase(clienteDeServicio()).subir(ruta, ARCHIVO_DE_PRUEBA)
+      const base = documentoSubido(entorno.postulacionId, entorno.aspiranteId)
+      const conRuta = new Documento(
+        base.id,
+        base.postulacionId,
+        base.tipo,
+        ruta,
+        base.nombreArchivo,
+        base.mimeType,
+        base.tamanioBytes,
+        base.vigencia,
+        'PENDIENTE',
+        base.subidoPor,
+        null,
+        null,
+        null,
+        base.creadoEl,
+        base.actualizadoEl,
+      )
+      await new RepositorioDeDocumentosSupabase(clienteDeServicio()).guardar(
+        estado === 'APROBADO' ? aprobado(conRuta, entorno.personalId) : conRuta,
+      )
+      return ruta
+    }
+
+    it('no sube archivos después de la validación', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion('DOCUMENTACION_VALIDADA')
+
+      await expect(
+        entorno.almacenDelAspirante.subir(rutaDe(entorno), ARCHIVO_DE_PRUEBA),
+      ).rejects.toThrow()
+    })
+
+    it('no sube archivos antes de la etapa de documentación', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion('PAGO_PENDIENTE')
+
+      await expect(
+        entorno.almacenDelAspirante.subir(rutaDe(entorno), ARCHIVO_DE_PRUEBA),
+      ).rejects.toThrow()
+    })
+
+    it('sube archivos con la documentación abierta', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const ruta = rutaDe(entorno)
+
+      await entorno.almacenDelAspirante.subir(ruta, ARCHIVO_DE_PRUEBA)
+
+      expect(await existe(ruta)).toBe(true)
+    })
+
+    it('no borra el archivo de un documento aprobado', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const ruta = await sembrarArchivo(entorno, 'APROBADO')
+
+      await entorno.almacenDelAspirante.eliminar(ruta)
+
+      expect(await existe(ruta)).toBe(true)
+    })
+
+    it('borra el archivo de un documento pendiente', async () => {
+      const entorno = await prepararEntornoDeDocumentosConSesion()
+      const ruta = await sembrarArchivo(entorno, 'PENDIENTE')
+
+      await entorno.almacenDelAspirante.eliminar(ruta)
+
+      expect(await existe(ruta)).toBe(false)
     })
   },
 )

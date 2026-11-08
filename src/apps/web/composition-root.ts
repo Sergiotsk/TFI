@@ -51,6 +51,7 @@ import {
   RevisarDocumentoUseCase,
   ActualizarDocumentoUseCase,
   EliminarDocumentoUseCase,
+  ReemplazarDocumentoUseCase,
   AcreditarPagoUseCase,
   ImportarInformeDePagosUseCase,
   ListarBandejaUseCase,
@@ -201,6 +202,14 @@ export function crearDependencias(supabase: SupabaseClient) {
       repoDocumentos,
       repoPostulaciones,
       repoPeriodos,
+      reloj,
+    ),
+    reemplazarDocumento: new ReemplazarDocumentoUseCase(
+      repoDocumentos,
+      repoPostulaciones,
+      repoPeriodos,
+      almacen,
+      generadorDeIds,
       reloj,
     ),
     eliminarDocumento: new EliminarDocumentoUseCase(

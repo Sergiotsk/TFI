@@ -5,9 +5,10 @@ import { ActualizarDocumentoUseCase } from './actualizar-documento'
 import { ConsultarDocumentoUseCase } from './consultar-documento'
 import { EliminarDocumentoUseCase } from './eliminar-documento'
 import { ListarDocumentosUseCase } from './listar-documentos'
+import { ReemplazarDocumentoUseCase } from './reemplazar-documento'
 import { RevisarDocumentoUseCase } from './revisar-documento'
 import { SubirDocumentoUseCase } from './subir-documento'
-import { ConflictoDeEstado, NoAutorizado, NoEncontrado } from '../errores'
+import { ConflictoDeEstado, NoAutorizado, NoEncontrado, SolicitudInvalida } from '../errores'
 import { SEGUNDOS_DE_URL_FIRMADA } from './comun'
 import { AlmacenDeArchivosFake } from '../../puertos/almacen-de-archivos/fake'
 import { AccionesDeDocumentacionFake } from '../../puertos/acciones-de-documentacion/fake'
@@ -102,6 +103,14 @@ function armar(estadoInicial: 'VACANTE_CONFIRMADA' | 'ESPERANDO_DOCUMENTACION' |
       documentos,
       postulaciones,
       periodos,
+      reloj,
+    ),
+    reemplazar: new ReemplazarDocumentoUseCase(
+      documentos,
+      postulaciones,
+      periodos,
+      almacen,
+      generador,
       reloj,
     ),
     eliminar: new EliminarDocumentoUseCase(
@@ -422,5 +431,167 @@ describe('ConsultarDocumento, ActualizarDocumento y EliminarDocumento', () => {
 
     expect(await documentos.obtenerPorId(documento.id)).toBeNull()
     await expect(almacen.urlFirmada(documento.ruta, 60)).rejects.toThrow()
+  })
+})
+
+async function conDocumentoPendiente() {
+  const mundo = await armarConPeriodo('ESPERANDO_DOCUMENTACION')
+  const documento = await mundo.subir.ejecutar(aspirante, {
+    postulacionId: mundo.postulacion.id,
+    tipo: 'DNI',
+    vigencia: 365,
+    archivo: archivo(),
+  })
+  return { ...mundo, documento }
+}
+
+const archivoCorrecto = () => ({ ...archivo(), nombreArchivo: 'dni-correcto.pdf' })
+
+async function agregarOtroDocumentoPendiente(
+  postulacionId: string,
+  documentos: RepositorioDeDocumentosFake,
+) {
+  await documentos.guardar(
+    new Documento(
+      'extra-1',
+      postulacionId,
+      'TITULO',
+      'ruta/extra.pdf',
+      'titulo.pdf',
+      'application/pdf',
+      1024,
+      365,
+      'PENDIENTE',
+      aspirante.perfilId,
+      null,
+      null,
+      null,
+      AHORA,
+      AHORA,
+    ),
+  )
+}
+
+describe('ReemplazarDocumento', () => {
+  it('cambia un documento pendiente por el archivo nuevo y borra el viejo', async () => {
+    const { reemplazar, documento, documentos, almacen, postulacion, postulaciones } =
+      await conDocumentoPendiente()
+
+    const nuevo = await reemplazar.ejecutar(aspirante, documento.id, archivoCorrecto())
+
+    expect(nuevo.id).not.toBe(documento.id)
+    expect(nuevo.tipo).toBe(documento.tipo)
+    expect(nuevo.vigencia).toBe(documento.vigencia)
+    expect(nuevo.estado).toBe('PENDIENTE')
+    expect(nuevo.nombreArchivo).toBe('dni-correcto.pdf')
+    expect((await documentos.obtenerPorPostulacion(postulacion.id)).map((d) => d.id)).toEqual([
+      nuevo.id,
+    ])
+    expect(almacen.obtener(nuevo.ruta)).toBeDefined()
+    expect(almacen.obtener(documento.ruta)).toBeUndefined()
+    expect((await postulaciones.obtenerPorId(postulacion.id))?.estado).toBe(
+      'ESPERANDO_DOCUMENTACION',
+    )
+  })
+
+  it.each(['APROBADO', 'OBSERVADO'] as const)('no reemplaza un documento %s', async (estado) => {
+    const { reemplazar, revisar, documento, documentos, almacen } = await conDocumentoPendiente()
+    await agregarOtroDocumentoPendiente(documento.postulacionId, documentos)
+    await revisar.ejecutar(secretaria, documento.id, {
+      estado,
+      observaciones: estado === 'OBSERVADO' ? 'Está ilegible' : undefined,
+    })
+
+    await expect(
+      reemplazar.ejecutar(aspirante, documento.id, archivoCorrecto()),
+    ).rejects.toBeInstanceOf(ConflictoDeEstado)
+
+    expect(await documentos.obtenerPorId(documento.id)).not.toBeNull()
+    expect(almacen.obtener(documento.ruta)).toBeDefined()
+  })
+
+  it('solo lo hace el aspirante dueño de la Postulación', async () => {
+    const { reemplazar, documento } = await conDocumentoPendiente()
+
+    await expect(
+      reemplazar.ejecutar(otroAspirante, documento.id, archivoCorrecto()),
+    ).rejects.toBeInstanceOf(NoAutorizado)
+    await expect(
+      reemplazar.ejecutar(secretaria, documento.id, archivoCorrecto()),
+    ).rejects.toBeInstanceOf(NoAutorizado)
+  })
+
+  it('un documento inexistente responde NoEncontrado', async () => {
+    const { reemplazar } = await conDocumentoPendiente()
+
+    await expect(
+      reemplazar.ejecutar(aspirante, 'no-existe', archivoCorrecto()),
+    ).rejects.toBeInstanceOf(NoEncontrado)
+  })
+
+  it('valida el archivo igual que la subida', async () => {
+    const { reemplazar, documento } = await conDocumentoPendiente()
+
+    await expect(
+      reemplazar.ejecutar(aspirante, documento.id, {
+        ...archivoCorrecto(),
+        mimeType: 'text/plain',
+      }),
+    ).rejects.toBeInstanceOf(SolicitudInvalida)
+  })
+
+  it('si no puede guardar el nuevo, restaura el documento y no deja el archivo nuevo', async () => {
+    const { reemplazar, documento, documentos, almacen } = await conDocumentoPendiente()
+    vi.spyOn(documentos, 'guardar').mockRejectedValueOnce(new Error('falló la base'))
+    const eliminarArchivo = vi.spyOn(almacen, 'eliminar')
+
+    await expect(reemplazar.ejecutar(aspirante, documento.id, archivoCorrecto())).rejects.toThrow(
+      'falló la base',
+    )
+
+    expect((await documentos.obtenerPorId(documento.id))?.ruta).toBe(documento.ruta)
+    expect(almacen.obtener(documento.ruta)).toBeDefined()
+    expect(eliminarArchivo).toHaveBeenCalledOnce()
+    expect(eliminarArchivo).not.toHaveBeenCalledWith(documento.ruta)
+  })
+
+  it('no pisa el documento si la baja no llegó a borrarlo', async () => {
+    const { reemplazar, documento, documentos } = await conDocumentoPendiente()
+    vi.spyOn(documentos, 'eliminar').mockResolvedValueOnce(undefined)
+    const guardar = vi.spyOn(documentos, 'guardar')
+
+    await expect(
+      reemplazar.ejecutar(aspirante, documento.id, archivoCorrecto()),
+    ).rejects.toBeInstanceOf(DocumentoDuplicado)
+
+    expect(guardar).toHaveBeenCalledOnce()
+  })
+})
+
+describe('EliminarDocumento de un documento aprobado', () => {
+  async function conAprobado() {
+    const mundo = await conDocumentoPendiente()
+    await agregarOtroDocumentoPendiente(mundo.documento.postulacionId, mundo.documentos)
+    await mundo.revisar.ejecutar(secretaria, mundo.documento.id, { estado: 'APROBADO' })
+    return mundo
+  }
+
+  it('el aspirante no puede borrarlo', async () => {
+    const { eliminar, documento, documentos, almacen } = await conAprobado()
+
+    await expect(eliminar.ejecutar(aspirante, documento.id)).rejects.toBeInstanceOf(
+      ConflictoDeEstado,
+    )
+
+    expect(await documentos.obtenerPorId(documento.id)).not.toBeNull()
+    expect(almacen.obtener(documento.ruta)).toBeDefined()
+  })
+
+  it('Secretaría sí puede', async () => {
+    const { eliminar, documento, documentos } = await conAprobado()
+
+    await eliminar.ejecutar(secretaria, documento.id)
+
+    expect(await documentos.obtenerPorId(documento.id)).toBeNull()
   })
 })

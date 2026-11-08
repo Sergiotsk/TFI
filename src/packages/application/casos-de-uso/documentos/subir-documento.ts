@@ -10,12 +10,12 @@ import type { RepositorioDePostulaciones } from '../../puertos/repositorio-de-po
 import type { Actor } from '../actor'
 import { ConflictoDeEstado, SolicitudInvalida } from '../errores'
 import {
-  MIME_TYPES_PERMITIDOS,
-  TAMANIO_MAXIMO_DE_ARCHIVO,
   admitenDocumentos,
   cargarContextoDeDocumento,
   estadoEfectivo,
   exigirAccesoADocumentos,
+  exigirArchivoValido,
+  nombreSeguroDeArchivo,
   transicionar,
   yaEstaValidada,
 } from './comun'
@@ -32,16 +32,6 @@ export interface DatosDeNuevoDocumento {
   /** Días de validez del documento; 0 significa sin vencimiento. */
   vigencia: number
   archivo: ArchivoDeDocumento
-}
-
-function nombreSeguro(nombre: string): string {
-  const limpio = nombre
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-
-  return (limpio || 'archivo').slice(-80)
 }
 
 /**
@@ -70,15 +60,7 @@ export class SubirDocumentoUseCase {
     if (datos.vigencia < 0) {
       throw new SolicitudInvalida('La vigencia no puede ser negativa')
     }
-    if (datos.archivo.contenido.byteLength === 0) {
-      throw new SolicitudInvalida('El archivo está vacío')
-    }
-    if (datos.archivo.contenido.byteLength > TAMANIO_MAXIMO_DE_ARCHIVO) {
-      throw new SolicitudInvalida('El archivo supera el máximo de 10 MB')
-    }
-    if (!(MIME_TYPES_PERMITIDOS as readonly string[]).includes(datos.archivo.mimeType)) {
-      throw new SolicitudInvalida('Solo se aceptan archivos PDF, JPG o PNG')
-    }
+    exigirArchivoValido(datos.archivo)
 
     const contexto = await cargarContextoDeDocumento(
       actor,
@@ -98,7 +80,7 @@ export class SubirDocumentoUseCase {
     }
 
     const id = this.generadorDeIds.nuevo()
-    const nombreArchivo = nombreSeguro(datos.archivo.nombreArchivo)
+    const nombreArchivo = nombreSeguroDeArchivo(datos.archivo.nombreArchivo)
     const ruta = `${contexto.periodo.institucionId}/${datos.postulacionId}/${id}-${nombreArchivo}`
 
     const documento = new Documento(

@@ -10,6 +10,7 @@ import {
   cargarContextoDeDocumento,
   estadoEfectivo,
   exigirAccesoADocumentos,
+  puedeGestionarDocumentos,
   yaEstaValidada,
 } from './comun'
 
@@ -47,6 +48,10 @@ export class EliminarDocumentoUseCase {
     }
     if (!admitenDocumentos(estado)) {
       throw new ConflictoDeEstado('La Postulación todavía no está en la etapa de documentación')
+    }
+
+    if (documento.estado === 'APROBADO' && !puedeGestionarDocumentos(actor)) {
+      throw new ConflictoDeEstado('Un documento aprobado no se puede quitar')
     }
 
     await this.almacen.eliminar(documento.ruta)

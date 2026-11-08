@@ -5,7 +5,7 @@ import type {
   Postulacion,
 } from '@tfi/domain'
 import type { Actor } from '../actor'
-import { NoAutorizado, NoEncontrado, ConflictoDeEstado } from '../errores'
+import { NoAutorizado, NoEncontrado, ConflictoDeEstado, SolicitudInvalida } from '../errores'
 import type { AccionesDeDocumentacion } from '../../puertos/acciones-de-documentacion/puerto'
 import type { Reloj } from '../../puertos/reloj/puerto'
 import type { RepositorioDePeriodos } from '../../puertos/repositorio-de-periodos/puerto'
@@ -25,6 +25,30 @@ export const ESTADOS_QUE_ADMITEN_DOCUMENTOS = [
 export const TAMANIO_MAXIMO_DE_ARCHIVO = 10 * 1024 * 1024
 export const MIME_TYPES_PERMITIDOS = ['application/pdf', 'image/jpeg', 'image/png'] as const
 export const SEGUNDOS_DE_URL_FIRMADA = 60
+
+/** Reglas del archivo, iguales para una subida nueva y para un reemplazo. */
+export function exigirArchivoValido(archivo: { contenido: ArrayBuffer; mimeType: string }): void {
+  if (archivo.contenido.byteLength === 0) {
+    throw new SolicitudInvalida('El archivo está vacío')
+  }
+  if (archivo.contenido.byteLength > TAMANIO_MAXIMO_DE_ARCHIVO) {
+    throw new SolicitudInvalida('El archivo supera el máximo de 10 MB')
+  }
+  if (!(MIME_TYPES_PERMITIDOS as readonly string[]).includes(archivo.mimeType)) {
+    throw new SolicitudInvalida('Solo se aceptan archivos PDF, JPG o PNG')
+  }
+}
+
+/** Nombre apto para la ruta del bucket: sin acentos ni caracteres especiales. */
+export function nombreSeguroDeArchivo(nombre: string): string {
+  const limpio = nombre
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  return (limpio || 'archivo').slice(-80)
+}
 
 export function puedeGestionarDocumentos(actor: Actor): boolean {
   return (ROLES_QUE_GESTIONAN_DOCUMENTOS as readonly string[]).includes(actor.rol)

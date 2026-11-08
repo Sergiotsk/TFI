@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { EncabezadoDePanel } from '@/components/panel/encabezado-de-panel'
 import { BotonPagarMercadoPago } from '@/components/panel/boton-pagar-mercado-pago'
 import { CorregirDocumento } from '@/components/panel/corregir-documento'
+import { ReemplazarDocumento } from '@/components/panel/reemplazar-documento'
 import { FormularioDeAccion } from '@/components/panel/formulario-de-accion'
 import { formatearFecha } from '@/components/panel/formato'
 import { InsigniaDePostulacion } from '@/components/panel/insignia-de-estado'
@@ -11,11 +12,18 @@ import { iniciarPagoAccion } from './actions'
 import type { Documento, PeriodoDeIngreso } from '@tfi/domain'
 import type { PostulacionConsultada } from '@tfi/application'
 
+// Etapas en las que el aspirante puede cambiar un documento que todavía no se revisó.
+const ETAPAS_CON_REEMPLAZO: readonly string[] = [
+  'ESPERANDO_DOCUMENTACION',
+  'DOCUMENTACION_EN_REVISION',
+  'OBSERVADO',
+]
+
 // Panel del aspirante conectado a los casos de uso: ConsultarPostulacion.listarMias, ListarPeriodosAbiertos y
 // CrearPostulacion. Demo: el pago se inicia con Mercado Pago y el webhook confirma la vacante; si no llega,
 // el personal acredita el pago a mano.
 export default async function PostulacionDelAspirantePage() {
-  const { postulaciones, periodos, observados } = await conActorDePanel(
+  const { postulaciones, periodos, observados, pendientes } = await conActorDePanel(
     async ({ consultarPostulacion, listarPeriodosAbiertos, listarDocumentos }, actor) => {
       const propias: PostulacionConsultada[] = await consultarPostulacion.listarMias(actor)
 
@@ -30,10 +38,21 @@ export default async function PostulacionDelAspirantePage() {
         observados.set(postulacion.id, pagina.items)
       }
 
+      const pendientes = new Map<string, Documento[]>()
+      for (const postulacion of propias.filter((p) => ETAPAS_CON_REEMPLAZO.includes(p.estado))) {
+        const pagina = await listarDocumentos.ejecutar(
+          actor,
+          { postulacionId: postulacion.id, estado: 'PENDIENTE' },
+          { pagina: 1, porPagina: 50 },
+        )
+        pendientes.set(postulacion.id, pagina.items)
+      }
+
       return {
         postulaciones: propias,
         periodos: propias.length === 0 ? await listarPeriodosAbiertos.ejecutar(actor) : [],
         observados,
+        pendientes,
       }
     },
   )
@@ -179,6 +198,27 @@ export default async function PostulacionDelAspirantePage() {
                   </ul>
                 </div>
               )
+            ) : null}
+
+            {(pendientes.get(postulacion.id) ?? []).length > 0 ? (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">¿Subiste un archivo equivocado?</p>
+                  <p className="text-xs text-muted-foreground">
+                    Podés reemplazarlo mientras la Secretaría no lo haya revisado.
+                  </p>
+                </div>
+                <ul className="space-y-4">
+                  {(pendientes.get(postulacion.id) ?? []).map((documento) => (
+                    <li key={documento.id} className="space-y-2">
+                      <span className="block text-sm font-semibold text-foreground">
+                        {documento.tipo} · {documento.nombreArchivo}
+                      </span>
+                      <ReemplazarDocumento documentoId={documento.id} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : null}
 
             {postulacion.estado === 'DOCUMENTACION_EN_REVISION' ? (
