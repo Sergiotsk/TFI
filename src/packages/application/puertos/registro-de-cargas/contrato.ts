@@ -21,13 +21,13 @@ export function probarContratoDeRegistroDeCargas(
       expect(carga.institucionId).toBe(institucionId)
       expect(carga.cargadaPor).toBe(cargadaPor)
       expect(carga.nombreArchivo).toBe('informe.csv')
-      expect(carga.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0 })
+      expect(carga.resumen).toEqual({ acreditados: 0, aDecidir: 0, noImputados: 0, duplicados: 0, ignorados: 0 })
     })
 
     it('cerrar() persiste el resumen', async () => {
       const { cargas, institucionId, cargadaPor } = await crearEntorno()
       const carga = await cargas.iniciar(institucionId, cargadaPor, 'informe.csv')
-      const resumen = { acreditados: 3, aDecidir: 1, noImputados: 2, duplicados: 4 }
+      const resumen = { acreditados: 3, aDecidir: 1, noImputados: 2, duplicados: 4, ignorados: 5 }
 
       await cargas.cerrar(carga.id, resumen)
 

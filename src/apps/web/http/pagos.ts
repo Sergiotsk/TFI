@@ -44,6 +44,7 @@ export interface CargaPresentada {
   aDecidir: number
   noImputados: number
   duplicados: number
+  ignorados: number
 }
 
 export function presentarCarga(carga: CargaDeInforme): CargaPresentada {

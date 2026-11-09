@@ -258,11 +258,13 @@ confirmada y la ocupación supera el total.
 - Una Postulación `VENCIDO` puede reintentar el pago con un plazo nuevo.
 - Hoy existe una sola institución (UTN FRH); no se construye la administración de instituciones (alta/baja desde
   la UI).
-- El formato del informe de SysAdmin todavía no fue entregado. Esta spec asume que trae **DNI**, **ID de
-  Postulación** (si el aspirante lo informó en ventanilla), monto, fecha de pago y una referencia del
-  comprobante. La imputación busca primero por ID de Postulación y, si no viene, por la Postulación en
-  `PAGO_PENDIENTE` de ese DNI en el período vigente. Si no hay ninguna, o hay más de una, el pago queda
-  `NO_IMPUTADO`. Probablemente traiga también nombre y apellido: se agrega cuando llegue el formato real.
+- El informe de SysAdmin es una planilla `.xlsx` (el "Informe TUP") con fecha del recibo, número de recibo,
+  nombre y documento de quien pagó, monto y una descripción en texto libre. **No trae el ID de Postulación**, así
+  que la imputación va por DNI: la Postulación en `PAGO_PENDIENTE` (o `VENCIDO`) de ese DNI. Si hay más de una, el
+  pago queda `NO_IMPUTADO`. El número de recibo es la referencia del pago (ADR 0011).
+- El informe trae también las cuotas de quienes ya cursan. Una fila del informe cuyo DNI no tiene Postulaciones,
+  o cuyas Postulaciones ya ocupan cupo todas, **se ignora**: no se registra como pago y solo se cuenta en el
+  resumen de la carga (ADR 0011). Los pagos manuales y los de Pagos360 no se ignoran nunca.
 - Un pago por un monto menor al de la matrícula del período queda `NO_IMPUTADO`.
 - En Pagos360, la referencia externa la genera el sistema a partir del ID de Postulación.
 - **Restricciones técnicas** (van al plan, no a esta spec): migración incremental en `src/supabase/migrations/`

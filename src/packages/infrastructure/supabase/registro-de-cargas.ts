@@ -32,6 +32,7 @@ export class RegistroDeCargasSupabase implements RegistroDeCargas {
         a_decidir: resumen.aDecidir,
         no_imputados: resumen.noImputados,
         duplicados: resumen.duplicados,
+        ignorados: resumen.ignorados,
       })
       .eq('id', cargaId)
 

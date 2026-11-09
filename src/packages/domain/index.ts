@@ -48,6 +48,7 @@ export {
   type DatosOpcionalesDePago,
 } from './pago/pago'
 export { CargaDeInforme, type ResumenDeCarga } from './pago/carga-de-informe'
+export { MOTIVOS_IGNORADO, motivoParaIgnorar, type MotivoIgnorado } from './pago/alcance-del-informe'
 export { DecisionDeDireccion, type ResolucionDeDireccion } from './pago/decision-de-direccion'
 export { Dni } from './perfil/dni'
 export {
