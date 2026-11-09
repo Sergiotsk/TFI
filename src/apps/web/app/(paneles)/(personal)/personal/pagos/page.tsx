@@ -17,7 +17,7 @@ export default async function InformesDePagosPage() {
   })
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <EncabezadoDePanel
         area="Tesorería TUP"
         titulo="Informes de pagos"
